@@ -32,7 +32,7 @@ bool DBManager::DBInit() {
 
     QSqlQuery query;
     query.exec("CREATE TABLE IF NOT EXISTS profiles ( id SERIAL PRIMARY KEY );");
-    query.exec("CREATE TABLE IF NOT EXISTS session ( ( id SERIAL PRIMARY KEY, profile_id INTEGER NOT NULL, challenge_level INTEGER NOT NULL, is_low DECIMAL(5, 2) NOT NULL, is_med DECIMAL(5, 2) NOT NULL, is_high DECIMAL(5, 2) NOT NULL, avg_coherence FLOAT NOT NULL, session_time INTEGER NOT NULL, achievement_score FLOAT NOT NULL, graph INTEGER[] NOT NULL, FOREIGN KEY (profile_id) REFERENCES profile (id), CHECK (is_low + is_med + is_high = 100));");
+    query.exec("CREATE TABLE IF NOT EXISTS session ( id SERIAL PRIMARY KEY, profile_id INTEGER NOT NULL, challenge_level INTEGER NOT NULL, is_low DECIMAL(5, 2) NOT NULL, is_med DECIMAL(5, 2) NOT NULL, is_high DECIMAL(5, 2) NOT NULL, avg_coherence FLOAT NOT NULL, session_time INTEGER NOT NULL, achievement_score FLOAT NOT NULL, graph INTEGER[] NOT NULL, FOREIGN KEY (profile_id) REFERENCES profile (id), CHECK (is_low + is_med + is_high = 100));");
 
     return denasDB.commit();
 }

@@ -17,20 +17,19 @@ public:
     static const QString DATABASE_PATH;
 
     DBManager();
-    bool addSessionRecord(const QString& therapy, const QDateTime& time, int powerLevel, int duration);
-    bool UpdateSessionRecord(const QString& therapy, const QDateTime& time, int powerLevel, int duration);
-    bool addProfile(int id, double batterLvl, int powerLvl);
+
+
+    bool addProfile(int id, double batterLvl);
     bool deleteRecords();
 
     Profile* getProfile(int id);
-    QVector<Record*> getSession(int id);
 
 
 private:
     QSqlDatabase denasDB;
 
-    bool isValidRecord(const QString& recordType, const QDateTime& time, int powerLevel, int duration);
-    bool addRecord(const QString& tableName, const QString& name, const QDateTime& time, int powerLevel, int duration);
+    bool isValidRecord(const QString& recordType, const QDateTime& time, int duration);
+    bool addRecord(const QString& tableName, const QString& name, const QDateTime& time, int duration);
     bool DBInit();
 
 };

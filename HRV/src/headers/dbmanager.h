@@ -19,14 +19,14 @@ public:
     DBManager();
     bool addProfile(int id, double batterLvl);
     Profile* getProfile(int id);
-
-
-    bool deleteRecords();
+    bool addSession(int profileId, int challengeLevel, float isLow, float isMed, float isHigh, float avgCoherence, int sessionTime, float achievementScore, QString graph, QString date);
+    Session* getSession(int id);
+    Session** getSessions(int profileId);
+    bool deleteSession(int id);
+    bool deleteSessions();
 
 private:
     QSqlDatabase denasDB;
-    bool isValidRecord(const QString& recordType, const QDateTime& time, int duration);
-    bool addRecord(const QString& tableName, const QString& name, const QDateTime& time, int duration);
 
     bool DBInit();
 

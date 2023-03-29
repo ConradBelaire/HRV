@@ -31,7 +31,7 @@ bool DBManager::DBInit() {
     denasDB.transaction();
 
     QSqlQuery query;
-    query.exec("CREATE TABLE IF NOT EXISTS profiles ( id SERIAL PRIMARY KEY );");
+    query.exec("CREATE TABLE IF NOT EXISTS profiles ( id SERIAL PRIMARY KEY, battery_level FLOAT NOT NULL );");
     query.exec("CREATE TABLE IF NOT EXISTS session ( id SERIAL PRIMARY KEY, profile_id INTEGER NOT NULL, challenge_level INTEGER NOT NULL, is_low DECIMAL(5, 2) NOT NULL, is_med DECIMAL(5, 2) NOT NULL, is_high DECIMAL(5, 2) NOT NULL, avg_coherence FLOAT NOT NULL, session_time INTEGER NOT NULL, achievement_score FLOAT NOT NULL, graph INTEGER[] NOT NULL, FOREIGN KEY (profile_id) REFERENCES profile (id), CHECK (is_low + is_med + is_high = 100));");
 
     return denasDB.commit();
@@ -43,8 +43,8 @@ Profile* DBManager::getProfile(int id) {
     denasDB.transaction();
 
     QSqlQuery query;
-    query.prepare("SELECT * FROM profiles WHERE pid=:pid");
-    query.bindValue(":pid", id);
+    query.prepare("SELECT * FROM profile WHERE id = :profile_id;");
+    query.bindValue(":profile_id", id);
     query.exec();
 
     if (!denasDB.commit()) {
@@ -53,48 +53,25 @@ Profile* DBManager::getProfile(int id) {
 
    // profile does not exist
     if (!query.next()) {
-        addProfile(id, 100.0, 1);
-        Profile* pro = new Profile(id, 100, 0);
+        addProfile(id);
+        Profile* pro = new Profile(id, 100);
         return pro;
     }
 
     // profile exists
-    Profile* pro = new Profile(query.value(0).toInt(), query.value(1).toDouble(), query.value(2).toInt());
+    Profile* pro = new Profile(query.value(0).toInt(), query.value(1).toDouble());
     return pro;
 }
 
 
-QVector<Record*> DBManager::getRecordings() {
-
-    QSqlQuery query;
-    QVector<Record*> qvr;
-    denasDB.transaction();
-
-    query.prepare("SELECT name as treatment,date,power_level,duration FROM ( SELECT name as name,tid as rid FROM therapy_records UNION SELECT name as name,fid as rid FROM frequency_records ) NATURAL JOIN records ORDER BY rid;");
-    query.exec();
-
-    while (query.next()) {
-        QString name = query.value(0).toString();
-        QDateTime start = QDateTime::fromString(query.value(1).toString(), DATE_FORMAT);
-        int power = query.value(2).toString().toInt();
-        int duration = query.value(3).toString().toInt();
-        Record* r = new Record(name, start, power, duration);
-        qvr.push_back(r);
-    }
-    return qvr;
-}
-
-
-bool DBManager::addProfile(int id, double batteryLvl, int powerLvl) {
+bool DBManager::addProfile(int id, double batteryLvl) {
 
     denasDB.transaction();
 
     QSqlQuery query;
-    //query.prepare("INSERT OR REPLACE INTO profiles (pid, battery_level, power_level) VALUES (:pid, :battery_level, :power_level);");
-    query.prepare("REPLACE INTO profiles (pid, battery_level, power_level) VALUES (:pid, :battery_level, :power_level);");
-    query.bindValue(":pid", id);
+    query.prepare("REPLACE INTO profiles (id, battery_level) VALUES (:profile_id, :battery_level);");
+    query.bindValue(":profile_id", id);
     query.bindValue(":battery_level", batteryLvl);
-    query.bindValue(":power_level", powerLvl);
     query.exec();
 
     return denasDB.commit();

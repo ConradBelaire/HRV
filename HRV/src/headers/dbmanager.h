@@ -17,8 +17,6 @@ public:
     static const QString DATABASE_PATH;
 
     DBManager();
-
-
     bool addProfile(int id, double batterLvl);
     bool deleteRecords();
 
@@ -27,9 +25,9 @@ public:
 
 private:
     QSqlDatabase denasDB;
-
     bool isValidRecord(const QString& recordType, const QDateTime& time, int duration);
     bool addRecord(const QString& tableName, const QString& name, const QDateTime& time, int duration);
+
     bool DBInit();
 
 };

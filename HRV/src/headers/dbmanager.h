@@ -18,10 +18,10 @@ public:
 
     DBManager();
     bool addProfile(int id, double batterLvl);
-    bool deleteRecords();
-
     Profile* getProfile(int id);
 
+
+    bool deleteRecords();
 
 private:
     QSqlDatabase denasDB;

@@ -1,0 +1,247 @@
+﻿Use Case: Breath Pacer
+Primary Actor: User
+Precondition: User has initiated a session and device is turned on. 
+Success guarantee: Breath Pacer will indicate when the user should inhale and exhale during the HRV session.
+Main success scenario:
+1. The breath pacer will start by filling up the indicator bar to indicate to the user that they should fill up their lungs with air at the rate of indicator bar going from left to right. 
+2. Once the indicator bar is filled the breath pacer will begin a timer set by the user (default 10 seconds) indicating how long the user should hold their breath.
+3. Once the timer is complete the indicator bar will gradually start to decrease to indicate the user should begin to exhale at the rate of the indicator bar. 
+Extensions:
+2a. The timer will increase with each breath.
+Related Information:
+* The user has the ability to change the default base timer in the settings of the device (this can be from 1-30 seconds).
+
+
+Use Case: Turn Device On
+Primary Actor: User
+Precondition: User has device.
+Success guarantee: Device turns on and displays menu. 
+Main success scenario:
+1. Device receives power on signal.
+2. Device initializes any necessary variables.
+3. Device displays menu
+Extensions:
+1a. Signal can either be from the power button or from the device itself.
+1b. If the device battery is at 0% the device does not get past step 1 and therefore does not initialize and does not display anything effectively leaving it in an off state until the battery is charged.
+
+
+Use Case: Turn Device Off
+Primary Actor: User
+Precondition: User has device.
+Success guarantee: Device turns off.
+Main success scenario:
+1. Device receives a power off signal while the device is already on.
+2. Device runs through any shutdown procedures.
+2. Device turns the display off.
+Extensions:
+1a. Signal can either be from the power button or from the device itself.
+
+
+
+
+
+
+Use Case: Reset Device
+Primary Actor: User
+Includes: Use Case: Turn Device Off, Use Case: Turn Device On
+Precondition: User has previous sessions stored and/or has turned on the device at least once.
+Success guarantee: Device is cleared of all logs and any related variables are reset to their initial values.
+Main success scenario:
+1. User presses the reset button.
+2. Device clears log database.
+3. Device has all related variables reset to initial values.
+4. Device turns off
+5. Device turns on.
+Extensions:
+4a. Refer to Use Case: Turn Device Off
+5a. Refer to Use Case: Turn Device On
+
+
+Use Case: Active Pulse Reading Indicator
+Primary Actor: User
+Precondition: Device is receiving heart rate pulses and is turned on.
+Success guarantee: Device will indicate with an LED that it is receiving a heart pulse rate.
+Main success scenario:
+1. Device will flash LED to the rate of the heart pulse rate that it is receiving.
+
+
+Use Case: View Log(s)
+Primary Actor: User
+Precondition: Device is turned on and at the menu screen.
+Success guarantee: User will be able to see a list of their previous sessions and revisit the summaries of each session.
+Main success scenario:
+1. User selects “Logs" in the menu.  
+2. Device gets logs/previous sessions from the database.
+3. Device displays logs/previous sessions to users in a listable format.
+4. User selects a log from the list view.
+5. Device display summary of selected log.
+Extensions:
+3a. If there are no logs/previous sessions found in the database the screen will display “No previous sessions.”
+Related Information:
+* For the list view each session should be assigned a number such as “Session X” where X is the session number provided by a total sessions counted variable as well as the date at which the session took place.
+* Device will display an expanded view of the selected log showing the summary view of the session. Here the user will also have an option to delete the log/previous session from the database.
+
+
+Use Case: Coherence Level Indicator
+Primary Actor: User
+Precondition: Device is turned on and the user has started a session.
+Success guarantee: Lights on the display will indicate the current coherence level of the user.
+Main success scenario:
+1. Device gets Challenge level.
+2. Device gets current Coherence Score.
+3. Coherence Level indicators display either the colour red, blue, or green depending on the Coherence Score and Challenge Level.
+4. Play a beep noise if the user reaches a new colour.
+Related Information:
+* Coherence Score can range from 0.0-16.0.
+* User has the ability to change the Challenge level in settings before starting a session. Can range from levels 1-4. Level 1 is default.
+* Light colour to display is determined with Coherence score and Challenge level as follows:
+
+
+	Red
+	Blue
+	Green
+	Level 1
+	0.0-0.5
+	0.6-0.9
+	1.0-16.0
+	Level 2
+	0.0-0.6
+	0.7-2.1
+	2.2-16.0
+	Level 3
+	0.0-1.8
+	1.9-4.0
+	4.1-16.0
+	Level 4
+	0.0-4.0
+	4.1-6.0
+	6.1-16.0
+	
+
+Use Case: User Starts a Session
+Primary Actor: User
+Includes: Use Case: Coherence Level Indicator, Use Case: Breath Pacer
+Precondition: Device is turned on and the user is at the menu screen.
+Success guarantee: Device will start and record a session.
+Main success scenario:
+1. User selects “Session”
+2. Device grabs current date and time.
+3. Device creates a new database entry for this session.
+4. Device displays a blank HRV graph, Breath Pacer, Coherence score, Timer, and Achievement score onto the screen.
+5. Device starts Breath Pacer and starts session length timer.
+6. Device outputs heart rate at current duration (session length timer) onto the HRV graph.
+7. Device calculates Coherence score.
+8. Device displays current Coherence score and duration (session length timer) of session.
+9. If conditions are met device updates achievement score and updates Coherence level indicator.
+10. Device adjust’s battery power level.
+11. Device repeats steps 6-10 until the user presses back or “MENU” buttons.
+12. Once the session has ended the device will stop the timer and Breath Pacer.
+13 .Device will display the session summary
+14. Device records summary data to database entry.
+Extensions:
+9a. Device should only update the achievement score and Coherence level indicator if 5 seconds have passed since the last update.
+9b. For updating the Coherence level indicator refer to Use Case: Coherence Level Indicator.
+Related Information:
+* Session summary includes the challenge level, percentage of time in different coherence levels (low medium and high), average coherence, length of session, achievement score, entire HRV graph 
+* Coherence score is calculated by comparing the current heart rate to the pattern of a sine wave with a frequency between 0.04-0.24 Hz (3-15 cycles per minute). The further away the heart rate is from the sine wave at that current time position then the worse the score (worst is 0, best is 16).
+* Achievement score is calculated by adding the current Coherence score to a total sum of all previous scores since the start of the session.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Features:         Green = Covered         Yellow = Not covered (probably doesn’t need a use case)
+
+
+* A suggested user interface consists of the following main components: A screen and buttons. The screen contains the menu options and the display graph. There are eight buttons: an off/on button for the device, a menu button, a standard back button which will return the user to the menu, four arrow buttons (up/down,left/right) and a selector in the center of the arrow buttons which also functions as a start/stop button in session mode.
+
+
+* An option to reset, wipe all data and restore the device to the initial install condition 
+
+
+* There is a battery charge indicator on the session screen  
+
+
+* A light on the machine and/or a symbol on the screen that indicates an active pulse reading 
+
+
+* A breath pacer in the form of a strip of lights on the machine itself or a ball going back and forth on the session screen, default set at one breath every 10 seconds, adjustable in settings
+   * The breath pacer, 1-30 seconds, increases time interval between each breath, default at 10 seconds 
+
+
+* Session Related
+   * Session screen must display the main HRV graph (HR vs time) with key metrics
+      * The metrics on the screen include the current coherence score (numerical value), length (duration of session), achievement (total sum of coherence scores sampled every 5 seconds) 
+   * On the device there should be a light that changes to red, blue or green indicating low, medium or high coherence, depending on the challenge level 
+   * A beep goes off when a new coherence level is reached 
+   * When the user ends a session a summary view will appear that includes the following information: challenge level, percentage of time in different coherence levels (low medium and high), average coherence, length of session, achievement score, entire HRV graph 
+
+
+* Logs Related
+   * The menu contains a log or history tab of all sessions, with dates, when selected show the summary view, as well as the ability to delete a session 
+
+
+* Settings Related
+   * The settings tab includes challenge level and breath pacer settings 
+   * There are 4 challenge levels for coherence, from beginner to advanced, for the user to choose 
+
+
+
+
+      * In addition, the device has an led light that changes to red, blue or green to indicate coherence level (not the same thing???)
+Understanding the Coherence Lights:

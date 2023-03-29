@@ -6,8 +6,10 @@ class DBManager;
 class Profile {
 
 public:
-    Profile(int);
+    Profile(int, double);
     int getId();
+    double getBLvl();
+    void setBLvl(double);
 
 private:
     int id;

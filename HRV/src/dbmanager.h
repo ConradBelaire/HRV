@@ -21,6 +21,7 @@ public:
     DBManager();
     bool addProfile(int id, double batterLvl);
     Profile* getProfile(int id);
+    bool deleteProfile(int id);
     bool addSession(int profileId, int challengeLevel, float isLow, float isMed, float isHigh, float avgCoherence, int sessionTime, float achievementScore, QString graph, QString date);
     Session* getSession(int id);
     Session** getSessions(int profileId);

@@ -20,13 +20,15 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     profile.cpp \
-    session.cpp
+    session.cpp \
+    menu.cpp
 
 HEADERS += \
     dbmanager.h \
     profile.h \
     session.h \
-    mainwindow.h
+    mainwindow.h \
+    menu.h
 
 FORMS += \
     mainwindow.ui

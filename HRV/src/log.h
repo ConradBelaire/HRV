@@ -1,5 +1,5 @@
-#ifndef SESSION_H
-#define SESSION_H
+#ifndef LOG_H
+#define LOG_H
 
 #include <QString>
 #include <QVector>
@@ -8,10 +8,10 @@
 
 class DBManager;
 
-class Session {
+class Log {
     public:
-        Session(int, int, int, float, float, float, float, int, float, const QString&, const QString&);
-        Session(int, int, int, float, float, float, float, int, float, QVector<int>, const QDateTime&);
+        Log(int, int, int, float, float, float, float, int, float, const QString&, const QString&);
+        Log(int, int, int, float, float, float, float, int, float, QVector<int>, const QDateTime&);
 
         int getId();
         int getProfileId();
@@ -20,7 +20,7 @@ class Session {
         float getIsMed();
         float getIsHigh();
         float getAvgCoherence();
-        int getSessionTime();
+        int getLogTime();
         float getAchievementScore();
         const QString& getGraph();
         const QString& getDate();
@@ -32,7 +32,7 @@ class Session {
         void setIsMed(float);
         void setIsHigh(float);
         void setAvgCoherence(float);
-        void setSessionTime(int);
+        void setLogTime(int);
         void setAchievementScore(float);
         void setGraph(const QString&);
         void setDate(const QString&);

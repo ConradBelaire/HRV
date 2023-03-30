@@ -23,7 +23,7 @@ bool DBManager::DBInit() {
 
     QSqlQuery query;
     query.exec("CREATE TABLE IF NOT EXISTS profiles ( id SERIAL PRIMARY KEY, battery_level FLOAT NOT NULL );");
-    query.exec("CREATE TABLE IF NOT EXISTS session ( id SERIAL PRIMARY KEY, profile_id INTEGER NOT NULL, challenge_level INTEGER NOT NULL, is_low FLOAT NOT NULL, is_med FLOAT NOT NULL, is_high FLOAT NOT NULL, avg_coherence FLOAT NOT NULL, session_time INTEGER NOT NULL, achievement_score FLOAT NOT NULL, graph TEXT NOT NULL, date VARCHAR(255) NOT NULL, CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES profile (id), CONSTRAINT check_percentages CHECK ((is_low + is_med + is_high) = 100) );");
+    query.exec("CREATE TABLE IF NOT EXISTS log ( id SERIAL PRIMARY KEY, profile_id INTEGER NOT NULL, challenge_level INTEGER NOT NULL, is_low FLOAT NOT NULL, is_med FLOAT NOT NULL, is_high FLOAT NOT NULL, avg_coherence FLOAT NOT NULL, session_time INTEGER NOT NULL, achievement_score FLOAT NOT NULL, graph TEXT NOT NULL, date VARCHAR(255) NOT NULL, CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES profile (id), CONSTRAINT check_percentages CHECK ((is_low + is_med + is_high) = 100) );");
 
     return denasDB.commit();
 }
@@ -82,12 +82,12 @@ bool DBManager::deleteProfile(int id) {
 }
 
 
-Sessions** DBManager::getProfileSessions(int id) {
+Log** DBManager::getProfileLogs(int profileId) {
 
     denasDB.transaction();
 
     QSqlQuery query;
-    query.prepare("SELECT * FROM session WHERE profile_id = :profile_id;");
+    query.prepare("SELECT * FROM log WHERE profile_id = :profile_id;");
     query.bindValue(":profile_id", id);
     query.exec();
 
@@ -101,9 +101,9 @@ Sessions** DBManager::getProfileSessions(int id) {
     }
 
     // profile exists
-    Session** sessions = new Session*[query.size()];
+    Log** logs = new Log*[query.size()];
     while (query.next()) {
-        sessions[i] = new Session(
+        logs[i] = new Log(
             query.value(0).toInt(),
             query.value(1).toInt(),
             query.value(2).toInt(),
@@ -118,30 +118,30 @@ Sessions** DBManager::getProfileSessions(int id) {
         );
         i++;
     }
-    return sessions;
+    return logs;
 }
 
 
-Session* DBManager::getSession(int id) {
+Log* DBManager::getLog(int id) {
 
     denasDB.transaction();
 
     QSqlQuery query;
-    query.prepare("SELECT * FROM sessions WHERE id = :session_id;");
-    query.bindValue(":session", id);
+    query.prepare("SELECT * FROM log WHERE id = :log_id;");
+    query.bindValue(":log", id);
     query.exec();
 
     if (!denasDB.commit()) {
         throw "Error: Query failed to execute";
     }
 
-   // session does not exist
+   // Log does not exist
     if (!query.next()) {
-        throw "Error: Session does not exist";
+        throw "Error: Log does not exist";
     }
 
-    // session exists
-    Session* session = new Session(
+    // Log exists
+    Log* log = new Log(
         query.value(0).toInt(),
         query.value(1).toInt(),
         query.value(2).toInt(),
@@ -154,11 +154,11 @@ Session* DBManager::getSession(int id) {
         query.value(9).toString(),
         query.value(10).toString()
     );
-    return session;
+    return log;
 }
 
 
-bool DBManager::addSession(
+bool DBManager::addLog(
     int profile_id,
     int challenge_level,
     float is_low,
@@ -173,7 +173,7 @@ bool DBManager::addSession(
     denasDB.transaction();
 
     QSqlQuery query;
-    query.prepare("INSERT INTO session ( profile_id, challenge_level, is_low, is_med, is_high, avg_coherence, session_time, achievement_score, graph, date ) VALUES ( :profile_id, :challenge_level, :is_low, :is_med, :is_high, :avg_coherence, :session_time, :achievement_score, :graph, :date );");
+    query.prepare("INSERT INTO log ( profile_id, challenge_level, is_low, is_med, is_high, avg_coherence, session_time, achievement_score, graph, date ) VALUES ( :profile_id, :challenge_level, :is_low, :is_med, :is_high, :avg_coherence, :session_time, :achievement_score, :graph, :date );");
     query.bindValue(":profile_id", profile_id);
     query.bindValue(":challenge_level", challenge_level);
     query.bindValue(":is_low", is_low);
@@ -190,23 +190,23 @@ bool DBManager::addSession(
 }
 
 
-bool DBManager::deleteSession(int id) {
+bool DBManager::deleteLog(int id) {
         denasDB.transaction();
 
         QSqlQuery query;
-        query.prepare("DELETE FROM session WHERE id = :session_id;");
-        query.bindValue(":session_id", id);
+        query.prepare("DELETE FROM log WHERE id = :log_id;");
+        query.bindValue(":log_id", id);
         query.exec();
 
         return denasDB.commit();
 }
 
 
-bool DBManager::deleteSessions() {
+bool DBManager::deleteLogs() {
         denasDB.transaction();
 
         QSqlQuery query;
-        query.exec("DELETE FROM session;");
+        query.exec("DELETE FROM log;");
 
         return denasDB.commit();
 }

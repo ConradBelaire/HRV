@@ -17,5 +17,15 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    // For testing purposes!
+    bool redLED;
+    bool greenLED;
+    bool blueLED;
+
+
+private slots:
+    void toggleRedLED();
+    void toggleGreenLED();
+    void toggleBlueLED();
 };
 #endif // MAINWINDOW_H

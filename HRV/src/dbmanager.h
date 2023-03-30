@@ -8,6 +8,7 @@
 #include <QSqlQuery>
 #include <QList>
 #include <QApplication>
+#include <string>
 
 #include "profile.h"
 #include "log.h"

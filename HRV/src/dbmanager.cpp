@@ -44,7 +44,7 @@ Profile* DBManager::getProfile(int id) {
 
    // profile does not exist
     if (!query.next()) {
-        addProfile(id);
+        addProfile(id, 100);
         Profile* pro = new Profile(id, 100);
         return pro;
     }
@@ -88,7 +88,7 @@ Log** DBManager::getProfileLogs(int profileId) {
 
     QSqlQuery query;
     query.prepare("SELECT * FROM log WHERE profile_id = :profile_id;");
-    query.bindValue(":profile_id", id);
+    query.bindValue(":profile_id", profileId);
     query.exec();
 
     if (!denasDB.commit()) {
@@ -102,6 +102,7 @@ Log** DBManager::getProfileLogs(int profileId) {
 
     // profile exists
     Log** logs = new Log*[query.size()];
+    int i = 0;
     while (query.next()) {
         logs[i] = new Log(
             query.value(0).toInt(),
@@ -167,8 +168,8 @@ bool DBManager::addLog(
     float avg_coherence,
     int session_time,
     float achievement_score,
-    string graph,
-    string date ) {
+    QString graph,
+    QString date ) {
 
     denasDB.transaction();
 
@@ -182,8 +183,8 @@ bool DBManager::addLog(
     query.bindValue(":avg_coherence", avg_coherence);
     query.bindValue(":session_time", session_time);
     query.bindValue(":achievement_score", achievement_score);
-    query.bindValue(":graph", QString::fromStdString(graph));
-    query.bindValue(":date", QString::fromStdString(date));
+    query.bindValue(":graph", graph);
+    query.bindValue(":date", date);
     query.exec();
 
     return denasDB.commit();

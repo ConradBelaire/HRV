@@ -1,18 +1,11 @@
-#ifndef LOG_H
-#define LOG_H
+#ifndef SESSION_H
+#define SESSION_H
 
-#include <QString>
-#include <QVector>
-#include <QDateTime>
+class Session {
 
-
-class DBManager;
-
-class Log {
     public:
-        // Log(Session*);
-        Log(int, int, int, float, float, float, float, int, float, const QString&, const QString&);
-        Log(int, int, int, float, float, float, float, int, float, QVector<int>, const QDateTime&);
+        Session(int, int, int, float, float, float, float, int, float, const QString&, const QString&);
+        Session(int, int, int, float, float, float, float, int, float, QVector<int>, const QDateTime&);
 
         int getId();
         int getProfileId();
@@ -40,7 +33,19 @@ class Log {
         void setGraph(QVector<int> arr);
         void setDate(const QDateTime& date);
 
+
+
+
+        void update_reading(int hrr);
     private:
+        int heart_rate_reading;
+
+
+
+
+        int seesion_num;
+        int eleapsed_time;
+        float coherent_sum;
         int session_num;
         int profile_id;
         int challenge_level;
@@ -54,4 +59,4 @@ class Log {
         QString date;
 };
 
-#endif
+#endif // PROFILE_H

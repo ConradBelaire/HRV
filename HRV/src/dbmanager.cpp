@@ -69,6 +69,19 @@ bool DBManager::addProfile(int id, double batteryLvl) {
 }
 
 
+bool DBManager::deleteProfile(int id) {
+
+    denasDB.transaction();
+
+    QSqlQuery query;
+    query.prepare("DELETE FROM profiles WHERE id = :profile_id;");
+    query.bindValue(":profile_id", id);
+    query.exec();
+
+    return denasDB.commit();
+}
+
+
 Log** DBManager::getProfileLogs(int profileId) {
 
     denasDB.transaction();

@@ -2,6 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QListWidget>
+
+#include "menu.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -16,7 +19,17 @@ public:
     ~MainWindow();
 
 private:
+    Menu* masterMenu;
+    Menu* mainMenuOG;
+
     Ui::MainWindow *ui;
+    QListWidget *activeQListWidget;
+
+
+    void updateMenu(const QString, const QStringList);
+    void initializeMainMenu(Menu*);
+
+
     // For testing purposes!
     bool redLED;
     bool greenLED;
@@ -24,6 +37,11 @@ private:
 
 
 private slots:
+    void navigateDownMenu();
+    void navigateUpMenu();
+    void navigateSubMenu();
+    void navigateToMainMenu();
+    void navigateBack();
     void toggleRedLED();
     void toggleGreenLED();
     void toggleBlueLED();

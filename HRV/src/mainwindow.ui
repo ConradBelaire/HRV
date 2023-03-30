@@ -1122,7 +1122,7 @@
        <enum>QLayout::SetMaximumSize</enum>
       </property>
       <item>
-       <widget class="QLabel" name="RedLED">
+       <widget class="QLabel" name="redLED">
         <property name="minimumSize">
          <size>
           <width>50</width>
@@ -1144,7 +1144,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="BlueLED">
+       <widget class="QLabel" name="blueLED">
         <property name="minimumSize">
          <size>
           <width>50</width>
@@ -1166,7 +1166,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="GreenLED">
+       <widget class="QLabel" name="greenLED">
         <property name="minimumSize">
          <size>
           <width>50</width>

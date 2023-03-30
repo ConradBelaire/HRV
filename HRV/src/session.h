@@ -1,13 +1,17 @@
 #ifndef SESSION_H
 #define SESSION_H
 
-#include <string>
+#include <QString>
+#include <QVector>
+#include <QDateTime>
+
 
 class DBManager;
 
 class Session {
     public:
-        Session(int, int, int, float, float, float, float, int, float, string, string);
+        Session(int, int, int, float, float, float, float, int, float, const QString&, const QString&);
+        Session(int, int, int, float, float, float, float, int, float, QVector<int>, const QDateTime&);
 
         int getId();
         int getProfileId();
@@ -18,8 +22,8 @@ class Session {
         float getAvgCoherence();
         int getSessionTime();
         float getAchievementScore();
-        string getGraph();
-        string getDate();
+        const QString& getGraph();
+        const QString& getDate();
 
         void setId(int);
         void setProfileId(int);
@@ -30,11 +34,13 @@ class Session {
         void setAvgCoherence(float);
         void setSessionTime(int);
         void setAchievementScore(float);
-        void setGraph(string);
-        void setDate(string);
+        void setGraph(const QString&);
+        void setDate(const QString&);
+        void setGraph(QVector<int> arr);
+        void setDate(const QDateTime& date);
 
     private:
-        int id;
+        int session_num;
         int profile_id;
         int challenge_level;
         float is_low;
@@ -43,8 +49,8 @@ class Session {
         float avg_coherence;
         int session_time;
         float achievement_score;
-        string graph;
-        string date;
-}
+        QString graph;
+        QString date;
+};
 
 #endif

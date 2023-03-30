@@ -1,8 +1,6 @@
 #ifndef PROFILE_H
 #define PROFILE_H
 
-class DBManager;
-
 class Profile {
 
 public:
@@ -13,7 +11,7 @@ public:
 
 private:
     int id;
-
+    double batteryLvl;
 };
 
 #endif // PROFILE_H

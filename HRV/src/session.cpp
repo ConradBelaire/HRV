@@ -27,7 +27,7 @@ Session::Session(int sessionNum, int pid, int challengeLevel, float isLow, float
     this->achievement_score = achievementScore;
     
     // format date
-    this->date = date.toString("dd.MM.yyyy - hh:mm:ss");
+    this->date = date.toString("dd.MM.yyyy hh:mm:ss");
     // convert vector to string
     if (HRarr.size()>1) {
         QString data = QString::number(HRarr[0]);
@@ -145,5 +145,5 @@ void Session::setGraph(QVector<int> HRarr) {
 }
 
 void Session::setDate(const QDateTime& date) {
-    this->date = date.toString("dd.MM.yyyy - hh:mm:ss");
+    this->date = date.toString("dd.MM.yyyy hh:mm:ss");
 }

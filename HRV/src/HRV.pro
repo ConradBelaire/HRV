@@ -26,6 +26,7 @@ SOURCES += \
 
 HEADERS += \
     dbmanager.h \
+    profile.h \
     session.h \
     mainwindow.h
     dpmanager.h

@@ -9,6 +9,8 @@
 #include <QList>
 #include <QApplication>
 
+#include "profile.h"
+#include "session.h"
 
 class DBManager {
 

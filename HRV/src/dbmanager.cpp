@@ -1,9 +1,5 @@
 #include "dbmanager.h"
 
-#include "profile.h"
-#include "session.h"
-
-
 const QString DBManager::DATABASE_PATH = "/database/denas.db";
 
 DBManager::DBManager() {

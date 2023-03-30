@@ -19,18 +19,14 @@ SOURCES += \
     dbmanager.cpp \
     main.cpp \
     mainwindow.cpp \
-    dbmanager.cpp \
     profile.cpp \
     session.cpp
-    dbmanager.cpp
 
 HEADERS += \
     dbmanager.h \
     profile.h \
     session.h \
     mainwindow.h
-    dpmanager.h
-    profile.h
 
 FORMS += \
     mainwindow.ui

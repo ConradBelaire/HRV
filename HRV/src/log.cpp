@@ -1,6 +1,6 @@
-#include "session.h"
+#include "log.h"
 
-Session::Session(int sessionNum, int pid, int challengeLevel, float isLow, float isMed, float isHigh, float avgCoherence, int sessionTime, float achievementScore, const QString& graph, const QString& date) {
+Log::Log(int sessionNum, int pid, int challengeLevel, float isLow, float isMed, float isHigh, float avgCoherence, int sessionTime, float achievementScore, const QString& graph, const QString& date) {
     this->session_num = sessionNum;
     this->profile_id = pid;
     this->challenge_level = challengeLevel;
@@ -15,7 +15,7 @@ Session::Session(int sessionNum, int pid, int challengeLevel, float isLow, float
     this->date = date;
 }
 
-Session::Session(int sessionNum, int pid, int challengeLevel, float isLow, float isMed, float isHigh, float avgCoherence, int sessionTime, float achievementScore, QVector<int> HRarr, const QDateTime& date) {
+Log::Log(int sessionNum, int pid, int challengeLevel, float isLow, float isMed, float isHigh, float avgCoherence, int sessionTime, float achievementScore, QVector<int> HRarr, const QDateTime& date) {
     this->session_num = sessionNum;
     this->profile_id = pid;
     this->challenge_level = challengeLevel;
@@ -25,7 +25,7 @@ Session::Session(int sessionNum, int pid, int challengeLevel, float isLow, float
     this->avg_coherence = avgCoherence;
     this->session_time = sessionTime;
     this->achievement_score = achievementScore;
-    
+
     // format date
     this->date = date.toString("dd.MM.yyyy hh:mm:ss");
     // convert vector to string
@@ -40,98 +40,98 @@ Session::Session(int sessionNum, int pid, int challengeLevel, float isLow, float
     }
 }
 
-int Session::getId() {
+int Log::getId() {
     return session_num;
 }
 
-int Session::getProfileId() {
+int Log::getProfileId() {
     return profile_id;
 }
 
-int Session::getChallengeLevel() {
+int Log::getChallengeLevel() {
     return challenge_level;
 }
 
-float Session::getIsLow() {
+float Log::getIsLow() {
     return is_low;
 }
 
-float Session::getIsMed() {
+float Log::getIsMed() {
     return is_med;
 }
 
-float Session::getIsHigh() {
+float Log::getIsHigh() {
     return is_high;
 }
 
-float Session::getAvgCoherence() {
+float Log::getAvgCoherence() {
     return avg_coherence;
 }
 
-int Session::getSessionTime() {
+int Log::getSessionTime() {
     return session_time;
 }
 
-float Session::getAchievementScore() {
+float Log::getAchievementScore() {
     return achievement_score;
 }
 
-const QString& Session::getGraph() {
+const QString& Log::getGraph() {
     return graph;
 }
 
-const QString& Session::getDate() {
+const QString& Log::getDate() {
     return date;
 }
 
 
 
-void Session::setId(int id) {
+void Log::setId(int id) {
     this->session_num = id;
 }
 
-void Session::setProfileId(int profile_id) {
+void Log::setProfileId(int profile_id) {
     this->profile_id = profile_id;
 }
 
-void Session::setChallengeLevel(int challenge_level) {
+void Log::setChallengeLevel(int challenge_level) {
     this->challenge_level = challenge_level;
 }
 
-void Session::setIsLow(float is_low) {
+void Log::setIsLow(float is_low) {
     this->is_low = is_low;
 }
 
-void Session::setIsMed(float is_med) {
+void Log::setIsMed(float is_med) {
     this->is_med = is_med;
 }
 
-void Session::setIsHigh(float is_high) {
+void Log::setIsHigh(float is_high) {
     this->is_high = is_high;
 }
 
-void Session::setAvgCoherence(float avg_coherence) {
+void Log::setAvgCoherence(float avg_coherence) {
     this->avg_coherence = avg_coherence;
 }
 
-void Session::setSessionTime(int session_time) {
+void Log::setSessionTime(int session_time) {
     this->session_time = session_time;
 }
 
-void Session::setAchievementScore(float achievement_score) {
+void Log::setAchievementScore(float achievement_score) {
     this->achievement_score = achievement_score;
 }
 
-void Session::setGraph(const QString& graph) {
+void Log::setGraph(const QString& graph) {
     this->graph = graph;
 }
 
-void Session::setDate(const QString& date) {
+void Log::setDate(const QString& date) {
     this->date = date;
 }
 
 
-void Session::setGraph(QVector<int> HRarr) {
+void Log::setGraph(QVector<int> HRarr) {
     // convert vector to string
     if (HRarr.size()>1) {
         QString data = QString::number(HRarr[0]);
@@ -144,6 +144,6 @@ void Session::setGraph(QVector<int> HRarr) {
     }
 }
 
-void Session::setDate(const QDateTime& date) {
+void Log::setDate(const QDateTime& date) {
     this->date = date.toString("dd.MM.yyyy hh:mm:ss");
 }

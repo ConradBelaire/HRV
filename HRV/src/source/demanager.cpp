@@ -72,6 +72,7 @@ bool DBManager::addProfile(int id, double batteryLvl) {
     return denasDB.commit();
 }
 
+
 Sessions** DBManager::getProfileSessions(int id) {
 
     denasDB.transaction();
@@ -111,6 +112,7 @@ Sessions** DBManager::getProfileSessions(int id) {
     return sessions;
 }
 
+
 Session* DBManager::getSession(int id) {
 
     denasDB.transaction();
@@ -145,6 +147,7 @@ Session* DBManager::getSession(int id) {
     );
     return session;
 }
+
 
 bool DBManager::addSession(
     int profile_id,
@@ -188,7 +191,6 @@ bool DBManager::deleteSession(int id) {
 
         return denasDB.commit();
 }
-
 
 
 bool DBManager::deleteSessions() {

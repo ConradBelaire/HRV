@@ -10,7 +10,7 @@
 #include <QApplication>
 
 #include "profile.h"
-#include "session.h"
+#include "log.h"
 
 class DBManager {
 
@@ -21,11 +21,11 @@ public:
     DBManager();
     bool addProfile(int id, double batterLvl);
     Profile* getProfile(int id);
-    bool addSession(int profileId, int challengeLevel, float isLow, float isMed, float isHigh, float avgCoherence, int sessionTime, float achievementScore, QString graph, QString date);
-    Session* getSession(int id);
-    Session** getSessions(int profileId);
-    bool deleteSession(int id);
-    bool deleteSessions();
+    bool addLog(int profileId, int challengeLevel, float isLow, float isMed, float isHigh, float avgCoherence, int sessionTime, float achievementScore, QString graph, QString date);
+    Log* getLog(int id);
+    Log** getProfileLogs(int profileId);
+    bool deleteLog(int id);
+    bool deleteLogs();
 
 private:
     QSqlDatabase denasDB;

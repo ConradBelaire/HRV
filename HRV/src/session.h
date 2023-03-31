@@ -1,62 +1,41 @@
 #ifndef SESSION_H
 #define SESSION_H
 
+#include <QDateTime>
+
 class Session {
 
     public:
-        Session(int, int, int, float, float, float, float, int, float, const QString&, const QString&);
-        Session(int, int, int, float, float, float, float, int, float, QVector<int>, const QDateTime&);
+        Session(int session_num, int challenge_level, int pacer_duration, const QDateTime& start_time);
 
-        int getId();
-        int getProfileId();
-        int getChallengeLevel();
-        float getIsLow();
-        float getIsMed();
-        float getIsHigh();
-        float getAvgCoherence();
-        int getLogTime();
-        float getAchievementScore();
-        const QString& getGraph();
-        const QString& getDate();
+        // getters
+        int getChallengeLevel() const;
+        int getSessionNum() const;
+        int getPacerDuration() const;
+        float getCoherentSum() const;
+        int getCoherenceCount() const;
+        float getCurrentCoherence() const;
+        int getCurrentHeartRate() const;
+        int getEleapsedTime() const;
+        float getAchievementScore() const;
+        QDateTime getStartTime() const;
 
-        void setId(int);
-        void setProfileId(int);
-        void setChallengeLevel(int);
-        void setIsLow(float);
-        void setIsMed(float);
-        void setIsHigh(float);
-        void setAvgCoherence(float);
-        void setLogTime(int);
-        void setAchievementScore(float);
-        void setGraph(const QString&);
-        void setDate(const QString&);
-        void setGraph(QVector<int> arr);
-        void setDate(const QDateTime& date);
+        // functions
+        void updateReading(int hr);
+        void addCoherenceScore(float coherence);
 
-
-
-
-        void update_reading(int hrr);
     private:
-        int heart_rate_reading;
+        const int CHALLENGE_LEVEL;
+        const int SESSION_NUM;
+        const QDateTime START_TIME;
+        const int PACER_DURATION;
 
-
-
-
-        int seesion_num;
-        int eleapsed_time;
-        float coherent_sum;
-        int session_num;
-        int profile_id;
-        int challenge_level;
-        float is_low;
-        float is_med;
-        float is_high;
-        float avg_coherence;
-        int session_time;
+        float coherence_sum;
+        int coherence_count;
+        float current_coherence;
+        int current_heart_rate;
+        int eleapsed_time
         float achievement_score;
-        QString graph;
-        QString date;
 };
 
 #endif // PROFILE_H

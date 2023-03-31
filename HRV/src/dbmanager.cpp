@@ -55,14 +55,15 @@ Profile* DBManager::getProfile(int id) {
 }
 
 
-bool DBManager::addProfile(int id, double batteryLvl) {
+bool DBManager::addProfile(int id, double batteryLvl, int sessionsAmt) {
 
     denasDB.transaction();
 
     QSqlQuery query;
-    query.prepare("REPLACE INTO profiles (id, battery_level) VALUES (:profile_id, :battery_level);");
+    query.prepare("REPLACE INTO profiles (id, battery_level, sessionAmt) VALUES (:profile_id, :battery_level, :sessionAmt);");
     query.bindValue(":profile_id", id);
     query.bindValue(":battery_level", batteryLvl);
+    query.bindValue(":sessionAmt", sessionsAmt);
     query.exec();
 
     return denasDB.commit();
@@ -161,6 +162,7 @@ Log* DBManager::getLog(int id) {
 
 bool DBManager::addLog(
     int profile_id,
+    int session_num,
     int challenge_level,
     float is_low,
     float is_med,
@@ -174,8 +176,9 @@ bool DBManager::addLog(
     denasDB.transaction();
 
     QSqlQuery query;
-    query.prepare("INSERT INTO log ( profile_id, challenge_level, is_low, is_med, is_high, avg_coherence, session_time, achievement_score, graph, date ) VALUES ( :profile_id, :challenge_level, :is_low, :is_med, :is_high, :avg_coherence, :session_time, :achievement_score, :graph, :date );");
+    query.prepare("INSERT INTO log ( profile_id, lod_id, challenge_level, is_low, is_med, is_high, avg_coherence, session_time, achievement_score, graph, date ) VALUES ( :profile_id, :lod_id, :challenge_level, :is_low, :is_med, :is_high, :avg_coherence, :session_time, :achievement_score, :graph, :date );");
     query.bindValue(":profile_id", profile_id);
+    query.bindValue(":lod_id", session_num);
     query.bindValue(":challenge_level", challenge_level);
     query.bindValue(":is_low", is_low);
     query.bindValue(":is_med", is_med);

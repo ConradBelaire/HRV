@@ -30,30 +30,35 @@ class MainWindow : public QMainWindow
 
         void UpdateMenu();
         void start_session(Session* session);
+        void drainBattery();
+        void resetDevice();
+        void powerChange();
 
 
     private:
-        // Menu* masterMenu;
-        // Menu* mainMenu;
-
+        Menu* masterMenu;
+        Menu* mainMenuOG;
         Ui::MainWindow *ui;
         QListWidget* activeQListWidget;
 
-        QStringList allLogs;
-
-        Session* currentSession;
         DBManager* dbmanager;
         Profile* profile;
-
-
-
         bool powerStatus;
-        bool connectedStatus;
 
+        void changePowerStatus();
+        void powerChange();
+        QVector<Log*> sessions;
+        int sessionsAmt;
+        QTimer* timer;
+
+
+        bool connectedStatus;
         int currentDurationCount;
+        Session* currentSession;
 
         // QString durationString;
 
+        QStringList allLogs;
         void updateMenu(const QString&, const QStringList&);
         // void initMainMenu(Menu*);
         void init_timer(QTimer* timer);

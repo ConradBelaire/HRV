@@ -1,60 +1,53 @@
-// #include 'session.h'
+#include "session.h"
 
-// Session::Session(
+Session::Session(int session_num, int challenge_level, int pacer_duration, const QDateTime& start_time): SESSION_NUM(session_num), CHALLENGE_LEVEL(challenge_level), PACER_DURATION(pacer_duration), START_TIME(start_time) {
+    coherence_sum = 0;
+    current_coherence = 0;
+    current_heart_rate = 0;
+    eleapsed_time = 0;
+    achievement_score = 0;
+}
 
-// ):
+int Session::getSessionNum() const {
+    return SESSION_NUM;
+}
 
-// {
+int Session::getChallengeLevel() const {
+    return CHALLENGE_LEVEL;
+}
 
-// }
+int Session::getPacerDuration() const {
+    return pacer_duration;
+}
 
-// Session::Session(int, int, int, float, float, float, float, int, float, QVector<int>, const QDateTime&)
+float Session::getCoherentSum() const {
+    return coherence_sum;
+}
 
-// int Session::getId(){return }
+float Session::getCurrentCoherence() const {
+    return current_coherence;
+}
 
-// int Session::getProfileId()
+int Session::getCurrentHeartRate() const {
+    return current_heart_rate;
+}
 
-// int Session::getChallengeLevel()
+int Session::getElapsedTime() const {
+    return eleapsed_time;
+}
 
-// float Session::getIsLow()
+QDateTime Session::getStartTime() const {
+    return START_TIME;
+}
 
-// float Session::getIsMed()
+// functions
+void Session::updateReading(int hr) {
+    current_heart_rate = hr;
+    eleapsed_time += 1;
+}
 
-// float Session::getIsHigh()
-
-// float Session::getAvgCoherence()
-
-// int Session::getLogTime()
-
-// float Session::getAchievementScore()
-
-// const QString& Session::getGraph()
-
-// const QString& Session::getDate()
-
-// void Session::setId(int)
-
-// void Session::setProfileId(int)
-
-// void Session::setChallengeLevel(int)
-
-// void Session::setIsLow(float)
-
-// void Session::setIsMed(float)
-
-// void Session::setIsHigh(float)
-
-// void Session::setAvgCoherence(float)
-
-// void Session::setLogTime(int)
-
-// void Session::setAchievementScore(float)
-
-// void Session::setGraph(const QString&)
-
-// void Session::setDate(const QString&)
-
-// void Session::setGraph(QVector<int> arr)
-
-// void Session::setDate(const QDateTime& date)
-
+void Session::addCoherenceScore(float coherence) {
+    coherence_sum += coherence;
+    coherence_count++;
+    achievement_score = coherence_sum / coherence_count;
+}

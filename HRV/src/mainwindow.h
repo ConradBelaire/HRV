@@ -56,6 +56,9 @@ class MainWindow : public QMainWindow
         int currentDurationCount;
         Session* currentSession;
 
+
+        int pacer_dur;
+        int challenge_level;
         // QString durationString;
 
         QStringList allLogs;

@@ -5,6 +5,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     ui->setupUi(this);
 
+    // init settings
+    pacer_dur = 10;
+    challenge_lvl = 1;
 
     // Set initial Skin status
     connectedStatus = false;
@@ -108,6 +111,17 @@ void MainWindow::initializeMainMenu(Menu* m) {
         history->addChildMenu(session_menu);
     }
 
+    Menu* reset = new Menu("RESET", {"YES","NO"}, settings);
+    Menu* challengeLevel = new Menu("CHALLENGE LEVEL", {"1","2","3","4"}, settings);
+    Menu* pacerDuration = new Menu(
+        "PACER DURATION",
+        {"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"},
+        settings
+    );
+
+    settings->addChildMenu(reset);
+    settings->addChildMenu(challengeLevel);
+    settings->addChildMenu(pacerDuration);
 }
 
 void MainWindow::navigateUpMenu() {
@@ -148,7 +162,7 @@ void MainWindow::navigateToMainMenu() {
     ui->electrodeLabel->setVisible(false);
 }
 
-
+// ok button
 void MainWindow::navigateBack() {
     if (currentTimerCount != 0) {
         //Save recording
@@ -215,6 +229,30 @@ void MainWindow::navigateSubMenu() {
         }
     }
 
+    if (masterMenu->getName() == "CHALLENGE LEVEL") {
+        challenge_level = index + 1;
+    }
+
+    if (masterMenu->getName() == "PACER DURATION") {
+        pacer_duration = index + 1;
+    }
+
+    if (masterMenu->getName() == "RESET") {
+        if (masterMenu->getMenuItems()[index] == "YES") {
+            challenge_level = 1;
+            pacer_duration = 10;
+            db->deleteProfiles();
+            profile = db->getProfile(1);
+
+            navigateBack();
+            return;
+        }
+        else {
+            navigateBack();
+            return;
+        }
+    }
+
     //If the menu is a parent and clicking on it should display more menus.
     if (masterMenu->getChildMenu(index)->getMenuItems().length() > 0) {
         masterMenu = masterMenu->getChildMenu(index);
@@ -246,7 +284,6 @@ void MainWindow::rechargeBattery(){
     change_battery_level(100);
 }
 
-// TODO: create buttons for the power functionality
 // function will set the battery level to the newLevel
 void MainWindow::changeBatteryLevel(double newLevel) {
 
@@ -279,8 +316,6 @@ void MainWindow::changeBatteryLevel(double newLevel) {
 }
 
 
-
-// IN PROGRESS
 // change the power status variable
 void MainWindow::powerChange(){
 
@@ -297,30 +332,25 @@ void MainWindow::powerChange(){
     }
 }
 
-
 // Toggle visibilty of the menu
 void MainWindow::changePowerStatus() {
     activeQListWidget->setVisible(powerStatus);
     ui->menuLabel->setVisible(powerStatus);
 }
 
-
-
-MainWindow::~MainWindow()
-{
-    delete ui;
-}
-
 void MainWindow::start_session(){
     //make whatever sesions ui visible
     ui->electrodeLabel->setVisible(true);
 
-    // set up timer
-    //      initailize graphics
+    // initialize the timer
+    timer = new QTimer(this);
+    timeString = QString::number(currentTimerCount/60) + ":00";
+    scene->addText(timeString);
+    initializeTimer(timer);
 
-
+    // create session
+    currentSession = new Session(profile->getSessAmt(), challenge_level, pacer_duration, QDateTime::currentDateTime());
 }
-
 
 void MainWindow::init_timer(QTimer* timer){
     connect(timer, &QTimer::timeout, this, &MainWindow::update_timer);
@@ -344,11 +374,9 @@ void MainWindow::drainBattery() {
     changeBatteryLevel(newBatteryLevel);
 }
 
-void MainWindow::resetDevice() {
-
-}
 
 
+// TODO: IMPLEMENT DB functinality
 void MainWindow::applyToSkin(bool checked) {
 
     // ui->electrodeLabel->setPixmap(QPixmap(checked ? ":/icons/electrodeOn.svg" : ":/icons/electrodeOff.svg"));
@@ -359,10 +387,27 @@ void MainWindow::applyToSkin(bool checked) {
         if (!onSkin) {
             currentTherapy->getTimer()->stop();
             // TODO: save session into db
+            Log *log = new Log(currentSession)
+            db->addlog(
+                log->getId(),
+                log->getProfileId(),
+                log->getChallengeLevel(),
+                log->getIsLow(),
+                log->getIsMed(),
+                log->getIsHigh()
+                log->getAvgCoherence(),
+                log->getLogTime(),
+                log->getAchievementScore(),
+                log->getGraph(),
+                log->getDate()
+            );
 
-            // reset variables
+
+            // reset timer
             currentTimerCount = 0;
             // TODO: session data varaibles to 0
+            // need to take in data for this
+
 
             // TODO: make session ui to invisible
             // TODO: make session summary visible

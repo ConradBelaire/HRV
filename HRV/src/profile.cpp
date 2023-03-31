@@ -1,9 +1,10 @@
 #include "profile.h"
 
-Profile::Profile(int id, double batteryLvl) {
+Profile::Profile(int id, double batteryLvl, int sessionAmt) {
 
     this->id = id;
     this->batteryLvl = batteryLvl;
+    this->sessionAmt = sessionAmt;
 }
 
 
@@ -11,3 +12,4 @@ Profile::Profile(int id, double batteryLvl) {
 int Profile::getId() { return id; }
 double Profile::getBLvl() { return batteryLvl; }
 void Profile::setBLvl(double newLvl) { batteryLvl = newLvl; }
+int getSessAmt() { return sessionAmt; }

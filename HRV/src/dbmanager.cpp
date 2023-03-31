@@ -23,7 +23,7 @@ bool DBManager::DBInit() {
 
     QSqlQuery query;
     query.exec("CREATE TABLE IF NOT EXISTS profiles ( id SERIAL PRIMARY KEY, battery_level FLOAT NOT NULL );");
-    query.exec("CREATE TABLE IF NOT EXISTS log ( id SERIAL PRIMARY KEY, profile_id INTEGER NOT NULL, challenge_level INTEGER NOT NULL, is_low FLOAT NOT NULL, is_med FLOAT NOT NULL, is_high FLOAT NOT NULL, avg_coherence FLOAT NOT NULL, session_time INTEGER NOT NULL, achievement_score FLOAT NOT NULL, graph TEXT NOT NULL, date VARCHAR(255) NOT NULL, CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES profile (id), CONSTRAINT check_percentages CHECK ((is_low + is_med + is_high) = 100) );");
+    query.exec("CREATE TABLE IF NOT EXISTS log ( id SERIAL PRIMARY KEY, profile_id INTEGER NOT NULL, challenge_level INTEGER NOT NULL, is_low FLOAT NOT NULL, is_med FLOAT NOT NULL, is_high FLOAT NOT NULL, avg_coherence FLOAT NOT NULL, session_time INTEGER NOT NULL, achievement_score FLOAT NOT NULL, graph TEXT NOT NULL, date VARCHAR(255) NOT NULL, CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES profiles (id) ON DELETE CASCADE, CONSTRAINT check_percentages CHECK ((is_low + is_med + is_high) = 100) );");
 
     return denasDB.commit();
 }
@@ -45,12 +45,12 @@ Profile* DBManager::getProfile(int id) {
    // profile does not exist
     if (!query.next()) {
         addProfile(id, 100);
-        Profile* pro = new Profile(id, 100);
+        Profile* pro = new Profile(id, 100, );
         return pro;
     }
 
     // profile exists
-    Profile* pro = new Profile(query.value(0).toInt(), query.value(1).toDouble());
+    Profile* pro = new Profile(query.value(0).toInt(), query.value(1).toDouble(), query.value(2).toint());
     return pro;
 }
 

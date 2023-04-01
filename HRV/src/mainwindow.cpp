@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // init settings
     pacer_dur = 10;
-    challenge_lvl = 1;
+    challenge_level = 1;
 
     // Set initial Skin status
     connectedStatus = false;
@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // create database manager
     dbmanager = new DBManager();
-
+    
     // create profile
     profile = dbmanager->getProfile(1);
 
@@ -72,7 +72,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow() {
 
-    db->addProfile(profile->getId(), profile->getBLvl(), profile->getPLvl());
+    db->addProfile(profile->getId(), profile->getBLvl(), profile->getSessAmt());
 
     delete mainMenuOG;
     delete ui;
@@ -260,7 +260,7 @@ void MainWindow::navigateSubMenu() {
     }
 
     //If the menu is not a parent and clicking on it should start a Session
-    else if (masterMenu->getChildMenu(index)->getMenuItems().length() == 0 && (masterMenu->getName() == "BEGIN SESSION") {
+    else if (masterMenu->getChildMenu(index)->getMenuItems().length() == 0 && (masterMenu->getName() == "BEGIN SESSION")) {
         //Update new menu info
         masterMenu = masterMenu->getChildMenu(index);
         MainWindow::updateMenu(masterMenu->getName(), {});
@@ -281,7 +281,7 @@ void MainWindow::updateMenu(const QString selectedMenuItem, const QStringList me
 
 // function will be used as a reference to the recharge button
 void MainWindow::rechargeBattery(){
-    change_battery_level(100);
+    changeBatteryLevel(100);
 }
 
 // function will set the battery level to the newLevel
@@ -299,6 +299,7 @@ void MainWindow::changeBatteryLevel(double newLevel) {
         int newLevelInt = int(newLevel);
         ui->batteryLevelBar->setValue(newLevelInt);
 
+        // does this even work?
         QString highBatteryHealth = "QProgressBar { selection-background-color: rgb(78, 154, 6); background-color: rgb(0, 0, 0); }";
         QString mediumBatteryHealth = "QProgressBar { selection-background-color: rgb(196, 160, 0); background-color: rgb(0, 0, 0); }";
         QString lowBatteryHealth = "QProgressBar { selection-background-color: rgb(164, 0, 0); background-color: rgb(0, 0, 0); }";
@@ -340,7 +341,10 @@ void MainWindow::changePowerStatus() {
 
 void MainWindow::start_session(){
     //make whatever sesions ui visible
-    ui->electrodeLabel->setVisible(true);
+    // ui->electrodeLabel->setVisible(true);
+
+
+    profile->increaseSessAmt();
 
     // initialize the timer
     timer = new QTimer(this);
@@ -349,7 +353,7 @@ void MainWindow::start_session(){
     initializeTimer(timer);
 
     // create session
-    currentSession = new Session(profile->getSessAmt(), challenge_level, pacer_duration, QDateTime::currentDateTime());
+    currentSession = new Session(profile->getSessAmt(), challenge_level, pacer_dur, QDateTime::currentDateTime());
 }
 
 void MainWindow::init_timer(QTimer* timer){

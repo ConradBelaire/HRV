@@ -43,13 +43,15 @@ class MainWindow : public QMainWindow
 
         DBManager* dbmanager;
         Profile* profile;
+
         bool powerStatus;
 
         void changePowerStatus();
         void powerChange();
         QVector<Log*> sessions;
-        int sessionsAmt;
+
         QTimer* timer;
+        QString timeString;
 
 
         bool connectedStatus;

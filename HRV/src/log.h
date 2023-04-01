@@ -4,14 +4,17 @@
 #include <QString>
 #include <QVector>
 #include <QDateTime>
+#include "sesshion.h"
 
 
 class DBManager;
 
 class Log {
     public:
+        // Log(Session*);
         Log(int, int, int, float, float, float, float, int, float, const QString&, const QString&);
         Log(int, int, int, float, float, float, float, int, float, QVector<int>, const QDateTime&);
+        Log(Session*);
 
         int getId();
         int getProfileId();
@@ -38,6 +41,8 @@ class Log {
         void setDate(const QString&);
         void setGraph(QVector<int> arr);
         void setDate(const QDateTime& date);
+
+        QString toString();
 
     private:
         int session_num;

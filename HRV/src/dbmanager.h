@@ -8,6 +8,7 @@
 #include <QSqlQuery>
 #include <QList>
 #include <QApplication>
+#include <string>
 
 #include "profile.h"
 #include "log.h"
@@ -19,10 +20,21 @@ public:
     static const QString DATABASE_PATH;
 
     DBManager();
-    bool addProfile(int id, double batterLvl);
+    bool addProfile(int id, double batterLvl, int sessionAmt);
     Profile* getProfile(int id);
     bool deleteProfile(int id);
-    bool addLog(int profileId, int challengeLevel, float isLow, float isMed, float isHigh, float avgCoherence, int sessionTime, float achievementScore, QString graph, QString date);
+    bool addLog(int profileId,
+                int sessionNum,
+                int challengeLevel,
+                float isLow,
+                float isMed,
+                float isHigh,
+                float avgCoherence,
+                int sessionTime,
+                float achievementScore,
+                QString graph,
+                QString date
+    );
     Log* getLog(int id);
     Log** getProfileLogs(int profileId);
     bool deleteLog(int id);

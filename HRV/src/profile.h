@@ -4,14 +4,16 @@
 class Profile {
 
 public:
-    Profile(int, double);
+    Profile(int, double, int);
     int getId();
     double getBLvl();
     void setBLvl(double);
+    int getSessAmt();
 
 private:
     int id;
     double batteryLvl;
+    int sessionAmt;
 };
 
 #endif // PROFILE_H

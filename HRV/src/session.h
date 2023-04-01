@@ -2,6 +2,7 @@
 #define SESSION_H
 
 #include <QDateTime>
+#include <QTimer>
 
 class Session {
 
@@ -19,6 +20,7 @@ class Session {
         int getEleapsedTime() const;
         float getAchievementScore() const;
         QDateTime getStartTime() const;
+        QTimer* getTimer();
 
         // functions
         void updateReading(int hr);
@@ -30,6 +32,7 @@ class Session {
         const QDateTime START_TIME;
         const int PACER_DURATION;
 
+        QTimer* timer;
         float coherence_sum;
         int coherence_count;
         float current_coherence;

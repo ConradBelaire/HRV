@@ -52,10 +52,10 @@ class MainWindow : public QMainWindow
 
         QTimer* timer;
         QString timeString;
-
-
+        
+        int currentTimerCount;
         bool connectedStatus;
-        int currentDurationCount;
+        // int currentDurationCount;
         Session* currentSession;
 
 
@@ -68,6 +68,8 @@ class MainWindow : public QMainWindow
         // void initMainMenu(Menu*);
         void init_timer(QTimer* timer);
         void update_timer();
+
+        void displaySummary();
     private slots:
 
 };

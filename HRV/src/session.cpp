@@ -40,6 +40,10 @@ QDateTime Session::getStartTime() const {
     return START_TIME;
 }
 
+QTimer* Session::getTimer() {
+    return timer;
+}
+
 // functions
 void Session::updateReading(int hr) {
     current_heart_rate = hr;

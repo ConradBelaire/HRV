@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connectedStatus = false;
 
     // Initialize the timer
-    currentDurationCount = 0;
+    currentTimerCount = -1;
 
     // create database manager
     dbmanager = new DBManager();
@@ -150,7 +150,7 @@ void MainWindow::navigateDownMenu() {
 void MainWindow::navigateToMainMenu() {
 
     if (currentTimerCount != -1) {
-        applyToSkin(false);
+        displaySummary();
     }
 
     // go to main menu
@@ -164,14 +164,9 @@ void MainWindow::navigateToMainMenu() {
 
 // ok button
 void MainWindow::navigateBack() {
-    if (currentTimerCount != 0) {
-        //Save recording
-        applyToSkin(false)
+    if (currentTimerCount != -1) {
+        displaySummary();
 
-        //Stop therapy
-        currentTimerCount = 0;
-        currentTherapy->getTimer()->stop();
-        currentTherapy->getTimer()->disconnect();
     }
 
     if (masterMenu->getName() == "MAIN MENU") {
@@ -231,18 +226,27 @@ void MainWindow::navigateSubMenu() {
 
     if (masterMenu->getName() == "CHALLENGE LEVEL") {
         challenge_level = index + 1;
+
+        // TODO: reset to 1 after 4
     }
 
     if (masterMenu->getName() == "PACER DURATION") {
-        pacer_duration = index + 1;
+        pacer_dur = index + 1;
+
+        // TODO: reset to 1 after 30
     }
 
     if (masterMenu->getName() == "RESET") {
         if (masterMenu->getMenuItems()[index] == "YES") {
             challenge_level = 1;
-            pacer_duration = 10;
+            pacer_dur = 10;
             db->deleteProfiles();
             profile = db->getProfile(1);
+
+            // TURN OFF
+            MainWindow::powerChange();
+            // TURN ON
+            MainWindow::powerChange();    
 
             navigateBack();
             return;
@@ -327,7 +331,7 @@ void MainWindow::powerChange(){
     }
 
     // if in the middle of a session
-    if (currentDurationCount != 0){
+    if (currentTimerCount != -1){
         //Save Session
         applyToSkin(false)
     }
@@ -346,9 +350,11 @@ void MainWindow::start_session(){
 
     profile->increaseSessAmt();
 
+    currentTimerCount = 0;
+
     // initialize the timer
     timer = new QTimer(this);
-    timeString = QString::number(currentTimerCount/60) + ":00";
+    timeString = QString::number(currentTimerCount) + "s";
     scene->addText(timeString);
     initializeTimer(timer);
 
@@ -366,11 +372,28 @@ void MainWindow::init_timer(QTimer* timer){
 
 void MainWindow::update_timer(){
     DrainBattery();
-    timeString = QString::number(currentDurationCount);
+    timeString = QString::number(currentTimerCount) + "s";
     ui->treatmentView->scene()->clear();
     ui->treatmentView->scene()->addText(timeString);
 
-    currentDurationCount++;
+    currentTimerCount++;
+    
+    // TODO: update pacer
+
+
+    // TODO: get heart rate
+
+
+    // TODO: calculate/get coherence score
+
+
+    // TODO: update the currentSession object
+    //currentSession->
+
+    // TODO: change coherence lights
+
+
+
 }
 
 void MainWindow::drainBattery() {
@@ -385,39 +408,44 @@ void MainWindow::applyToSkin(bool checked) {
 
     // ui->electrodeLabel->setPixmap(QPixmap(checked ? ":/icons/electrodeOn.svg" : ":/icons/electrodeOff.svg"));
     ui->applyToSkinAdminBox->setCurrentIndex(checked ? 1 : 0);
-    onSkin = checked;
+    bool onSkin = checked; // why?
 
-    if (currentTimerCount != 0) {
+    if (this->currentTimerCount != -1) {
         if (!onSkin) {
-            currentTherapy->getTimer()->stop();
-            // TODO: save session into db
-            Log *log = new Log(currentSession)
-            db->addlog(
-                log->getId(),
-                log->getProfileId(),
-                log->getChallengeLevel(),
-                log->getIsLow(),
-                log->getIsMed(),
-                log->getIsHigh()
-                log->getAvgCoherence(),
-                log->getLogTime(),
-                log->getAchievementScore(),
-                log->getGraph(),
-                log->getDate()
-            );
-
-
-            // reset timer
-            currentTimerCount = 0;
-            // TODO: session data varaibles to 0
-            // need to take in data for this
-
-
-            // TODO: make session ui to invisible
-            // TODO: make session summary visible
+            displaySummary();
         }
         else {
             currentTherapy->getTimer()->start(1000);
         }
     }
+}
+
+void MainWindow::displaySummary() {
+    currentTherapy->getTimer()->stop();
+    // TODO: save session into db
+    Log *log = new Log(this->currentSession)
+                   db->addlog(
+                       log->getId(),
+                       log->getProfileId(),
+                       log->getChallengeLevel(),
+                       log->getIsLow(),
+                       log->getIsMed(),
+                       log->getIsHigh()
+                           log->getAvgCoherence(),
+                       log->getLogTime(),
+                       log->getAchievementScore(),
+                       log->getGraph(),
+                       log->getDate());
+
+    delete log;
+    // reset timer
+    this->currentTimerCount = -1;
+
+    currentTherapy->getTimer()->stop();
+    currentTherapy->getTimer()->disconnect();
+    // TODO: session data varaibles to 0
+    // need to take in data for this
+
+    // TODO: make session ui to invisible
+    // TODO: make session summary visible
 }

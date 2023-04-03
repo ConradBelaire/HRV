@@ -133,8 +133,23 @@ void MainWindow::initializeMainMenu(Menu* m) {
         Menu* clearHistory = new Menu("CLEAR", {"YES","NO"}, history);
         history->addChildMenu(clearHistory);
 
-        for (Session* s : this->sessions) {
-            Menu* session_menu = new Menu(s->getSessionNum(), {"VIEW", "DELETE"}, history);
+        for (Log* log : dbmanager->getProfileLogs(profile->getId())) {
+            Menu* session_menu = new Menu(log->getId(), {"VIEW", "DELETE"}, history);
+            Menu* view = new Menu("VIEW", {
+                "Session Number: " + log->getId(),
+                "Date: " + log->getDate(),
+                "Session time: " + log->getSessionTime(),
+                "Challenge Level: " + log->getChallengeLevel(),
+                "Pacer Duration: " + log->getPacerDuration(),
+                "Coherence Average: " + log->getCoherenceAvg(),
+                "Achievement Score: " + log->getAchievementScore(),
+                "Low Coherence Percentage: " + log->getLowCoherencePercentage(),
+                "Medium Coherence Percentage: " + log->getMediumCoherencePercentage(),
+                "High Coherence Percentage: " + log->getHighCoherencePercentage(),
+
+            }, session_menu);
+
+            Menu* delete = new Menu("DELETE", {"YES","NO"}, session_menu);
             history->addChildMenu(session_menu);
         }
         return history;
@@ -207,8 +222,9 @@ void MainWindow::navigateSubMenu() {
 
     // navigate to begin_session menu
     if(masterMenu->getChildMenu(index)->getName() == "BEGIN SESSION") {
-        masterMenu = masterMenu->getChildMenu();
-        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        masterMenu = masterMenu->getChildMenu(index);
+        MainWindow::updateMenu(masterMenu->getName(), {});
+        MainWindow::start_session();
         return;
     }
 
@@ -219,10 +235,45 @@ void MainWindow::navigateSubMenu() {
         return;
     }
 
+    // delete session
     if(is_session_num(masterMenu->getChildMenu(index)->getName())){
-        dbmanager->deleteLog(masterMenu->getChildMenu(index)->getName());
-        navigateBack();
+        masterMenu = masterMenu->getChildMenu();
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
         return;
+    }
+
+    // fucntion to determine if session number is real
+    bool is_session_num(QString log_id){
+        int session_id = session_id.toInt();
+        return dbmanager->doesLogExist(log_id);
+    }
+
+    // navigate into the view menu
+    if (masterMenu->getChildMenu(index)->getName() == "VIEW") {
+        masterMenu = masterMenu->getChildMenu(index);
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
+    }
+
+    // navigate into the delete menu
+    if (masterMenu->getChildMenu(index)->getName() == "DELETE") {
+        masterMenu = masterMenu->getChildMenu(index);
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
+    }
+
+    // fucntionality of the delete menu
+    if(masterMenu->getParent()->getName == "DELETE"){
+        if (masterMenu->getMenuItems()[index] == "YES") {
+            int log_id = masterMenu->getParent()->getParent()->getName().toInt();
+            dbmanager->deleteLog(log_id);
+            navigateBack();
+            return;
+        }
+        else {
+            navigateBack();
+            return;
+        }
     }
 
     // navigate to clear menu
@@ -259,20 +310,10 @@ void MainWindow::navigateSubMenu() {
         return;
     }
 
-
-
-
-    // Prevent crash if ok button is selected in view
-    // TODO: Look into this when we have UI set up
-    if (masterMenu->getName() == "VIEW") {
-        return;
-    }
-
-    //Logic for when the menu is the delete menu.
-    if (masterMenu->getName() == "CLEAR") {
+    // fucntionality of the reset menu
+    if(masterMenu->getParent()->getName() == "RESET"){
         if (masterMenu->getMenuItems()[index] == "YES") {
-            dbmanager->deleteSessions();
-
+            dbmanager->resetProfile(profile->getId());
             navigateBack();
             return;
         }
@@ -281,70 +322,43 @@ void MainWindow::navigateSubMenu() {
             return;
         }
     }
+
+    // navigate to challenge menu
+    if (masterMenu->getChildMenu(index)->getName() == "CHALLENGE LEVEL") {
+        masterMenu = masterMenu->getChildMenu();
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
+    }
+
+    // navigate to challenge menu
+    if(masterMenu->getParent()->getName() == "CHALLENGE LEVEL"){
+        challenge_level = index + 1;
+    }
+
+    // navigate to Pacer duration menu
+    if (masterMenu->getChildMenu(index)->getName() == "PACER DURATION") {
+        masterMenu = masterMenu->getChildMenu();
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
+    }
+
+    // navigate to Pacer duration menu
+    if(masterMenu->getParent()->getName() == "PACER DURATION"){
+        pacer_dur = index + 1;
+    }
+}
 
     //Logic for when the menu is the delete specific session menu.
 
     if (masterMenu->getName() == "DELETE") {
         if (masterMenu->getMenuItems()[index] == "YES") {
-            Session* session = dbmanager->getSesion(masterMenu->getParent()->getName());
-            dbmanager->deleteSession(session);
+            Log* session = dbmanager->getLog(masterMenu->getParent()->getName());
+            dbmanager->deleteLog(session->getId());
 
             navigateBack();
             return;
         }
-        else {
-            navigateBack();
-            return;
-        }
-    }
 
-    if (masterMenu->getName() == "CHALLENGE LEVEL") {
-        challenge_level = index + 1;
-
-        // TODO: reset to 1 after 4
-    }
-
-    if (masterMenu->getName() == "PACER DURATION") {
-        pacer_dur = index + 1;
-
-        // TODO: reset to 1 after 30
-    }
-
-    if (masterMenu->getName() == "RESET") {
-        if (masterMenu->getMenuItems()[index] == "YES") {
-            challenge_level = 1;
-            pacer_dur = 10;
-            dbmanager->deleteProfile(1);
-            profile = dbmanager->getProfile(1);
-
-            // TURN OFF
-            MainWindow::powerChange();
-            // TURN ON
-            MainWindow::powerChange();
-
-            navigateBack();
-            return;
-        }
-        else {
-            navigateBack();
-            return;
-        }
-    }
-
-    //If the menu is a parent and clicking on it should display more menus.
-    if (masterMenu->getChildMenu(index)->getMenuItems().length() > 0) {
-        masterMenu = masterMenu->getChildMenu(index);
-        MainWindow::updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
-    }
-
-    //If the menu is not a parent and clicking on it should start a Session
-    else if (masterMenu->getChildMenu(index)->getMenuItems().length() == 0 && (masterMenu->getName() == "BEGIN SESSION")) {
-        //Update new menu info
-        masterMenu = masterMenu->getChildMenu(index);
-        MainWindow::updateMenu(masterMenu->getName(), {});
-        MainWindow::beginSession();
-
-    }
 }
 
 void MainWindow::updateMenu(const QString selectedMenuItem, const QStringList menuItems) {

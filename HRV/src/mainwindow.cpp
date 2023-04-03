@@ -17,6 +17,10 @@ MainWindow::MainWindow(QWidget *parent)
     greenLED = true;
     blueLED = true;
 
+    batteryLevel = 100.0;
+
+    // TODO: connect charge button
+    //connect(ui->chargeAdminButton, &QPushButton::released, this, &MainWindow::rechargeBattery);
 
 
     // Create menu tree
@@ -38,6 +42,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->backButton, &QPushButton::pressed, this, &MainWindow::navigateBack);
     connect(ui->okButton, &QPushButton::pressed, this, &MainWindow::navigateSubMenu);
     connect(ui->menuButton, &QPushButton::pressed, this, &MainWindow::navigateToMainMenu);
+
+    // battery
+    connect(ui->chargeBatteryButton, &QPushButton::released, this, &MainWindow::rechargeBattery);
+    connect(ui->batteryLevelAdminSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryLevel);
+    ui->batteryLevelAdminSpinBox->setValue(batteryLevel);
 }
 
 MainWindow::~MainWindow()
@@ -138,6 +147,43 @@ void MainWindow::navigateBack() {
 }
 
 
+// function will be used as a reference to the recharge button
+void MainWindow::rechargeBattery(){
+    changeBatteryLevel(100);
+}
+
+void MainWindow::changeBatteryLevel(double newLevel) {
+    if (newLevel >= 0.0 && newLevel <= 100.0) {
+        /*
+        if (newLevel == 0.0 && powerStatus == true) {
+            powerChange();
+            profile->setBLvl(0);
+        }else{
+            profile->setBLvl(newLevel);
+        }
+        */
+
+        batteryLevel = newLevel;
+
+        ui->batteryLevelAdminSpinBox->setValue(newLevel);
+        int newLevelInt = int(newLevel);
+        ui->batteryLevelBar->setValue(newLevelInt);
+
+        QString highBatteryHealth = "QProgressBar { selection-background-color: rgb(78, 154, 6); background-color: rgb(0, 0, 0); }";
+        QString mediumBatteryHealth = "QProgressBar { selection-background-color: rgb(196, 160, 0); background-color: rgb(0, 0, 0); }";
+        QString lowBatteryHealth = "QProgressBar { selection-background-color: rgb(164, 0, 0); background-color: rgb(0, 0, 0); }";
+
+        if (newLevelInt >= 50) {
+            ui->batteryLevelBar->setStyleSheet(highBatteryHealth);
+        }
+        else if (newLevelInt >= 20) {
+            ui->batteryLevelBar->setStyleSheet(mediumBatteryHealth);
+        }
+        else {
+            ui->batteryLevelBar->setStyleSheet(lowBatteryHealth);
+        }
+    }
+}
 
 void MainWindow::toggleRedLED()
 {

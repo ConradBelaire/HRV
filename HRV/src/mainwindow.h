@@ -35,6 +35,8 @@ private:
     bool greenLED;
     bool blueLED;
 
+    double batteryLevel;
+
 
 private slots:
     void navigateDownMenu();
@@ -45,5 +47,7 @@ private slots:
     void toggleRedLED();
     void toggleGreenLED();
     void toggleBlueLED();
+    void rechargeBattery();
+    void changeBatteryLevel(double newLevel);
 };
 #endif // MAINWINDOW_H

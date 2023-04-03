@@ -180,3 +180,19 @@ QString Log::toString() {
     QString str = "Session ID: " + QString::number(session_num) + "\n Date: " + date + "Challenge Lvl: " + challenge_level;
     return str;
 }
+
+
+float Log::getLowCoherencePercentage(){
+    float total_sum = is_low + is_med + is_high;
+    return (is_low / total_sum) * 100;
+}
+
+float Log::getMedCoherencePercentage(){
+    float total_sum = is_low + is_med + is_high;
+    return (is_med / total_sum) * 100;
+}
+
+float Log::getHighCoherencePercentage(){
+    float total_sum = is_low + is_med + is_high;
+    return (is_high / total_sum) * 100;
+}

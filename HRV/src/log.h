@@ -26,6 +26,9 @@ class Log {
         float getAchievementScore();
         const QString& getGraph();
         const QString& getDate();
+        float getLowCoherencePercentage();
+        float getMedCoherencePercentage();
+        float getHighCoherencePercentage();
 
         void setId(int);
         void setProfileId(int);
@@ -50,6 +53,7 @@ class Log {
         float is_low;
         float is_med;
         float is_high;
+
         float avg_coherence;
         int session_time;
         float achievement_score;

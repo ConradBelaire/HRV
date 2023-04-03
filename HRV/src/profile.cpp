@@ -12,4 +12,5 @@ Profile::Profile(int id, double batteryLvl, int sessionAmt) {
 int Profile::getId() { return id; }
 double Profile::getBLvl() { return batteryLvl; }
 void Profile::setBLvl(double newLvl) { batteryLvl = newLvl; }
-int getSessAmt() { return sessionAmt; }
+int Profile::getSessAmt() { return sessionAmt; }
+void Profile::increaseSessAmt() { sessionAmt++; }

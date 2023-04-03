@@ -43,17 +43,19 @@ class MainWindow : public QMainWindow
 
         DBManager* dbmanager;
         Profile* profile;
+
         bool powerStatus;
 
         void changePowerStatus();
         void powerChange();
         QVector<Log*> sessions;
-        int sessionsAmt;
+
         QTimer* timer;
-
-
+        QString timeString;
+        
+        int currentTimerCount;
         bool connectedStatus;
-        int currentDurationCount;
+        // int currentDurationCount;
         Session* currentSession;
 
 
@@ -66,6 +68,8 @@ class MainWindow : public QMainWindow
         // void initMainMenu(Menu*);
         void init_timer(QTimer* timer);
         void update_timer();
+
+        void displaySummary();
     private slots:
 
 };

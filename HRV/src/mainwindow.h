@@ -47,7 +47,7 @@ class MainWindow : public QMainWindow
         bool powerStatus;
 
         void changePowerStatus();
-        void powerChange();
+        //void powerChange();
         QVector<Log*> sessions;
 
         QTimer* timer;

@@ -44,13 +44,13 @@ Profile* DBManager::getProfile(int id) {
 
    // profile does not exist
     if (!query.next()) {
-        addProfile(id, 100);
-        Profile* pro = new Profile(id, 100, );
+        addProfile(id, 100, 0);
+        Profile* pro = new Profile(id, 100, 0);
         return pro;
     }
 
     // profile exists
-    Profile* pro = new Profile(query.value(0).toInt(), query.value(1).toDouble(), query.value(2).toint());
+    Profile* pro = new Profile(query.value(0).toInt(), query.value(1).toDouble(), query.value(2).toInt());
     return pro;
 }
 

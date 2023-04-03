@@ -37,7 +37,7 @@ class Session {
         int coherence_count;
         float current_coherence;
         int current_heart_rate;
-        int eleapsed_time
+        int eleapsed_time;
         float achievement_score;
 };
 

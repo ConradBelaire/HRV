@@ -76,6 +76,11 @@ class MainWindow : public QMainWindow
 
         void displaySummary();
 
+        // util fucntions
+        Menu* create_history_menu(Menu* m);
+        Menu* create_settings_menu(Menu* m);
+        bool is_session_num(QString log_id);
+
         // For testing purposes!
         bool redLED;
         bool greenLED;

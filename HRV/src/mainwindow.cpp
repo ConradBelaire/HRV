@@ -85,35 +85,7 @@ MainWindow::~MainWindow() {
     delete profile;
 }
 
-void MainWindow::initializeMainMenu(Menu* m) {
-    // create begin_session menu
-    m->addChildMenu(begin_session);
-    Menu* begin_session = new Menu("BEGIN SESSION", {}, m);
-
-    //create history menu
-    Menu* history = create_history_menu();
-    m->addChildMenu(history);
-
-    Menu* settings = new Menu("SETTINGS", {"RESET", "CHALLENGE LEVEL", "PACER DURATION"}, m);
-    m->addChildMenu(settings);
-
-    Menu* settings = create_settings_menu();
-
-    Menu* create_settings_menu(){
-        Menu* settings = new Menu("SETTINGS", {"RESET", "CHALLENGE LEVEL", "PACER DURATION"}, m);
-        Menu* reset = new Menu("RESET", {"YES","NO"}, settings);
-        Menu* challengeLevel = new Menu("CHALLENGE LEVEL", {"1","2","3","4"}, settings);
-        Menu* pacerDuration = new Menu(
-            "PACER DURATION",
-            {"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"},
-            settings
-        );
-        settings->addChildMenu(reset);
-        settings->addChildMenu(challengeLevel);
-        settings->addChildMenu(pacerDuration);
-    }
-
-    Menu* create_history_menu() {
+Menu* MainWindow::create_history_menu(Menu* m) {
         // initialise session list
         QStringList sessionList;
         sessionList.append("CLEAR");
@@ -148,7 +120,35 @@ void MainWindow::initializeMainMenu(Menu* m) {
             history->addChildMenu(session_menu);
         }
         return history;
-    }
+}
+
+Menu* MainWindow::create_settings_menu(Menu* m){
+        Menu* settings = new Menu("SETTINGS", {"RESET", "CHALLENGE LEVEL", "PACER DURATION"}, m);
+        Menu* reset = new Menu("RESET", {"YES","NO"}, settings);
+        Menu* challengeLevel = new Menu("CHALLENGE LEVEL", {"1","2","3","4"}, settings);
+        Menu* pacerDuration = new Menu(
+            "PACER DURATION",
+            {"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"},
+            settings
+        );
+        settings->addChildMenu(reset);
+        settings->addChildMenu(challengeLevel);
+        settings->addChildMenu(pacerDuration);
+}
+
+void MainWindow::initializeMainMenu(Menu* m) {
+    // create begin_session menu
+    m->addChildMenu(begin_session);
+    Menu* begin_session = new Menu("BEGIN SESSION", {}, m);
+
+    //create history menu
+    Menu* history = create_history_menu();
+    m->addChildMenu(history);
+
+    Menu* settings = new Menu("SETTINGS", {"RESET", "CHALLENGE LEVEL", "PACER DURATION"}, m);
+    m->addChildMenu(settings);
+
+    Menu* settings = create_settings_menu(m);
 }
 
 void MainWindow::navigateUpMenu() {
@@ -209,6 +209,12 @@ void MainWindow::navigateBack() {
     //ui->electrodeLabel->setVisible(false);
 }
 
+// fucntion to determine if session number is real
+bool MainWindow::is_session_num(QString log_id){
+    int session_id = session_id.toInt();
+    return dbmanager->doesLogExist(log_id);
+}
+
 // pressing the ok button
 void MainWindow::navigateSubMenu() {
 
@@ -235,12 +241,6 @@ void MainWindow::navigateSubMenu() {
         masterMenu = masterMenu->getChildMenu();
         updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
         return;
-    }
-
-    // fucntion to determine if session number is real
-    bool is_session_num(QString log_id){
-        int session_id = session_id.toInt();
-        return dbmanager->doesLogExist(log_id);
     }
 
     // navigate into the view menu

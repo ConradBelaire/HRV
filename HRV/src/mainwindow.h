@@ -80,6 +80,7 @@ class MainWindow : public QMainWindow
         Menu* create_history_menu(Menu* m);
         Menu* create_settings_menu(Menu* m);
         bool is_session_num(QString log_id);
+        QString floatToStringWithOneDecimalPlace(float value);
 
         // For testing purposes!
         bool redLED;

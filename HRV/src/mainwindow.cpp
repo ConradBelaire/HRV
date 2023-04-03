@@ -85,6 +85,12 @@ MainWindow::~MainWindow() {
     delete profile;
 }
 
+QString MainWindow::floatToStringWithOneDecimalPlace(float value) {
+    std::ostringstream ss;
+    ss << std::fixed << std::setprecision(1) << value;
+    return ss.str();
+}
+
 Menu* MainWindow::create_history_menu(Menu* m) {
         // initialise session list
         QStringList sessionList;
@@ -110,9 +116,9 @@ Menu* MainWindow::create_history_menu(Menu* m) {
                 "Pacer Duration: " + log->getPacerDuration(),
                 "Coherence Average: " + log->getCoherenceAvg(),
                 "Achievement Score: " + log->getAchievementScore(),
-                "Low Coherence Percentage: " + log->getLowCoherencePercentage(),
-                "Medium Coherence Percentage: " + log->getMediumCoherencePercentage(),
-                "High Coherence Percentage: " + log->getHighCoherencePercentage(),
+                "Low Coherence Percentage: " + floatToStringWithOneDecimalPlace(log->getLowCoherencePercentage()),
+                "Medium Coherence Percentage: " + floatToStringWithOneDecimalPlace(log->getMedCoherencePercentage()),
+                "High Coherence Percentage: " + floatToStringWithOneDecimalPlace(log->getHighCoherencePercentage()),
 
             }, session_menu);
 

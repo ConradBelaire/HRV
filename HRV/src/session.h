@@ -25,7 +25,7 @@ class Session {
         int getTimeLow() const;
         int getTimeMed() const;
         int getTimeHigh() const;
-        QVector<int> getGraph();
+        QVector<int> getGraph() const;
 
         // setters
         void addToLow();

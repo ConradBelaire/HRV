@@ -107,7 +107,7 @@ void MainWindow::initializeMainMenu(Menu* m) {
     history->addChildMenu(clearHistory);
 
     for (Session* s : this->sessions) {
-        Menu* session_menu = new Menu(s->getName(), {"VIEW", "DELETE"}, history)
+        Menu* session_menu = new Menu(s->getName(), {"VIEW", "DELETE"}, history);
         history->addChildMenu(session_menu);
     }
 

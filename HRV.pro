@@ -2,6 +2,9 @@ QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+TARGET = HRV
+TEMPLATE = app
+
 CONFIG += c++11
 
 source_dir = HRV/src
@@ -19,20 +22,24 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+QMAKE_CLEAN += hrv.db
+
 SOURCES += \
     $${source_dir}/dbmanager.cpp \
     $${source_dir}/main.cpp \
     $${source_dir}/mainwindow.cpp \
     $${source_dir}/profile.cpp \
     $${source_dir}/session.cpp \
-    $${source_dir}/menu.cpp
+    $${source_dir}/menu.cpp  \
+    $${source_dir}/log.cpp
 
 HEADERS += \
     $${source_dir}/dbmanager.h \
     $${source_dir}/profile.h \
     $${source_dir}/session.h \
     $${source_dir}/mainwindow.h \
-    $${source_dir}/menu.h
+    $${source_dir}/menu.h \
+    $${source_dir}/log.cpp
 
 FORMS += \
     $${forms_dir}/mainwindow.ui

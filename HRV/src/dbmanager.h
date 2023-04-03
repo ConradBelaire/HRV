@@ -41,7 +41,7 @@ public:
     bool deleteLogs();
 
 private:
-    QSqlDatabase denasDB;
+    QSqlDatabase hrvDB;
 
     bool DBInit();
 

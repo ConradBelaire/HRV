@@ -1,13 +1,13 @@
 #include "dbmanager.h"
 
-const QString DBManager::DATABASE_PATH = "/database/denas.db";
+const QString DBManager::DATABASE_PATH = "/database/hrv.db";
 
 DBManager::DBManager() {
 
-    denasDB = QSqlDatabase::addDatabase("QSQLITE");
-    denasDB.setDatabaseName("denas.db");
+    hrvDB = QSqlDatabase::addDatabase("QSQLITE");
+    hrvDB.setDatabaseName("hrv.db");
 
-    if (!denasDB.open()) {
+    if (!hrvDB.open()) {
         throw "Error: Database could not be opened";
     }
 
@@ -19,26 +19,26 @@ DBManager::DBManager() {
 
 bool DBManager::DBInit() {
 
-    denasDB.transaction();
+    hrvDB.transaction();
 
     QSqlQuery query;
     query.exec("CREATE TABLE IF NOT EXISTS profiles ( id SERIAL PRIMARY KEY, battery_level FLOAT NOT NULL );");
     query.exec("CREATE TABLE IF NOT EXISTS log ( id SERIAL PRIMARY KEY, profile_id INTEGER NOT NULL, challenge_level INTEGER NOT NULL, is_low FLOAT NOT NULL, is_med FLOAT NOT NULL, is_high FLOAT NOT NULL, avg_coherence FLOAT NOT NULL, session_time INTEGER NOT NULL, achievement_score FLOAT NOT NULL, graph TEXT NOT NULL, date VARCHAR(255) NOT NULL, CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES profiles (id) ON DELETE CASCADE, CONSTRAINT check_percentages CHECK ((is_low + is_med + is_high) = 100) );");
 
-    return denasDB.commit();
+    return hrvDB.commit();
 }
 
 
 Profile* DBManager::getProfile(int id) {
 
-    denasDB.transaction();
+    hrvDB.transaction();
 
     QSqlQuery query;
     query.prepare("SELECT * FROM profile WHERE id = :profile_id;");
     query.bindValue(":profile_id", id);
     query.exec();
 
-    if (!denasDB.commit()) {
+    if (!hrvDB.commit()) {
         throw "Error: Query failed to execute";
     }
 
@@ -57,7 +57,7 @@ Profile* DBManager::getProfile(int id) {
 
 bool DBManager::addProfile(int id, double batteryLvl, int sessionsAmt) {
 
-    denasDB.transaction();
+    hrvDB.transaction();
 
     QSqlQuery query;
     query.prepare("REPLACE INTO profiles (id, battery_level, sessionAmt) VALUES (:profile_id, :battery_level, :sessionAmt);");
@@ -66,33 +66,33 @@ bool DBManager::addProfile(int id, double batteryLvl, int sessionsAmt) {
     query.bindValue(":sessionAmt", sessionsAmt);
     query.exec();
 
-    return denasDB.commit();
+    return hrvDB.commit();
 }
 
 
 bool DBManager::deleteProfile(int id) {
 
-    denasDB.transaction();
+    hrvDB.transaction();
 
     QSqlQuery query;
     query.prepare("DELETE FROM profiles WHERE id = :profile_id;");
     query.bindValue(":profile_id", id);
     query.exec();
 
-    return denasDB.commit();
+    return hrvDB.commit();
 }
 
 
 Log** DBManager::getProfileLogs(int profileId) {
 
-    denasDB.transaction();
+    hrvDB.transaction();
 
     QSqlQuery query;
     query.prepare("SELECT * FROM log WHERE profile_id = :profile_id;");
     query.bindValue(":profile_id", profileId);
     query.exec();
 
-    if (!denasDB.commit()) {
+    if (!hrvDB.commit()) {
         throw "Error: Query failed to execute";
     }
 
@@ -126,14 +126,14 @@ Log** DBManager::getProfileLogs(int profileId) {
 
 Log* DBManager::getLog(int id) {
 
-    denasDB.transaction();
+    hrvDB.transaction();
 
     QSqlQuery query;
     query.prepare("SELECT * FROM log WHERE id = :log_id;");
     query.bindValue(":log", id);
     query.exec();
 
-    if (!denasDB.commit()) {
+    if (!hrvDB.commit()) {
         throw "Error: Query failed to execute";
     }
 
@@ -173,7 +173,7 @@ bool DBManager::addLog(
     QString graph,
     QString date ) {
 
-    denasDB.transaction();
+    hrvDB.transaction();
 
     QSqlQuery query;
     query.prepare("INSERT INTO log ( profile_id, lod_id, challenge_level, is_low, is_med, is_high, avg_coherence, session_time, achievement_score, graph, date ) VALUES ( :profile_id, :lod_id, :challenge_level, :is_low, :is_med, :is_high, :avg_coherence, :session_time, :achievement_score, :graph, :date );");
@@ -190,28 +190,28 @@ bool DBManager::addLog(
     query.bindValue(":date", date);
     query.exec();
 
-    return denasDB.commit();
+    return hrvDB.commit();
 }
 
 
 bool DBManager::deleteLog(int id) {
-        denasDB.transaction();
+        hrvDB.transaction();
 
         QSqlQuery query;
         query.prepare("DELETE FROM log WHERE id = :log_id;");
         query.bindValue(":log_id", id);
         query.exec();
 
-        return denasDB.commit();
+        return hrvDB.commit();
 }
 
 
 bool DBManager::deleteLogs() {
-        denasDB.transaction();
+        hrvDB.transaction();
 
         QSqlQuery query;
         query.exec("DELETE FROM log;");
 
-        return denasDB.commit();
+        return hrvDB.commit();
 }
 

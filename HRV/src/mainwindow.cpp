@@ -361,7 +361,7 @@ void MainWindow::navigateSubMenu() {
 
 }
 
-void MainWindow::updateMenu(const QString selectedMenuItem, const QStringList menuItems) {
+void MainWindow::updateMenu(const QString &selectedMenuItem, const QStringList &menuItems) {
 
     activeQListWidget->clear();
     activeQListWidget->addItems(menuItems);
@@ -444,7 +444,7 @@ void MainWindow::start_session(){
     timer = new QTimer(this);
     timeString = QString::number(currentTimerCount) + "s";
     scene->addText(timeString);
-    initializeTimer(timer);
+    init_timer(timer);
 
     // create session
     currentSession = new Session(profile->getSessAmt(), challenge_level, pacer_dur, QDateTime::currentDateTime());
@@ -514,16 +514,16 @@ void MainWindow::applyToSkin(bool checked) {
 void MainWindow::displaySummary() {
     currentSession->getTimer()->stop();
     // TODO: save session into dbmanager
-    Log *log = new Log(this->currentSession, profile->getId())
+    Log *log = new Log(this->currentSession, profile->getId());
     dbmanager->addlog(
         log->getId(),
         log->getProfileId(),
         log->getChallengeLevel(),
         log->getIsLow(),
         log->getIsMed(),
-        log->getIsHigh()
+        log->getIsHigh(),
         log->getAvgCoherence(),
-        log->getLogTime(),
+        log->getSessionTime(),
         log->getAchievementScore(),
         log->getGraph(),
         log->getDate()

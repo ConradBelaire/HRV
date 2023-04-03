@@ -60,7 +60,7 @@ int Session::getTimeHigh() const{
     return time_in_high;
 }
 
-QVector getGraph() const {
+QVector<int> Session::getGraph() const {
     return recordedHR;
 }
 

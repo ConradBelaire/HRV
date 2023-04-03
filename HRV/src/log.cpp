@@ -63,9 +63,9 @@ Log::Log(Session* session, int profile_id) {
     }
 
     // calculate in_low in_med in_high
-    this->is_low = session->getTimeLow() / session->getElapsedTime();
-    this->is_med = session->getTimeMed() / session->getElapsedTime();
-    this->is_high = session->getTimeHigh() / session->getElapsedTime();
+    this->is_low = session->getTimeLow() / session->getEleapsedTime();
+    this->is_med = session->getTimeMed() / session->getEleapsedTime();
+    this->is_high = session->getTimeHigh() / session->getEleapsedTime();
 }
 
 int Log::getId() {

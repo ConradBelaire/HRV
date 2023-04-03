@@ -22,10 +22,10 @@ class Session {
         float getAchievementScore() const;
         QDateTime getStartTime() const;
         QTimer* getTimer();
-        void getTimeLow() const;
-        void getTimeMed() const;
-        void getTimeHigh() const;
-        QVector getGraph() const;
+        int getTimeLow() const;
+        int getTimeMed() const;
+        int getTimeHigh() const;
+        QVector<int> getGraph();
 
         // setters
         void addToLow();
@@ -57,4 +57,4 @@ class Session {
         QVector<int> recordedHR;
 };
 
-#endif // PROFILE_H
+#endif // PROFILE_H-

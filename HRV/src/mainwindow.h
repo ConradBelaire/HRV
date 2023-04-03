@@ -68,6 +68,11 @@ class MainWindow : public QMainWindow
         void initializeMainMenu(Menu*);
         void init_timer(QTimer* timer);
         void update_timer();
+        void applyToSkin(bool checked);
+        void start_session();
+        void changeBatteryLevel(double newLevel);
+        void rechargeBattery();
+
 
         void displaySummary();
 

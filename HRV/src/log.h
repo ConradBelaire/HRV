@@ -13,7 +13,7 @@ class Log {
     public:
         // Log(int, int, int, float, float, float, float, int, float, const QString&, const QString&);
         // Log(int, int, int, float, float, float, float, int, float, QVector<int>, const QDateTime&);
-        Log(Session*);
+        Log(Session*, int);
 
         int getId();
         int getProfileId();

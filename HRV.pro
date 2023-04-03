@@ -24,13 +24,15 @@ SOURCES += \
     $${source_dir}/main.cpp \
     $${source_dir}/mainwindow.cpp \
     $${source_dir}/profile.cpp \
-    $${source_dir}/session.cpp
+    $${source_dir}/session.cpp \
+    $${source_dir}/menu.cpp
 
 HEADERS += \
     $${source_dir}/dbmanager.h \
     $${source_dir}/profile.h \
     $${source_dir}/session.h \
-    $${source_dir}/mainwindow.h
+    $${source_dir}/mainwindow.h \
+    $${source_dir}/menu.h
 
 FORMS += \
     $${forms_dir}/mainwindow.ui

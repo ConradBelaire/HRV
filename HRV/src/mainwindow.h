@@ -65,12 +65,25 @@ class MainWindow : public QMainWindow
 
         QStringList allLogs;
         void updateMenu(const QString&, const QStringList&);
-        // void initMainMenu(Menu*);
+        void initializeMainMenu(Menu*);
         void init_timer(QTimer* timer);
         void update_timer();
 
         void displaySummary();
-    private slots:
 
+        // For testing purposes!
+        bool redLED;
+        bool greenLED;
+        bool blueLED;
+
+    private slots:
+        void navigateDownMenu();
+        void navigateUpMenu();
+        void navigateSubMenu();
+        void navigateToMainMenu();
+        void navigateBack();
+        void toggleRedLED();
+        void toggleGreenLED();
+        void toggleBlueLED();
 };
 #endif // MAINWINDOW_H

@@ -124,6 +124,25 @@ Log** DBManager::getProfileLogs(int profileId) {
 }
 
 
+bool doesLogExist(int id){
+    hrvDB.transaction();
+
+    QSqlQuery query;
+    query.prepare("SELECT * FROM log WHERE id = :log_id;");
+    query.bindValue(":log_id", id);
+    query.exec();
+
+    if (!hrvDB.commit()) {
+        throw "Error: Query failed to execute";
+    }
+
+    if (!query.next()) {
+        return false;
+    }
+    return true;
+}
+
+
 Log* DBManager::getLog(int id) {
 
     hrvDB.transaction();

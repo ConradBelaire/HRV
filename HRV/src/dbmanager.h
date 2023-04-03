@@ -39,6 +39,7 @@ public:
     Log** getProfileLogs(int profileId);
     bool deleteLog(int id);
     bool deleteLogs();
+    bool doesLogExist(int id);
 
 private:
     QSqlDatabase hrvDB;

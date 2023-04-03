@@ -95,33 +95,55 @@ void MainWindow::initializeMainMenu(Menu* m) {
         sessionList.append(s->getName());
     }
 
-    Menu* begin_session = new Menu("BEGIN SESSION", {}, m);
-    Menu* history = new Menu("HISTORY", sessionList, m);
-    Menu* settings = new Menu("SETTINGS", {"RESET", "CHALLENGE LEVEL", "PACER DURATION"}, m);
-
+void MainWindow::initializeMainMenu(Menu* m) {
+    // create begin_session menu
     m->addChildMenu(begin_session);
+    Menu* begin_session = new Menu("BEGIN SESSION", {}, m);
+
+    //create history menu
+    Menu* history = create_history_menu();
     m->addChildMenu(history);
+
+    Menu* settings = new Menu("SETTINGS", {"RESET", "CHALLENGE LEVEL", "PACER DURATION"}, m);
     m->addChildMenu(settings);
 
-    Menu* clearHistory = new Menu("CLEAR", {"YES","NO"}, history);
-    history->addChildMenu(clearHistory);
+    Menu* settings = create_settings_menu();
 
-    for (Session* s : this->sessions) {
-        Menu* session_menu = new Menu(s->getName(), {"VIEW", "DELETE"}, history);
-        history->addChildMenu(session_menu);
+    Menu* create_settings_menu(){
+        Menu* settings = new Menu("SETTINGS", {"RESET", "CHALLENGE LEVEL", "PACER DURATION"}, m);
+        Menu* reset = new Menu("RESET", {"YES","NO"}, settings);
+        Menu* challengeLevel = new Menu("CHALLENGE LEVEL", {"1","2","3","4"}, settings);
+        Menu* pacerDuration = new Menu(
+            "PACER DURATION",
+            {"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"},
+            settings
+        );
+        settings->addChildMenu(reset);
+        settings->addChildMenu(challengeLevel);
+        settings->addChildMenu(pacerDuration);
     }
 
-    Menu* reset = new Menu("RESET", {"YES","NO"}, settings);
-    Menu* challengeLevel = new Menu("CHALLENGE LEVEL", {"1","2","3","4"}, settings);
-    Menu* pacerDuration = new Menu(
-        "PACER DURATION",
-        {"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"},
-        settings
-    );
+    Menu* create_history_menu() {
+        // initialise session list
+        QStringList sessionList;
+        sessionList.append("CLEAR");
 
-    settings->addChildMenu(reset);
-    settings->addChildMenu(challengeLevel);
-    settings->addChildMenu(pacerDuration);
+        for (log* s : dbmanager->getProfileLogs(profile->getId())) {
+            sessionList.append(s->getName());
+        }
+        //create parent menu
+        Menu* history = new Menu("HISTORY", sessionList, m);
+
+        // create child menus
+        Menu* clearHistory = new Menu("CLEAR", {"YES","NO"}, history);
+        history->addChildMenu(clearHistory);
+
+        for (Session* s : this->sessions) {
+            Menu* session_menu = new Menu(s->getSessionNum(), {"VIEW", "DELETE"}, history);
+            history->addChildMenu(session_menu);
+        }
+        return history;
+    }
 }
 
 void MainWindow::navigateUpMenu() {

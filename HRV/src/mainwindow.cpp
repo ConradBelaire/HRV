@@ -85,11 +85,6 @@ MainWindow::~MainWindow() {
     delete profile;
 }
 
-
-
-void logs_to_sessions()
-
-
 void MainWindow::initializeMainMenu(Menu* m) {
     // create begin_session menu
     m->addChildMenu(begin_session);
@@ -346,19 +341,6 @@ void MainWindow::navigateSubMenu() {
     if(masterMenu->getParent()->getName() == "PACER DURATION"){
         pacer_dur = index + 1;
     }
-}
-
-    //Logic for when the menu is the delete specific session menu.
-
-    if (masterMenu->getName() == "DELETE") {
-        if (masterMenu->getMenuItems()[index] == "YES") {
-            Log* session = dbmanager->getLog(masterMenu->getParent()->getName());
-            dbmanager->deleteLog(session->getId());
-
-            navigateBack();
-            return;
-        }
-
 }
 
 void MainWindow::updateMenu(const QString &selectedMenuItem, const QStringList &menuItems) {

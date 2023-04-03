@@ -52,7 +52,7 @@ class MainWindow : public QMainWindow
 
         QTimer* timer;
         QString timeString;
-        
+
         int currentTimerCount;
         bool connectedStatus;
         // int currentDurationCount;

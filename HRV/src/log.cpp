@@ -1,58 +1,54 @@
 #include "log.h"
 
-Log::Log(int sessionNum, int pid, int challengeLevel, float isLow, float isMed, float isHigh, float avgCoherence, int sessionTime, float achievementScore, const QString& graph, const QString& date) {
-    this->session_num = sessionNum;
-    this->profile_id = pid;
-    this->challenge_level = challengeLevel;
-    this->is_low = isLow;
-    this->is_med = isMed;
-    this->is_high = isHigh;
-    this->avg_coherence = avgCoherence;
-    this->session_time = sessionTime;
-    this->achievement_score = achievementScore;
+// Log::Log(int sessionNum, int pid, int challengeLevel, float isLow, float isMed, float isHigh, float avgCoherence, int sessionTime, float achievementScore, const QString& graph, const QString& date) {
+//     this->session_num = sessionNum;
+//     this->profile_id = pid;
+//     this->challenge_level = challengeLevel;
+//     this->is_low = isLow;
+//     this->is_med = isMed;
+//     this->is_high = isHigh;
+//     this->avg_coherence = avgCoherence;
+//     this->session_time = sessionTime;
+//     this->achievement_score = achievementScore;
 
-    this->graph = graph;
-    this->date = date;
-}
+//     this->graph = graph;
+//     this->date = date;
+// }
 
-Log::Log(int sessionNum, int pid, int challengeLevel, float isLow, float isMed, float isHigh, float avgCoherence, int sessionTime, float achievementScore, QVector<int> HRarr, const QDateTime& date) {
-    this->session_num = sessionNum;
-    this->profile_id = pid;
-    this->challenge_level = challengeLevel;
-    this->is_low = isLow;
-    this->is_med = isMed;
-    this->is_high = isHigh;
-    this->avg_coherence = avgCoherence;
-    this->session_time = sessionTime;
-    this->achievement_score = achievementScore;
+// Log::Log(int sessionNum, int pid, int challengeLevel, float isLow, float isMed, float isHigh, float avgCoherence, int sessionTime, float achievementScore, QVector<int> HRarr, const QDateTime& date) {
+//     this->session_num = sessionNum;
+//     this->profile_id = pid;
+//     this->challenge_level = challengeLevel;
+//     this->is_low = isLow;
+//     this->is_med = isMed;
+//     this->is_high = isHigh;
+//     this->avg_coherence = avgCoherence;
+//     this->session_time = sessionTime;
+//     this->achievement_score = achievementScore;
 
-    // format date
-    this->date = date.toString("dd.MM.yyyy hh:mm:ss");
-    // convert vector to string
-    if (HRarr.size()>1) {
-        QString data = QString::number(HRarr[0]);
-        for (int i = 1; i < HRarr.size(); i++) {
-            data.append(",");
-            data.append(QString::number(HRarr[i]));
-        }
-    } else {
-        this->graph = QString::number(HRarr[0]);
-    }
-}
+//     // format date
+//     this->date = date.toString("dd.MM.yyyy hh:mm:ss");
+//     // convert vector to string
+//     if (HRarr.size()>1) {
+//         QString data = QString::number(HRarr[0]);
+//         for (int i = 1; i < HRarr.size(); i++) {
+//             data.append(",");
+//             data.append(QString::number(HRarr[i]));
+//         }
+//     } else {
+//         this->graph = QString::number(HRarr[0]);
+//     }
+// }
 
-Log::Log(Session* session) {
+Log::Log(Session* session, int profile_id) {
+    this->profile_id = profile_id;
     this->session_num = session->getSessionNum();
-    this->profile_id = session->getProfileId();
     this->challenge_level = session->getChallengeLevel();
-    this->is_low = session->getIsLow();
-    this->is_med = session->getIsMed();
-    this->is_high = session->getIsHigh();
-    this->avg_coherence = session->getAvgCoherence();
-    this->session_time = session->getSessionTime();
+    this->session_time = session->getEleapsedTime();
     this->achievement_score = session->getAchievementScore();
 
     // format date
-    this->date = session->getDate().toString("dd.MM.yyyy hh:mm:ss");
+    this->date = session->getStartTime().toString("dd.MM.yyyy hh:mm:ss");
     // convert vector to string
     QVector<int> HRarr = session->getGraph();
     if (HRarr.size()>1) {
@@ -61,9 +57,15 @@ Log::Log(Session* session) {
             data.append(",");
             data.append(QString::number(HRarr[i]));
         }
+        this->graph = data;
     } else {
         this->graph = QString::number(HRarr[0]);
     }
+
+    // calculate in_low in_med in_high
+    this->is_low = session->getTimeLow() / session->getElapsedTime();
+    this->is_med = session->getTimeMed() / session->getElapsedTime();
+    this->is_high = session->getTimeHigh() / session->getElapsedTime();
 }
 
 int Log::getId() {
@@ -175,6 +177,6 @@ void Log::setDate(const QDateTime& date) {
 }
 
 QString Log::toString() {
-    QString str = "Session ID: " + QString::number(session_num) + "\n Date: " + date.toString("dd.MM.yyyy hh:mm") + "Challenge Lvl: " + challenge_level;
+    QString str = "Session ID: " + QString::number(session_num) + "\n Date: " + date + "Challenge Lvl: " + challenge_level;
     return str;
 }

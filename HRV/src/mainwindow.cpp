@@ -15,9 +15,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Initialize the timer
     currentTimerCount = -1;
 
-    // create database manager
+    // create database dbmanager
     dbmanager = new DBManager();
-    
+
     // create profile
     profile = dbmanager->getProfile(1);
 
@@ -72,7 +72,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow() {
 
-    db->addProfile(profile->getId(), profile->getBLvl(), profile->getSessAmt());
+    dbmanager->addProfile(profile->getId(), profile->getBLvl(), profile->getSessAmt());
 
     delete mainMenuOG;
     delete ui;
@@ -81,19 +81,14 @@ MainWindow::~MainWindow() {
         delete sessions[i];
     }
 
-    delete db;
+    delete dbmanager;
     delete profile;
 }
 
 
-void MainWindow::initializeMainMenu(Menu* m) {
 
-    QStringList sessionList;
-    sessionList.append("CLEAR");
+void logs_to_sessions()
 
-    for (Session* s : this->sessions) {
-        sessionList.append(s->getName());
-    }
 
 void MainWindow::initializeMainMenu(Menu* m) {
     // create begin_session menu
@@ -204,11 +199,68 @@ void MainWindow::navigateBack() {
     //ui->electrodeLabel->setVisible(false);
 }
 
-
+// pressing the ok button
 void MainWindow::navigateSubMenu() {
 
     int index = activeQListWidget->currentRow();
     if (index < 0) return;
+
+    // navigate to begin_session menu
+    if(masterMenu->getChildMenu(index)->getName() == "BEGIN SESSION") {
+        masterMenu = masterMenu->getChildMenu();
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
+    }
+
+    // navigate to history menu
+    if (masterMenu->getChildMenu(index)->getName() == "HISTORY") {
+        masterMenu = masterMenu->getChildMenu();
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
+    }
+
+    if(is_session_num(masterMenu->getChildMenu(index)->getName())){
+        dbmanager->deleteLog(masterMenu->getChildMenu(index)->getName());
+        navigateBack();
+        return;
+    }
+
+    // navigate to clear menu
+    if (masterMenu->getChildMenu(index)->getName() == "CLEAR") {
+        masterMenu = masterMenu->getChildMenu();
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
+    }
+
+    // fucntionality of the clear menu
+    if (masterMenu->getParent()->getName() == "CLEAR"){
+        if (masterMenu->getMenuItems()[index] == "YES") {
+            dbmanager->deleteSessions();
+            navigateBack();
+            return;
+        }
+        else {
+            navigateBack();
+            return;
+        }
+    }
+
+    // navigate to settings menu
+    if (masterMenu->getChildMenu(index)->getName() == "SETTINGS") {
+        masterMenu = masterMenu->getChildMenu();
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
+    }
+
+    // navigate to Reset menu
+    if (masterMenu->getChildMenu(index)->getName() == "RESET") {
+        masterMenu = masterMenu->getChildMenu();
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
+    }
+
+
+
 
     // Prevent crash if ok button is selected in view
     // TODO: Look into this when we have UI set up
@@ -219,7 +271,7 @@ void MainWindow::navigateSubMenu() {
     //Logic for when the menu is the delete menu.
     if (masterMenu->getName() == "CLEAR") {
         if (masterMenu->getMenuItems()[index] == "YES") {
-            db->deleteSessions();
+            dbmanager->deleteSessions();
 
             navigateBack();
             return;
@@ -234,8 +286,8 @@ void MainWindow::navigateSubMenu() {
 
     if (masterMenu->getName() == "DELETE") {
         if (masterMenu->getMenuItems()[index] == "YES") {
-            Session* session = db->getSesionByName(masterMenu->getParent()->getName());
-            db->deleteSession(session);
+            Session* session = dbmanager->getSesion(masterMenu->getParent()->getName());
+            dbmanager->deleteSession(session);
 
             navigateBack();
             return;
@@ -262,13 +314,13 @@ void MainWindow::navigateSubMenu() {
         if (masterMenu->getMenuItems()[index] == "YES") {
             challenge_level = 1;
             pacer_dur = 10;
-            db->deleteProfiles();
-            profile = db->getProfile(1);
+            dbmanager->deleteProfile(1);
+            profile = dbmanager->getProfile(1);
 
             // TURN OFF
             MainWindow::powerChange();
             // TURN ON
-            MainWindow::powerChange();    
+            MainWindow::powerChange();
 
             navigateBack();
             return;
@@ -355,7 +407,7 @@ void MainWindow::powerChange(){
     // if in the middle of a session
     if (currentTimerCount != -1){
         //Save Session
-        applyToSkin(false)
+        applyToSkin(false);
     }
 }
 
@@ -393,13 +445,13 @@ void MainWindow::init_timer(QTimer* timer){
 }
 
 void MainWindow::update_timer(){
-    DrainBattery();
+    drainBattery();
     timeString = QString::number(currentTimerCount) + "s";
     //ui->treatmentView->scene()->clear();
     //ui->treatmentView->scene()->addText(timeString);
 
     currentTimerCount++;
-    
+
     // TODO: update pacer
 
 
@@ -425,46 +477,50 @@ void MainWindow::drainBattery() {
 
 
 
-// TODO: IMPLEMENT DB functinality
+// TODO?:
 void MainWindow::applyToSkin(bool checked) {
 
     // ui->electrodeLabel->setPixmap(QPixmap(checked ? ":/icons/electrodeOn.svg" : ":/icons/electrodeOff.svg"));
     ui->applyToSkinAdminBox->setCurrentIndex(checked ? 1 : 0);
     bool onSkin = checked; // why?
 
-    if (this->currentTimerCount != -1) {
+    // if the timer is not running
+    if (currentTimerCount != -1) {
+
+        // is it on skin
         if (!onSkin) {
             displaySummary();
         }
         else {
-            currentTherapy->getTimer()->start(1000);
+            currentSession->getTimer()->start(1000);
         }
     }
 }
 
 void MainWindow::displaySummary() {
-    currentTherapy->getTimer()->stop();
-    // TODO: save session into db
-    Log *log = new Log(this->currentSession)
-                   db->addlog(
-                       log->getId(),
-                       log->getProfileId(),
-                       log->getChallengeLevel(),
-                       log->getIsLow(),
-                       log->getIsMed(),
-                       log->getIsHigh()
-                           log->getAvgCoherence(),
-                       log->getLogTime(),
-                       log->getAchievementScore(),
-                       log->getGraph(),
-                       log->getDate());
+    currentSession->getTimer()->stop();
+    // TODO: save session into dbmanager
+    Log *log = new Log(this->currentSession, profile->getId())
+    dbmanager->addlog(
+        log->getId(),
+        log->getProfileId(),
+        log->getChallengeLevel(),
+        log->getIsLow(),
+        log->getIsMed(),
+        log->getIsHigh()
+        log->getAvgCoherence(),
+        log->getLogTime(),
+        log->getAchievementScore(),
+        log->getGraph(),
+        log->getDate()
+    );
 
     delete log;
     // reset timer
     this->currentTimerCount = -1;
 
-    currentTherapy->getTimer()->stop();
-    currentTherapy->getTimer()->disconnect();
+    currentSession->getTimer()->stop();
+    currentSession->getTimer()->disconnect();
     // TODO: session data varaibles to 0
     // need to take in data for this
 

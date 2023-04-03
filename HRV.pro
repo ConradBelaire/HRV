@@ -39,7 +39,7 @@ HEADERS += \
     $${source_dir}/session.h \
     $${source_dir}/mainwindow.h \
     $${source_dir}/menu.h \
-    $${source_dir}/log.cpp
+    $${source_dir}/log.h
 
 FORMS += \
     $${forms_dir}/mainwindow.ui

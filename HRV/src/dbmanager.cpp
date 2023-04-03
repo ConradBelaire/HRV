@@ -23,7 +23,7 @@ bool DBManager::DBInit() {
 
     QSqlQuery query;
     query.exec("CREATE TABLE IF NOT EXISTS profiles ( id SERIAL PRIMARY KEY, battery_level FLOAT NOT NULL );");
-    query.exec("CREATE TABLE IF NOT EXISTS log ( id SERIAL PRIMARY KEY, profile_id INTEGER NOT NULL, challenge_level INTEGER NOT NULL, is_low FLOAT NOT NULL, is_med FLOAT NOT NULL, is_high FLOAT NOT NULL, avg_coherence FLOAT NOT NULL, session_time INTEGER NOT NULL, achievement_score FLOAT NOT NULL, graph TEXT NOT NULL, date VARCHAR(255) NOT NULL, CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES profiles (id) ON DELETE CASCADE, CONSTRAINT check_percentages CHECK ((is_low + is_med + is_high) = 100) );");
+    query.exec("CREATE TABLE IF NOT EXISTS log ( id SERIAL PRIMARY KEY, profile_id INTEGER NOT NULL, challenge_level INTEGER NOT NULL, is_low INTEGER NOT NULL, is_med INTEGER NOT NULL, is_high INTEGER NOT NULL, avg_coherence FLOAT NOT NULL, session_time INTEGER NOT NULL, pacer_duration INTEGER NOT NULL, achievement_score FLOAT NOT NULL, date VARCHAR(255)NOT NULL, CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES profiles (id) ON DELETE CASCADE, CONSTRAINT check_percentages CHECK ((is_low + is_med + is_high) = 100) );" );
 
     return hrvDB.commit();
 }
@@ -163,50 +163,37 @@ Log* DBManager::getLog(int id) {
 
     // Log exists
     Log* log = new Log(
+        id,
         query.value(0).toInt(),
         query.value(1).toInt(),
         query.value(2).toInt(),
-        query.value(3).toFloat(),
-        query.value(4).toFloat(),
+        query.value(3).toInt(),
+        query.value(4).toInt(),
         query.value(5).toFloat(),
-        query.value(6).toFloat(),
+        query.value(6).toInt(),
         query.value(7).toInt(),
         query.value(8).toFloat(),
         query.value(9).toString(),
-        query.value(10).toString()
     );
     return log;
 }
 
-
-bool DBManager::addLog(
-    int profile_id,
-    int session_num,
-    int challenge_level,
-    float is_low,
-    float is_med,
-    float is_high,
-    float avg_coherence,
-    int session_time,
-    float achievement_score,
-    QString graph,
-    QString date ) {
+bool DBManager::addLog(Log* log) {
 
     hrvDB.transaction();
 
     QSqlQuery query;
-    query.prepare("INSERT INTO log ( profile_id, lod_id, challenge_level, is_low, is_med, is_high, avg_coherence, session_time, achievement_score, graph, date ) VALUES ( :profile_id, :lod_id, :challenge_level, :is_low, :is_med, :is_high, :avg_coherence, :session_time, :achievement_score, :graph, :date );");
-    query.bindValue(":profile_id", profile_id);
-    query.bindValue(":lod_id", session_num);
-    query.bindValue(":challenge_level", challenge_level);
-    query.bindValue(":is_low", is_low);
-    query.bindValue(":is_med", is_med);
-    query.bindValue(":is_high", is_high);
-    query.bindValue(":avg_coherence", avg_coherence);
-    query.bindValue(":session_time", session_time);
-    query.bindValue(":achievement_score", achievement_score);
-    query.bindValue(":graph", graph);
-    query.bindValue(":date", date);
+    query.prepare("INSERT INTO log (profile_id, challenge_level, is_low, is_med, is_high, avg_coherence, session_time, pacer_duration, achievement_score, graph, date) VALUES (:profile_id, :challenge_level, :is_low, :is_med, :is_high, :avg_coherence, :session_time, :pacer_duration, :achievement_score, :date);");
+    query.bindValue(":profile_id", log->getProfileId());
+    query.bindValue(":challenge_level", log->getChallengeLevel());
+    query.bindValue(":is_low", log->getIsLow());
+    query.bindValue(":is_med", log->getIsMed());
+    query.bindValue(":is_high", log->getIsHigh());
+    query.bindValue(":avg_coherence", log->getAvgCoherence());
+    query.bindValue(":session_time", log->getSessionTime());
+    query.bindValue(":pacer_duration", log->getPacerDuration());
+    query.bindValue(":achievement_score", log->getAchievementScore());
+    query.bindValue(":date", log->getDate());
     query.exec();
 
     return hrvDB.commit();

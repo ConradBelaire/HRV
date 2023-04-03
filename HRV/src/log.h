@@ -11,21 +11,32 @@ class DBManager;
 
 class Log {
     public:
-        // Log(int, int, int, float, float, float, float, int, float, const QString&, const QString&);
-        // Log(int, int, int, float, float, float, float, int, float, QVector<int>, const QDateTime&);
+        Log(
+            int sessionNum,
+            int profile_id,
+            int challengeLevel,
+            int pacer_duration,
+            float avgCoherence,
+            int isLow,
+            int isMed,
+            int isHigh,
+            int sessionTime,
+            float achievementScore,
+            QString date,
+        );
         Log(Session*, int);
 
         int getId();
         int getProfileId();
         int getChallengeLevel();
-        float getIsLow();
-        float getIsMed();
-        float getIsHigh();
+        int getIsLow();
+        int getIsMed();
+        int getIsHigh();
         float getAvgCoherence();
         int getSessionTime();
+        int getPacerDuration();
         float getAchievementScore();
-        const QString& getGraph();
-        const QString& getDate();
+        QString getDate();
         float getLowCoherencePercentage();
         float getMedCoherencePercentage();
         float getHighCoherencePercentage();
@@ -39,9 +50,7 @@ class Log {
         void setAvgCoherence(float);
         void setSessionTime(int);
         void setAchievementScore(float);
-        void setGraph(const QString&);
         void setDate(const QString&);
-        void setGraph(QVector<int> arr);
         void setDate(const QDateTime& date);
 
         QString toString();
@@ -50,14 +59,15 @@ class Log {
         int session_num;
         int profile_id;
         int challenge_level;
-        float is_low;
-        float is_med;
-        float is_high;
-
+        int pacer_duration;
         float avg_coherence;
+        int is_low;
+        int is_med;
+        int is_high;
+
         int session_time;
         float achievement_score;
-        QString graph;
+
         QString date;
 };
 

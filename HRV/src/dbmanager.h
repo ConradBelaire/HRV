@@ -23,19 +23,8 @@ public:
     bool addProfile(int id, double batterLvl, int sessionAmt);
     Profile* getProfile(int id);
     bool deleteProfile(int id);
-    bool addLog(int profileId,
-                int sessionNum,
-                int challengeLevel,
-                float isLow,
-                float isMed,
-                float isHigh,
-                float avgCoherence,
-                int sessionTime,
-                float achievementScore,
-                QString graph,
-                QString date
-    );
     Log* getLog(int id);
+    bool addLog(Log* log);
     Log** getProfileLogs(int profileId);
     bool deleteLog(int id);
     bool deleteLogs();

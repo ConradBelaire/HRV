@@ -1,72 +1,44 @@
 #include "log.h"
 
-// Log::Log(int sessionNum, int pid, int challengeLevel, float isLow, float isMed, float isHigh, float avgCoherence, int sessionTime, float achievementScore, const QString& graph, const QString& date) {
-//     this->session_num = sessionNum;
-//     this->profile_id = pid;
-//     this->challenge_level = challengeLevel;
-//     this->is_low = isLow;
-//     this->is_med = isMed;
-//     this->is_high = isHigh;
-//     this->avg_coherence = avgCoherence;
-//     this->session_time = sessionTime;
-//     this->achievement_score = achievementScore;
+// TODO: ADD HRV DATA
+Log::Log(
+    int sessionNum,
+    int profile_id,
+    int challengeLevel,
+    int isLow,
+    int isMed,
+    int isHigh,
+    float avgCoherence,
+    int sessionTime,
+    int pacer_duration;
+    float achievementScore,
+    QString date,
+):
+    session_num(sessionNum),
+    profile_id(profile_id),
+    challenge_level(challengeLevel),
+    pacer_duration(pacer_duration),
+    avg_coherence(avgCoherence),
+    is_low(isLow),
+    is_med(isMed),
+    is_high(isHigh),
+    session_time(sessionTime),
+    achievement_score(achievementScore),
+    date(date) {}
 
-//     this->graph = graph;
-//     this->date = date;
-// }
-
-// Log::Log(int sessionNum, int pid, int challengeLevel, float isLow, float isMed, float isHigh, float avgCoherence, int sessionTime, float achievementScore, QVector<int> HRarr, const QDateTime& date) {
-//     this->session_num = sessionNum;
-//     this->profile_id = pid;
-//     this->challenge_level = challengeLevel;
-//     this->is_low = isLow;
-//     this->is_med = isMed;
-//     this->is_high = isHigh;
-//     this->avg_coherence = avgCoherence;
-//     this->session_time = sessionTime;
-//     this->achievement_score = achievementScore;
-
-//     // format date
-//     this->date = date.toString("dd.MM.yyyy hh:mm:ss");
-//     // convert vector to string
-//     if (HRarr.size()>1) {
-//         QString data = QString::number(HRarr[0]);
-//         for (int i = 1; i < HRarr.size(); i++) {
-//             data.append(",");
-//             data.append(QString::number(HRarr[i]));
-//         }
-//     } else {
-//         this->graph = QString::number(HRarr[0]);
-//     }
-// }
-
-Log::Log(Session* session, int profile_id) {
-    this->profile_id = profile_id;
-    this->session_num = session->getSessionNum();
-    this->challenge_level = session->getChallengeLevel();
-    this->session_time = session->getEleapsedTime();
-    this->achievement_score = session->getAchievementScore();
-
-    // format date
-    this->date = session->getStartTime().toString("dd.MM.yyyy hh:mm:ss");
-    // convert vector to string
-    QVector<int> HRarr = session->getGraph();
-    if (HRarr.size()>1) {
-        QString data = QString::number(HRarr[0]);
-        for (int i = 1; i < HRarr.size(); i++) {
-            data.append(",");
-            data.append(QString::number(HRarr[i]));
-        }
-        this->graph = data;
-    } else {
-        this->graph = QString::number(HRarr[0]);
-    }
-
-    // calculate in_low in_med in_high
-    this->is_low = session->getTimeLow() / session->getEleapsedTime();
-    this->is_med = session->getTimeMed() / session->getEleapsedTime();
-    this->is_high = session->getTimeHigh() / session->getEleapsedTime();
-}
+// TODO: ADD HRV DATA
+Log::Log(Session* session, int profile_id):
+    session_num(session->getSessionNum()),
+    profile_id(profile_id),
+    challenge_level(session->getChallengeLevel()),
+    pacer_duration(session->getPacerDuration()),
+    avg_coherence(session->getCoherentSum() / session->getEleapsedTime()),
+    is_low(session->getTimeLow()),
+    is_med(session->getTimeMed()),
+    is_high(session->getTimeHigh()),
+    session_time(session->getEleapsedTime()),
+    achievement_score(session->getAchievementScore()),
+    date(session->getStartTime().toString()) {}
 
 int Log::getId() {
     return session_num;
@@ -104,11 +76,15 @@ float Log::getAchievementScore() {
     return achievement_score;
 }
 
+int Log::getPacerDuration() {
+    return pacer_duration;
+}
+
 const QString& Log::getGraph() {
     return graph;
 }
 
-const QString& Log::getDate() {
+QDateTime Log::getDate() {
     return date;
 }
 

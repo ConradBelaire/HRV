@@ -88,7 +88,7 @@ MainWindow::~MainWindow() {
 QString MainWindow::floatToStringWithOneDecimalPlace(float value) {
     std::ostringstream ss;
     ss << std::fixed << std::setprecision(1) << value;
-    return ss.str();
+    return QString::fromStdString(ss.str());
 }
 
 Menu* MainWindow::create_history_menu(Menu* m) {
@@ -107,20 +107,21 @@ Menu* MainWindow::create_history_menu(Menu* m) {
         history->addChildMenu(clearHistory);
 
         for (Log* log : dbmanager->getProfileLogs(profile->getId())) {
-            Menu* session_menu = new Menu(log->getId(), {"VIEW", "DELETE"}, history);
+            Menu* session_menu = new Menu(QString::number(log->getId()), {"VIEW", "DELETE"}, history);
             Menu* view = new Menu("VIEW", {
-                "Session Number: " + log->getId(),
-                "Date: " + log->getDate(),
-                "Session time: " + log->getSessionTime(),
-                "Challenge Level: " + log->getChallengeLevel(),
-                "Pacer Duration: " + log->getPacerDuration(),
-                "Coherence Average: " + log->getCoherenceAvg(),
-                "Achievement Score: " + log->getAchievementScore(),
+                "Session Number: " << QString::number(log->getId()),
+                "Date: " << log->getDate(),
+                "Session time: " + QString::number(log->getSessionTime()),
+                "Challenge Level: " + QString::number(log->getChallengeLevel()),
+                "Pacer Duration: " + QString::number(log->getPacerDuration()),
+                "Coherence Average: " + floatToStringWithOneDecimalPlace(log->getAvgCoherence()),
+                "Achievement Score: " + floatToStringWithOneDecimalPlace(log->getAchievementScore()),
                 "Low Coherence Percentage: " + floatToStringWithOneDecimalPlace(log->getLowCoherencePercentage()),
                 "Medium Coherence Percentage: " + floatToStringWithOneDecimalPlace(log->getMedCoherencePercentage()),
                 "High Coherence Percentage: " + floatToStringWithOneDecimalPlace(log->getHighCoherencePercentage()),
 
             }, session_menu);
+            session_menu->addChildMenu(view);
 
             Menu* delete = new Menu("DELETE", {"YES","NO"}, session_menu);
             history->addChildMenu(session_menu);

@@ -40,10 +40,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->powerButton, &QPushButton::released, this, &MainWindow::powerChange);
 
     // TODO: connect charge button
-    connect(ui->chargeAdminButton, &QPushButton::released, this, &MainWindow::rechargeBattery);
+    //connect(ui->chargeAdminButton, &QPushButton::released, this, &MainWindow::rechargeBattery);
 
     // TODO: connect SpinBox to set the battery level
-    connect(ui->batteryLevelAdminSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryLevel);
+    //connect(ui->batteryLevelAdminSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryLevel);
 
     // TODO: connect the menu buttons
     // TODO?: maybe apply a skin to these buttons
@@ -57,15 +57,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // TODO?: apply more skins
 
     // TODO: connect the power level spin box
-    connect(ui->powerLevelAdminSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::changePowerLevel);
+    //connect(ui->powerLevelAdminSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::changePowerLevel);
 
     // Initialize battery levels
-    ui->powerLevelAdminSpinBox->setValue(profile->getPLvl());
-    ui->batteryLevelAdminSpinBox->setValue(profile->getBLvl());
+    //ui->powerLevelAdminSpinBox->setValue(profile->getPLvl());
+    //ui->batteryLevelAdminSpinBox->setValue(profile->getBLvl());
 
     // set session ui to invisible
     // TODO: add session ui items
-    ui->programViewWidget->setVisible(false);
+    //ui->programViewWidget->setVisible(false);
     //ui->electrodeLabel->setVisible(false);
 }
 
@@ -158,11 +158,11 @@ void MainWindow::navigateToMainMenu() {
         masterMenu = masterMenu->getParent();
     }
     updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
-    ui->programViewWidget->setVisible(false);
-    ui->electrodeLabel->setVisible(false);
+    //ui->programViewWidget->setVisible(false);
+    //ui->electrodeLabel->setVisible(false);
 }
 
-// ok button
+// back button
 void MainWindow::navigateBack() {
     if (currentTimerCount != -1) {
         displaySummary();
@@ -178,8 +178,8 @@ void MainWindow::navigateBack() {
     }
 
     // set the session ui to invisible
-    ui->programViewWidget->setVisible(false);
-    ui->electrodeLabel->setVisible(false);
+    //ui->programViewWidget->setVisible(false);
+    //ui->electrodeLabel->setVisible(false);
 }
 
 
@@ -299,9 +299,9 @@ void MainWindow::changeBatteryLevel(double newLevel) {
             profile->setBLvl(newLevel);
         }
 
-        ui->batteryLevelAdminSpinBox->setValue(newLevel);
+        //ui->batteryLevelAdminSpinBox->setValue(newLevel);
         int newLevelInt = int(newLevel);
-        ui->batteryLevelBar->setValue(newLevelInt);
+        //ui->batteryLevelBar->setValue(newLevelInt);
 
         // does this even work?
         QString highBatteryHealth = "QProgressBar { selection-background-color: rgb(78, 154, 6); background-color: rgb(0, 0, 0); }";
@@ -309,13 +309,13 @@ void MainWindow::changeBatteryLevel(double newLevel) {
         QString lowBatteryHealth = "QProgressBar { selection-background-color: rgb(164, 0, 0); background-color: rgb(0, 0, 0); }";
 
         if (newLevelInt >= 50) {
-            ui->batteryLevelBar->setStyleSheet(highBatteryHealth);
+            //ui->batteryLevelBar->setStyleSheet(highBatteryHealth);
         }
         else if (newLevelInt >= 20) {
-            ui->batteryLevelBar->setStyleSheet(mediumBatteryHealth);
+            //ui->batteryLevelBar->setStyleSheet(mediumBatteryHealth);
         }
         else {
-            ui->batteryLevelBar->setStyleSheet(lowBatteryHealth);
+            //ui->batteryLevelBar->setStyleSheet(lowBatteryHealth);
         }
     }
 }
@@ -373,8 +373,8 @@ void MainWindow::init_timer(QTimer* timer){
 void MainWindow::update_timer(){
     DrainBattery();
     timeString = QString::number(currentTimerCount) + "s";
-    ui->treatmentView->scene()->clear();
-    ui->treatmentView->scene()->addText(timeString);
+    //ui->treatmentView->scene()->clear();
+    //ui->treatmentView->scene()->addText(timeString);
 
     currentTimerCount++;
     

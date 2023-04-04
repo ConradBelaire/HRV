@@ -1,91 +1,117 @@
 #include "session.h"
 
-Session::Session(int session_num, int challenge_level, int pacer_duration, const QDateTime& start_time): SESSION_NUM(session_num), CHALLENGE_LEVEL(challenge_level), PACER_DURATION(pacer_duration), START_TIME(start_time) {
-    coherence_sum = 0;
-    current_coherence = 0;
-    current_heart_rate = 0;
-    eleapsed_time = 0;
-    achievement_score = 0;
-    time_in_high = 0;
-    time_in_med = 0;
-    time_in_low = 0;
-}
+Session::Session(
+    int sessionNum,
+    int challengeLevel,
+    int pacerDuration,
+    const QDateTime& startTime,
+    QTimer* timer) :
+    SESSION_NUM(sessionNum),
+    CHALLENGE_LEVEL(challengeLevel),
+    PACER_DURATION(pacerDuration),
+    START_TIME(startTime),
+    currentHR(0),
+    timeInLow(0),
+    timeInMed(0),
+    timeInHigh(0),
+    elapsedTime(0),
+    countUpdates(0),
+    coherenceCount(0),
+    coherenceSum(0),
+    currentCoherence(0),
+    achievementScore(0),
+    timer(timer)   {}
 
 // getters
-int Session::getSessionNum() const {
-    return SESSION_NUM;
-}
+int Session::getTimeLow() const {return timeInLow;}
+int Session::getTimeMed() const {return timeInMed;}
+int Session::getTimeHigh() const {return timeInHigh;}
+int Session::getSessionNum() const {return SESSION_NUM;}
+int Session::getElapsedTime() const {return elapsedTime;}
+int Session::getPacerDuration() const {return PACER_DURATION;}
+int Session::getChallengeLevel() const {return CHALLENGE_LEVEL;}
+int Session::getCoherenceCount() const {return coherenceCount;}
+int Session::getCurrentHeartRate() const {return currentHR;}
 
-int Session::getChallengeLevel() const {
-    return CHALLENGE_LEVEL;
-}
+float Session::getCoherentSum() const {return coherenceSum;}
+float Session::getCurrentCoherence() const {return currentCoherence;}
+float Session::getAchievementScore() const {return achievementScore;}
 
-int Session::getPacerDuration() const {
-    return PACER_DURATION;
-}
-
-float Session::getCoherentSum() const {
-    return coherence_sum;
-}
-
-float Session::getCurrentCoherence() const {
-    return current_coherence;
-}
-
-int Session::getCurrentHeartRate() const {
-    return current_heart_rate;
-}
-
-int Session::getEleapsedTime() const {
-    return eleapsed_time;
-}
-
-QDateTime Session::getStartTime() const {
-    return START_TIME;
-}
-
-QTimer* Session::getTimer() {
-    return timer;
-}
-
-int Session::getTimeLow() const {
-    return time_in_low;
-}
-
-int Session::getTimeMed() const {
-    return time_in_med;
-}
-
-int Session::getTimeHigh() const{
-    return time_in_high;
-}
-
-QVector<int> Session::getGraph() const {
-    return recordedHR;
-}
+QTimer* Session::getTimer() {return timer;}
+QDateTime Session::getStartTime() const {return START_TIME;}
+QVector<int> Session::getGraph() const {return recordedHR;}
 
 // setters
-void Session::addToLow() {
-    time_in_low++;
-}
-
-void Session::addToMed() {
-    time_in_med++;
-}
-
-void Session::addToHigh() {
-    time_in_high++;
-}
+void Session::addToLow() {timeInLow++;}
+void Session::addToMed() {timeInMed++;}
+void Session::addToHigh() {timeInHigh++;}
 
 // functions
-void Session::updateReading(int hr) {
-    current_heart_rate = hr;
-    eleapsed_time += 1;
-    recordedHR.append(hr);
+float Session::updateSession(int newHR) {
+    currentHR = newHR;
+    elapsedTime++;
+    recordedHR.append(newHR);
+
+    if (countUpdates == 5) {
+        countUpdates = 0;
+        return calculateCoherenceScore();;
+    } else {
+        countUpdates++;
+        return -1;
+    }
 }
 
-void Session::addCoherenceScore(float coherence) {
-    coherence_sum += coherence;
-    coherence_count++;
-    achievement_score = coherence_sum / coherence_count;
+int Session::determineScoreLevel(float cohernceScore) {
+    switch(CHALLENGE_LEVEL) {
+        case 1:
+            if (0 <= cohernceScore && cohernceScore <= 0.5) {return 0;}
+            else if (0.6 <= cohernceScore && cohernceScore <= 0.9) {return 1;}
+            else if (1.0 <= cohernceScore && cohernceScore <= 16) {return 2;}
+            else {return -1;}
+        case 2:
+            if (0 <= cohernceScore && cohernceScore <= 0.6) {return 0;}
+            else if (0.7 <= cohernceScore && cohernceScore <= 2.1) {return 1;}
+            else if (2.2 <= cohernceScore && cohernceScore <= 16) {return 2;}
+            else {return -1;}
+        case 3:
+            if (0 <= cohernceScore && cohernceScore <= 1.8) {return 0;}
+            else if (1.9 <= cohernceScore && cohernceScore <= 4.0) {return 1;}
+            else if (4.1 <= cohernceScore && cohernceScore <= 16) {return 2;}
+            else {return -1;}
+        case 4:
+            if (0 <= cohernceScore && cohernceScore <= 4.0) {return 0;}
+            else if (4.1 <= cohernceScore && cohernceScore <= 6.0) {return 1;}
+            else if (6.1 <= cohernceScore && cohernceScore <= 16) {return 2;}
+            else {return -1;}
+        default:
+            return -1;
+    }
+}
+
+// private functions
+void Session::addCoherenceScore(float newCoherenceScore) {
+    coherenceSum += newCoherenceScore;
+    coherenceCount++;
+    achievementScore = coherenceSum / coherenceCount;
+}
+
+float Session::calculateCoherenceScore() {
+    currentCoherence = 0; // temp
+
+    // TODO: Figure out how to calculate this shit
+
+    int rank = determineScoreLevel(currentCoherence);
+    switch(rank) {
+        case 0:
+            addToLow();
+            break;
+        case 1:
+            addToMed();
+            break;
+        case 2:
+            addToHigh();
+            break;
+    }
+    addCoherenceScore(currentCoherence);
+    return currentCoherence;
 }

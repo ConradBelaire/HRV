@@ -83,6 +83,8 @@ class MainWindow : public QMainWindow
         Menu* create_settings_menu(Menu* m);
         bool is_session_num(QString log_id);
         QString floatToStringWithOneDecimalPlace(float value);
+        void updatePacer();
+
 
         // For testing purposes!
         bool redLED;

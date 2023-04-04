@@ -459,21 +459,26 @@ void MainWindow::update_timer(){
 
     currentTimerCount++;
 
+    // TODO: get new heart rate from table?
+    int newHeartRate = 0;   // some function should be here to set this value. the function could look up an array heart rates based of currentTimerCount
+    // calculate new coherence score
+    float newCoherenceScore = currentSession->updateSession(newHeartRate);
+
+    // determine light to turn on
+    switch(currentSession->determineScoreLevel(newCoherenceScore)) {
+        case 0:
+            toggleRedLED();
+            break;
+        case 1:
+            toggleBlueLED();
+            break;
+        case 2:
+            toggleGreenLED();
+            break;
+    }
+
     // TODO: update pacer
-
-
-    // TODO: get heart rate
-
-
-    // TODO: calculate/get coherence score
-
-
-    // TODO: update the currentSession object
-    //currentSession->
-
-    // TODO: change coherence lights
-
-
+    updatePacer();
 
 }
 
@@ -521,4 +526,31 @@ void MainWindow::displaySummary() {
 
     // TODO: make session ui to invisible
     // TODO: make session summary visible
+}
+
+void MainWindow::toggleRedLED() {
+    // TODO: Change colour of red led to on
+
+    // TODO: change colour of green and blue led to off
+}
+
+void MainWindow::toggleBlueLED() {
+    // TODO: Change colour of blue led to on
+
+    // TODO: change colour of red and green led to off
+}
+
+void MainWindow::toggleGreenLED() {
+    // TODO: Change colour of green led to on
+
+    // TODO: change colour of red and blue led to off
+}
+
+void MainWindow::updatePacer() {
+    // TODO: connect pacer once implemented
+
+    // math for paccer
+    int pacerBarValue = currentTimerCount / currentSession->getPacerDuration();
+    // TODO: set progress bar here
+
 }

@@ -96,7 +96,7 @@ class MainWindow : public QMainWindow
         void navigateToMainMenu();
         void navigateBack();
         void toggleRedLED();
-        void toggleGreenLED();
         void toggleBlueLED();
+        void toggleGreenLED();
 };
 #endif // MAINWINDOW_H

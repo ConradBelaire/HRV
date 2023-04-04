@@ -42,9 +42,8 @@ class Session {
 
         // functions
         float updateSession(int newHR);
-        void addCoherenceScore(float newCoherenceScore);
+        int determineScoreLevel(float cohernceScore);
 
-        float calculateCoherenceScore();
 
 
     private:
@@ -68,6 +67,9 @@ class Session {
 
         QTimer* timer;
         QVector<int> recordedHR;
+
+        void addCoherenceScore(float newCoherenceScore);
+        float calculateCoherenceScore();
 };
 
 #endif // SESSION_H

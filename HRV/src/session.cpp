@@ -66,22 +66,38 @@ float Session::updateSession(int newHR) {
     }
 }
 
+int Session::determineScoreLevel(float cohernceScore) {
+    switch(CHALLENGE_LEVEL) {
+        case 1:
+            if (0 <= cohernceScore && cohernceScore <= 0.5) {return 0;}
+            else if (0.6 <= cohernceScore && cohernceScore <= 0.9) {return 1;}
+            else if (1.0 <= cohernceScore && cohernceScore <= 16) {return 2;}
+            else {return -1;}
+        case 2:
+            if (0 <= cohernceScore && cohernceScore <= 0.6) {return 0;}
+            else if (0.7 <= cohernceScore && cohernceScore <= 2.1) {return 1;}
+            else if (2.2 <= cohernceScore && cohernceScore <= 16) {return 2;}
+            else {return -1;}
+        case 3:
+            if (0 <= cohernceScore && cohernceScore <= 1.8) {return 0;}
+            else if (1.9 <= cohernceScore && cohernceScore <= 4.0) {return 1;}
+            else if (4.1 <= cohernceScore && cohernceScore <= 16) {return 2;}
+            else {return -1;}
+        case 4:
+            if (0 <= cohernceScore && cohernceScore <= 4.0) {return 0;}
+            else if (4.1 <= cohernceScore && cohernceScore <= 6.0) {return 1;}
+            else if (6.1 <= cohernceScore && cohernceScore <= 16) {return 2;}
+            else {return -1;}
+        default:
+            return -1;
+    }
+}
+
+// private functions
 void Session::addCoherenceScore(float newCoherenceScore) {
     coherenceSum += newCoherenceScore;
     coherenceCount++;
     achievementScore = coherenceSum / coherenceCount;
-}
-
-int Session::determineScoreLevel(float cohernceScore) {
-    switch(CHALLENGE_LEVEL) {
-        case 1:
-            if ()
-        case 2:
-
-        case 3:
-
-        case 4:
-    }
 }
 
 float Session::calculateCoherenceScore() {

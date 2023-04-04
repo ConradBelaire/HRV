@@ -440,7 +440,7 @@ void MainWindow::start_session(){
     init_timer(timer);
 
     // create session
-    currentSession = new Session(profile->getSessAmt(), challenge_level, pacer_dur, QDateTime::currentDateTime());
+    currentSession = new Session(profile->getSessAmt(), challenge_level, pacer_dur, QDateTime::currentDateTime(), timer);
 }
 
 void MainWindow::init_timer(QTimer* timer){

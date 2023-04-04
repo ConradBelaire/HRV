@@ -33,8 +33,8 @@ Log::Log(Session* session, int profileId) :
     isLow(session->getTimeLow()),
     isMed(session->getTimeMed()),
     isHigh(session->getTimeHigh()),
-    avgCoherence(session->getCoherentSum() / session->getEleapsedTime()),
-    sessionTime(session->getEleapsedTime()),
+    avgCoherence(session->getCoherentSum() / session->getElapsedTime()),
+    sessionTime(session->getElapsedTime()),
     pacerDuration(session->getPacerDuration()),
     achievementScore(session->getAchievementScore()),
     date(session->getStartTime().toString()) {}

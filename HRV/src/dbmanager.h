@@ -37,4 +37,4 @@ private:
 
 };
 
-#endif // DBMANAGER_
+#endif // DBMANAGER_H

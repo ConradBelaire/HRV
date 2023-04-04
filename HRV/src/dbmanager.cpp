@@ -1,11 +1,11 @@
 #include "dbmanager.h"
 
-const QString DBManager::DATABASE_PATH = "/database/hrv.db";
+const QString DBManager::DATABASE_PATH = "/database/hrv.sqlite";
 
 DBManager::DBManager() {
 
     hrvDB = QSqlDatabase::addDatabase("QSQLITE");
-    hrvDB.setDatabaseName("hrv.db");
+    hrvDB.setDatabaseName("hrv.sqlite");
 
     if (!hrvDB.open()) {
         throw "Error: Database could not be opened";

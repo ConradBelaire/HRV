@@ -86,7 +86,7 @@ class MainWindow : public QMainWindow
         void updatePacer();
 
 
-        // For testing purposes!
+        // might not be only testing purposes
         bool redLED;
         bool greenLED;
         bool blueLED;

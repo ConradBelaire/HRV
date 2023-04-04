@@ -63,6 +63,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     //ui->powerLevelAdminSpinBox->setValue(profile->getPLvl());
     //ui->batteryLevelAdminSpinBox->setValue(profile->getBLvl());
 
+    // Admin extra buttons
+    connect(ui->redButton, SIGNAL(released()), this, SLOT (toggleRedLED()));
+    connect(ui->greenButton, SIGNAL(released()), this, SLOT (toggleGreenLED()));
+    connect(ui->blueButton, SIGNAL(released()), this, SLOT (toggleBlueLED()));
+    redLED = true;
+    greenLED = true;
+    blueLED = true;
+
     // set session ui to invisible
     // TODO: add session ui items
     //ui->programViewWidget->setVisible(false);
@@ -528,22 +536,42 @@ void MainWindow::displaySummary() {
     // TODO: make session summary visible
 }
 
-void MainWindow::toggleRedLED() {
-    // TODO: Change colour of red led to on
-
-    // TODO: change colour of green and blue led to off
+void MainWindow::toggleRedLED()
+{
+    if (redLED) { // Disabling
+        ui->redLED->setStyleSheet("background-color: rgb(80, 0, 0)");
+        redLED = false;
+    }
+    else { // Enabling
+        ui->redLED->setStyleSheet("background-color: rgb(255, 0, 0)");
+        redLED = true;
+    }
+    //cout << "red" << endl;
 }
 
-void MainWindow::toggleBlueLED() {
-    // TODO: Change colour of blue led to on
+void MainWindow::toggleGreenLED()
+{
+    if (greenLED) { // Disabling
+        ui->greenLED->setStyleSheet("background-color: rgb(0, 50, 0)");
+        greenLED = false;
+    }
+    else { // Enabling
+        ui->greenLED->setStyleSheet("background-color: rgb(0, 128, 0)");
+        greenLED = true;
+    }
 
-    // TODO: change colour of red and green led to off
 }
 
-void MainWindow::toggleGreenLED() {
-    // TODO: Change colour of green led to on
-
-    // TODO: change colour of red and blue led to off
+void MainWindow::toggleBlueLED()
+{
+    if (blueLED) { // Disabling
+        ui->blueLED->setStyleSheet("background-color: rgb(0, 0, 80)");
+        blueLED = false;
+    }
+    else { // Enabling
+        ui->blueLED->setStyleSheet("background-color: rgb(0, 0, 255)");
+        blueLED = true;
+    }
 }
 
 void MainWindow::updatePacer() {

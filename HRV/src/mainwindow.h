@@ -8,6 +8,8 @@
 #include <iostream>
 #include <QtGlobal>
 #include <QObject>
+#include <sstream>
+#include <iomanip>
 
 #include "session.h"
 #include "menu.h"

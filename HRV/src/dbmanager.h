@@ -25,7 +25,7 @@ public:
     bool deleteProfile(int id);
     Log* getLog(int id);
     bool addLog(Log* log);
-    Log** getProfileLogs(int profileId);
+    QVector<Log*>* getLogs(int id);
     bool deleteLog(int id);
     bool deleteLogs();
     bool doesLogExist(int id);

@@ -83,13 +83,13 @@ bool DBManager::deleteProfile(int id) {
 }
 
 
-Log** DBManager::getProfileLogs(int profileId) {
+QVector<Log*>* DBManager::getLogs(int id) {
 
     hrvDB.transaction();
 
     QSqlQuery query;
     query.prepare("SELECT * FROM log WHERE profile_id = :profile_id;");
-    query.bindValue(":profile_id", profileId);
+    query.bindValue(":profile_id", id);
     query.exec();
 
     if (!hrvDB.commit()) {
@@ -101,22 +101,24 @@ Log** DBManager::getProfileLogs(int profileId) {
         throw "Error: Profile does not exist";
     }
 
+    QVector<Log*>* logs = new QVector<Log*>();
+
     // profile exists
-    Log** logs = new Log*[query.size()];
     int i = 0;
     while (query.next()) {
-        logs[i] = new Log(
-            query.value(0).toInt(),
-            query.value(1).toInt(),
-            query.value(2).toInt(),
-            query.value(3).toFloat(),
-            query.value(4).toFloat(),
-            query.value(5).toFloat(),
-            query.value(6).toFloat(),
-            query.value(7).toInt(),
-            query.value(8).toFloat(),
-            query.value(9).toString(),
-            query.value(10).toString()
+        logs->append(
+            new Log(
+                id,
+                query.value(0).toInt(),
+                query.value(1).toInt(),
+                query.value(2).toInt(),
+                query.value(3).toInt(),
+                query.value(4).toInt(),
+                query.value(5).toFloat(),
+                query.value(6).toInt(),
+                query.value(7).toInt(),
+                query.value(8).toFloat(),
+                query.value(9).toString())
         );
         i++;
     }
@@ -173,7 +175,7 @@ Log* DBManager::getLog(int id) {
         query.value(6).toInt(),
         query.value(7).toInt(),
         query.value(8).toFloat(),
-        query.value(9).toString(),
+        query.value(9).toString()
     );
     return log;
 }

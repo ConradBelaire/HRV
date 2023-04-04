@@ -96,8 +96,9 @@ Menu* MainWindow::create_history_menu(Menu* m) {
         QStringList sessionList;
         sessionList.append("CLEAR");
 
-        for (log* s : dbmanager->getProfileLogs(profile->getId())) {
-            sessionList.append(s->getName());
+        QVector<Log*>* logs = dbmanager->getLogs(profile->getId());
+        for (Log* currentLog : *logs) {
+            sessionList.append(QString::number(currentLog->getSessionTime()));
         }
         //create parent menu
         Menu* history = new Menu("HISTORY", sessionList, m);
@@ -106,56 +107,57 @@ Menu* MainWindow::create_history_menu(Menu* m) {
         Menu* clearHistory = new Menu("CLEAR", {"YES","NO"}, history);
         history->addChildMenu(clearHistory);
 
-        for (Log* log : dbmanager->getProfileLogs(profile->getId())) {
-            Menu* session_menu = new Menu(QString::number(log->getId()), {"VIEW", "DELETE"}, history);
+        for (Log* currentLog : *logs) {
+            Menu* session_menu = new Menu(QString::number(currentLog->getId()), {"VIEW", "DELETE"}, history);
             Menu* view = new Menu("VIEW", {
-                "Session Number: " << QString::number(log->getId()),
-                "Date: " << log->getDate(),
-                "Session time: " + QString::number(log->getSessionTime()),
-                "Challenge Level: " + QString::number(log->getChallengeLevel()),
-                "Pacer Duration: " + QString::number(log->getPacerDuration()),
-                "Coherence Average: " + floatToStringWithOneDecimalPlace(log->getAvgCoherence()),
-                "Achievement Score: " + floatToStringWithOneDecimalPlace(log->getAchievementScore()),
-                "Low Coherence Percentage: " + floatToStringWithOneDecimalPlace(log->getLowCoherencePercentage()),
-                "Medium Coherence Percentage: " + floatToStringWithOneDecimalPlace(log->getMedCoherencePercentage()),
-                "High Coherence Percentage: " + floatToStringWithOneDecimalPlace(log->getHighCoherencePercentage()),
+                "Session Number: " + QString::number(currentLog->getId()),
+                "Date: " + currentLog->getDate(),
+                "Session time: " + QString::number(currentLog->getSessionTime()),
+                "Challenge Level: " + QString::number(currentLog->getChallengeLevel()),
+                "Pacer Duration: " + QString::number(currentLog->getPacerDuration()),
+                "Coherence Average: " + floatToStringWithOneDecimalPlace(currentLog->getAvgCoherence()),
+                "Achievement Score: " + floatToStringWithOneDecimalPlace(currentLog->getAchievementScore()),
+                "Low Coherence Percentage: " + floatToStringWithOneDecimalPlace(currentLog->getLowCoherencePercentage()),
+                "Medium Coherence Percentage: " + floatToStringWithOneDecimalPlace(currentLog->getMedCoherencePercentage()),
+                "High Coherence Percentage: " + floatToStringWithOneDecimalPlace(currentLog->getHighCoherencePercentage()),
 
             }, session_menu);
+            Menu* delete_menu = new Menu("DELETE", {"YES","NO"}, session_menu);
             session_menu->addChildMenu(view);
+            session_menu->addChildMenu(delete_menu);
 
-            Menu* delete = new Menu("DELETE", {"YES","NO"}, session_menu);
             history->addChildMenu(session_menu);
         }
         return history;
 }
 
 Menu* MainWindow::create_settings_menu(Menu* m){
-        Menu* settings = new Menu("SETTINGS", {"RESET", "CHALLENGE LEVEL", "PACER DURATION"}, m);
-        Menu* reset = new Menu("RESET", {"YES","NO"}, settings);
-        Menu* challengeLevel = new Menu("CHALLENGE LEVEL", {"1","2","3","4"}, settings);
-        Menu* pacerDuration = new Menu(
-            "PACER DURATION",
-            {"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"},
-            settings
-        );
-        settings->addChildMenu(reset);
-        settings->addChildMenu(challengeLevel);
-        settings->addChildMenu(pacerDuration);
+    Menu* settings = new Menu("SETTINGS", {"RESET", "CHALLENGE LEVEL", "PACER DURATION"}, m);
+    Menu* reset = new Menu("RESET", {"YES","NO"}, settings);
+    Menu* challengeLevel = new Menu("CHALLENGE LEVEL", {"1","2","3","4"}, settings);
+    Menu* pacerDuration = new Menu(
+        "PACER DURATION",
+        {"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"},
+        settings
+    );
+    settings->addChildMenu(reset);
+    settings->addChildMenu(challengeLevel);
+    settings->addChildMenu(pacerDuration);
+    return settings;
 }
 
 void MainWindow::initializeMainMenu(Menu* m) {
     // create begin_session menu
-    m->addChildMenu(begin_session);
     Menu* begin_session = new Menu("BEGIN SESSION", {}, m);
+    m->addChildMenu(begin_session);
 
     //create history menu
-    Menu* history = create_history_menu();
+    Menu* history = create_history_menu(m);
     m->addChildMenu(history);
 
-    Menu* settings = new Menu("SETTINGS", {"RESET", "CHALLENGE LEVEL", "PACER DURATION"}, m);
-    m->addChildMenu(settings);
-
+    // create settings menu
     Menu* settings = create_settings_menu(m);
+    m->addChildMenu(settings);
 }
 
 void MainWindow::navigateUpMenu() {
@@ -218,8 +220,7 @@ void MainWindow::navigateBack() {
 
 // fucntion to determine if session number is real
 bool MainWindow::is_session_num(QString log_id){
-    int session_id = session_id.toInt();
-    return dbmanager->doesLogExist(log_id);
+    return dbmanager->doesLogExist(log_id.toInt());
 }
 
 // pressing the ok button
@@ -238,14 +239,14 @@ void MainWindow::navigateSubMenu() {
 
     // navigate to history menu
     if (masterMenu->getChildMenu(index)->getName() == "HISTORY") {
-        masterMenu = masterMenu->getChildMenu();
+        masterMenu = masterMenu->getChildMenu(index);
         updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
         return;
     }
 
     // delete session
     if(is_session_num(masterMenu->getChildMenu(index)->getName())){
-        masterMenu = masterMenu->getChildMenu();
+        masterMenu = masterMenu->getChildMenu(index);
         updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
         return;
     }
@@ -265,7 +266,7 @@ void MainWindow::navigateSubMenu() {
     }
 
     // fucntionality of the delete menu
-    if(masterMenu->getParent()->getName == "DELETE"){
+    if(masterMenu->getParent()->getName() == "DELETE"){
         if (masterMenu->getMenuItems()[index] == "YES") {
             int log_id = masterMenu->getParent()->getParent()->getName().toInt();
             dbmanager->deleteLog(log_id);
@@ -280,7 +281,7 @@ void MainWindow::navigateSubMenu() {
 
     // navigate to clear menu
     if (masterMenu->getChildMenu(index)->getName() == "CLEAR") {
-        masterMenu = masterMenu->getChildMenu();
+        masterMenu = masterMenu->getChildMenu(index);
         updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
         return;
     }
@@ -288,7 +289,7 @@ void MainWindow::navigateSubMenu() {
     // fucntionality of the clear menu
     if (masterMenu->getParent()->getName() == "CLEAR"){
         if (masterMenu->getMenuItems()[index] == "YES") {
-            dbmanager->deleteSessions();
+            dbmanager->deleteLogs();
             navigateBack();
             return;
         }
@@ -300,14 +301,14 @@ void MainWindow::navigateSubMenu() {
 
     // navigate to settings menu
     if (masterMenu->getChildMenu(index)->getName() == "SETTINGS") {
-        masterMenu = masterMenu->getChildMenu();
+        masterMenu = masterMenu->getChildMenu(index);
         updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
         return;
     }
 
     // navigate to Reset menu
     if (masterMenu->getChildMenu(index)->getName() == "RESET") {
-        masterMenu = masterMenu->getChildMenu();
+        masterMenu = masterMenu->getChildMenu(index);
         updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
         return;
     }
@@ -315,7 +316,9 @@ void MainWindow::navigateSubMenu() {
     // fucntionality of the reset menu
     if(masterMenu->getParent()->getName() == "RESET"){
         if (masterMenu->getMenuItems()[index] == "YES") {
-            dbmanager->resetProfile(profile->getId());
+            dbmanager->deleteLogs();
+            challenge_level = 1;
+            pacer_dur = 10;
             navigateBack();
             return;
         }
@@ -327,7 +330,7 @@ void MainWindow::navigateSubMenu() {
 
     // navigate to challenge menu
     if (masterMenu->getChildMenu(index)->getName() == "CHALLENGE LEVEL") {
-        masterMenu = masterMenu->getChildMenu();
+        masterMenu = masterMenu->getChildMenu(index);
         updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
         return;
     }
@@ -339,7 +342,7 @@ void MainWindow::navigateSubMenu() {
 
     // navigate to Pacer duration menu
     if (masterMenu->getChildMenu(index)->getName() == "PACER DURATION") {
-        masterMenu = masterMenu->getChildMenu();
+        masterMenu = masterMenu->getChildMenu(index);
         updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
         return;
     }
@@ -432,7 +435,8 @@ void MainWindow::start_session(){
     // initialize the timer
     timer = new QTimer(this);
     timeString = QString::number(currentTimerCount) + "s";
-    scene->addText(timeString);
+    // TODO: update screen
+    //scene->addText(timeString);
     init_timer(timer);
 
     // create session
@@ -482,9 +486,9 @@ void MainWindow::drainBattery() {
 
 // TODO?:
 void MainWindow::applyToSkin(bool checked) {
-
+    // TODO: update screen
     // ui->electrodeLabel->setPixmap(QPixmap(checked ? ":/icons/electrodeOn.svg" : ":/icons/electrodeOff.svg"));
-    ui->applyToSkinAdminBox->setCurrentIndex(checked ? 1 : 0);
+    // ui->applyToSkinAdminBox->setCurrentIndex(checked ? 1 : 0);
     bool onSkin = checked; // why?
 
     // if the timer is not running
@@ -504,19 +508,7 @@ void MainWindow::displaySummary() {
     currentSession->getTimer()->stop();
     // TODO: save session into dbmanager
     Log *log = new Log(this->currentSession, profile->getId());
-    dbmanager->addlog(
-        log->getId(),
-        log->getProfileId(),
-        log->getChallengeLevel(),
-        log->getIsLow(),
-        log->getIsMed(),
-        log->getIsHigh(),
-        log->getAvgCoherence(),
-        log->getSessionTime(),
-        log->getAchievementScore(),
-        log->getGraph(),
-        log->getDate()
-    );
+    dbmanager->addLog(log);
 
     delete log;
     // reset timer

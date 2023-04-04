@@ -39,49 +39,27 @@ Log::Log(Session* session, int profileId) :
     achievementScore(session->getAchievementScore()),
     date(session->getStartTime().toString()) {}
 
-int Log::getId() {
-    return sessionNum;
-}
+int Log::getId() {return sessionNum;}
 
-int Log::getProfileId() {
-    return profileId;
-}
+int Log::getProfileId() {return profileId;}
 
-int Log::getChallengeLevel() {
-    return challengeLevel;
-}
+int Log::getChallengeLevel() {return challengeLevel;}
 
-int Log::getIsLow() {
-    return isLow;
-}
+int Log::getIsLow() {return isLow;}
 
-int Log::getIsMed() {
-    return isMed;
-}
+int Log::getIsMed() {return isMed;}
 
-int Log::getIsHigh() {
-    return isHigh;
-}
+int Log::getIsHigh() {return isHigh;}
 
-float Log::getAvgCoherence() {
-    return avgCoherence;
-}
+float Log::getAvgCoherence() {return avgCoherence;}
 
-int Log::getPacerDuration() {
-    return pacerDuration;
-}
+int Log::getPacerDuration() {return pacerDuration;}
 
-int Log::getSessionTime() {
-    return sessionTime;
-}
+int Log::getSessionTime() {return sessionTime;}
 
-float Log::getAchievementScore() {
-    return achievementScore;
-}
+float Log::getAchievementScore() {return achievementScore;}
 
-QString Log::getDate() {
-    return date;
-}
+QString Log::getDate() {return date;}
 
 float Log::getLowCoherencePercentage(){
     float total_sum = isLow + isMed + isHigh;

@@ -6,26 +6,21 @@ Session::Session(
     int pacerDuration,
     const QDateTime& startTime,
     QTimer* timer) :
-
     SESSION_NUM(sessionNum),
     CHALLENGE_LEVEL(challengeLevel),
     PACER_DURATION(pacerDuration),
-    START_TIME(startTime) {
-
-    currentHR = 0;
-    timeInLow = 0;
-    timeInMed = 0;
-    timeInHigh = 0;
-    elapsedTime = 0;
-    countUpdates = 0;
-    coherenceCount = 0;
-
-    coherenceSum = 0;
-    currentCoherence = 0;
-    achievementScore = 0;
-
-    this->timer = timer;
-}
+    START_TIME(startTime),
+    currentHR(0),
+    timeInLow(0),
+    timeInMed(0),
+    timeInHigh(0),
+    elapsedTime(0),
+    countUpdates(0),
+    coherenceCount(0),
+    coherenceSum(0),
+    currentCoherence(0),
+    achievementScore(0),
+    timer(timer)   {}
 
 // getters
 int Session::getTimeLow() const {return timeInLow;}

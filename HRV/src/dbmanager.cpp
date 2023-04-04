@@ -126,7 +126,7 @@ QVector<Log*>* DBManager::getLogs(int id) {
 }
 
 
-bool doesLogExist(int id){
+bool DBManager::doesLogExist(int id){
     hrvDB.transaction();
 
     QSqlQuery query;

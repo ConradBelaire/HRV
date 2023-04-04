@@ -93,12 +93,12 @@ QVector<Log*>* DBManager::getLogs(int id) {
     query.exec();
 
     if (!hrvDB.commit()) {
-        throw "Error: Query failed to execute";
+        //throw "Error: Query failed to execute";
     }
 
    // profile does not exist
     if (!query.next()) {
-        throw "Error: Profile does not exist";
+        //throw "Error: Profile does not exist";
     }
 
     QVector<Log*>* logs = new QVector<Log*>();

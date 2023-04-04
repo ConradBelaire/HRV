@@ -15,9 +15,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Initialize the timer
     currentTimerCount = -1;
 
-    // create database manager
+    // create database dbmanager
     dbmanager = new DBManager();
-    
+
     // create profile
     profile = dbmanager->getProfile(1);
 
@@ -40,10 +40,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->powerButton, &QPushButton::released, this, &MainWindow::powerChange);
 
     // TODO: connect charge button
-    connect(ui->chargeAdminButton, &QPushButton::released, this, &MainWindow::rechargeBattery);
+    //connect(ui->chargeAdminButton, &QPushButton::released, this, &MainWindow::rechargeBattery);
 
     // TODO: connect SpinBox to set the battery level
-    connect(ui->batteryLevelAdminSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryLevel);
+    //connect(ui->batteryLevelAdminSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryLevel);
 
     // TODO: connect the menu buttons
     // TODO?: maybe apply a skin to these buttons
@@ -57,22 +57,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // TODO?: apply more skins
 
     // TODO: connect the power level spin box
-    connect(ui->powerLevelAdminSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::changePowerLevel);
+    //connect(ui->powerLevelAdminSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::changePowerLevel);
 
     // Initialize battery levels
-    ui->powerLevelAdminSpinBox->setValue(profile->getPLvl());
-    ui->batteryLevelAdminSpinBox->setValue(profile->getBLvl());
+    //ui->powerLevelAdminSpinBox->setValue(profile->getPLvl());
+    //ui->batteryLevelAdminSpinBox->setValue(profile->getBLvl());
 
     // set session ui to invisible
     // TODO: add session ui items
-    ui->programViewWidget->setVisible(false);
+    //ui->programViewWidget->setVisible(false);
     //ui->electrodeLabel->setVisible(false);
 }
 
 
 MainWindow::~MainWindow() {
 
-    db->addProfile(profile->getId(), profile->getBLvl(), profile->getSessAmt());
+    dbmanager->addProfile(profile->getId(), profile->getBLvl(), profile->getSessAmt());
 
     delete mainMenuOG;
     delete ui;
@@ -81,36 +81,58 @@ MainWindow::~MainWindow() {
         delete sessions[i];
     }
 
-    delete db;
+    delete dbmanager;
     delete profile;
 }
 
+QString MainWindow::floatToStringWithOneDecimalPlace(float value) {
+    std::ostringstream ss;
+    ss << std::fixed << std::setprecision(1) << value;
+    return QString::fromStdString(ss.str());
+}
 
-void MainWindow::initializeMainMenu(Menu* m) {
+Menu* MainWindow::create_history_menu(Menu* m) {
+        // initialise session list
+        QStringList sessionList;
+        sessionList.append("CLEAR");
 
-    QStringList sessionList;
-    sessionList.append("CLEAR");
+        QVector<Log*>* logs = dbmanager->getLogs(profile->getId());
+        for (Log* currentLog : *logs) {
+            sessionList.append(QString::number(currentLog->getSessionTime()));
+        }
+        //create parent menu
+        Menu* history = new Menu("HISTORY", sessionList, m);
 
-    for (Session* s : this->sessions) {
-        sessionList.append(s->getName());
-    }
+        // create child menus
+        Menu* clearHistory = new Menu("CLEAR", {"YES","NO"}, history);
+        history->addChildMenu(clearHistory);
 
-    Menu* begin_session = new Menu("BEGIN SESSION", {}, m);
-    Menu* history = new Menu("HISTORY", sessionList, m);
+        for (Log* currentLog : *logs) {
+            Menu* session_menu = new Menu(QString::number(currentLog->getId()), {"VIEW", "DELETE"}, history);
+            Menu* view = new Menu("VIEW", {
+                "Session Number: " + QString::number(currentLog->getId()),
+                "Date: " + currentLog->getDate(),
+                "Session time: " + QString::number(currentLog->getSessionTime()),
+                "Challenge Level: " + QString::number(currentLog->getChallengeLevel()),
+                "Pacer Duration: " + QString::number(currentLog->getPacerDuration()),
+                "Coherence Average: " + floatToStringWithOneDecimalPlace(currentLog->getAvgCoherence()),
+                "Achievement Score: " + floatToStringWithOneDecimalPlace(currentLog->getAchievementScore()),
+                "Low Coherence Percentage: " + floatToStringWithOneDecimalPlace(currentLog->getLowCoherencePercentage()),
+                "Medium Coherence Percentage: " + floatToStringWithOneDecimalPlace(currentLog->getMedCoherencePercentage()),
+                "High Coherence Percentage: " + floatToStringWithOneDecimalPlace(currentLog->getHighCoherencePercentage()),
+
+            }, session_menu);
+            Menu* delete_menu = new Menu("DELETE", {"YES","NO"}, session_menu);
+            session_menu->addChildMenu(view);
+            session_menu->addChildMenu(delete_menu);
+
+            history->addChildMenu(session_menu);
+        }
+        return history;
+}
+
+Menu* MainWindow::create_settings_menu(Menu* m){
     Menu* settings = new Menu("SETTINGS", {"RESET", "CHALLENGE LEVEL", "PACER DURATION"}, m);
-
-    m->addChildMenu(begin_session);
-    m->addChildMenu(history);
-    m->addChildMenu(settings);
-
-    Menu* clearHistory = new Menu("CLEAR", {"YES","NO"}, history);
-    history->addChildMenu(clearHistory);
-
-    for (Session* s : this->sessions) {
-        Menu* session_menu = new Menu(s->getName(), {"VIEW", "DELETE"}, history)
-        history->addChildMenu(session_menu);
-    }
-
     Menu* reset = new Menu("RESET", {"YES","NO"}, settings);
     Menu* challengeLevel = new Menu("CHALLENGE LEVEL", {"1","2","3","4"}, settings);
     Menu* pacerDuration = new Menu(
@@ -118,10 +140,24 @@ void MainWindow::initializeMainMenu(Menu* m) {
         {"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"},
         settings
     );
-
     settings->addChildMenu(reset);
     settings->addChildMenu(challengeLevel);
     settings->addChildMenu(pacerDuration);
+    return settings;
+}
+
+void MainWindow::initializeMainMenu(Menu* m) {
+    // create begin_session menu
+    Menu* begin_session = new Menu("BEGIN SESSION", {}, m);
+    m->addChildMenu(begin_session);
+
+    //create history menu
+    Menu* history = create_history_menu(m);
+    m->addChildMenu(history);
+
+    // create settings menu
+    Menu* settings = create_settings_menu(m);
+    m->addChildMenu(settings);
 }
 
 void MainWindow::navigateUpMenu() {
@@ -158,11 +194,11 @@ void MainWindow::navigateToMainMenu() {
         masterMenu = masterMenu->getParent();
     }
     updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
-    ui->programViewWidget->setVisible(false);
-    ui->electrodeLabel->setVisible(false);
+    //ui->programViewWidget->setVisible(false);
+    //ui->electrodeLabel->setVisible(false);
 }
 
-// ok button
+// back button
 void MainWindow::navigateBack() {
     if (currentTimerCount != -1) {
         displaySummary();
@@ -178,27 +214,62 @@ void MainWindow::navigateBack() {
     }
 
     // set the session ui to invisible
-    ui->programViewWidget->setVisible(false);
-    ui->electrodeLabel->setVisible(false);
+    //ui->programViewWidget->setVisible(false);
+    //ui->electrodeLabel->setVisible(false);
 }
 
+// fucntion to determine if session number is real
+bool MainWindow::is_session_num(QString log_id){
+    return dbmanager->doesLogExist(log_id.toInt());
+}
 
+// pressing the ok button
 void MainWindow::navigateSubMenu() {
 
     int index = activeQListWidget->currentRow();
     if (index < 0) return;
 
-    // Prevent crash if ok button is selected in view
-    // TODO: Look into this when we have UI set up
-    if (masterMenu->getName() == "VIEW") {
+    // navigate to begin_session menu
+    if(masterMenu->getChildMenu(index)->getName() == "BEGIN SESSION") {
+        masterMenu = masterMenu->getChildMenu(index);
+        MainWindow::updateMenu(masterMenu->getName(), {});
+        MainWindow::start_session();
         return;
     }
 
-    //Logic for when the menu is the delete menu.
-    if (masterMenu->getName() == "CLEAR") {
-        if (masterMenu->getMenuItems()[index] == "YES") {
-            db->deleteSessions();
+    // navigate to history menu
+    if (masterMenu->getChildMenu(index)->getName() == "HISTORY") {
+        masterMenu = masterMenu->getChildMenu(index);
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
+    }
 
+    // delete session
+    if(is_session_num(masterMenu->getChildMenu(index)->getName())){
+        masterMenu = masterMenu->getChildMenu(index);
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
+    }
+
+    // navigate into the view menu
+    if (masterMenu->getChildMenu(index)->getName() == "VIEW") {
+        masterMenu = masterMenu->getChildMenu(index);
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
+    }
+
+    // navigate into the delete menu
+    if (masterMenu->getChildMenu(index)->getName() == "DELETE") {
+        masterMenu = masterMenu->getChildMenu(index);
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
+    }
+
+    // fucntionality of the delete menu
+    if(masterMenu->getParent()->getName() == "DELETE"){
+        if (masterMenu->getMenuItems()[index] == "YES") {
+            int log_id = masterMenu->getParent()->getParent()->getName().toInt();
+            dbmanager->deleteLog(log_id);
             navigateBack();
             return;
         }
@@ -208,13 +279,17 @@ void MainWindow::navigateSubMenu() {
         }
     }
 
-    //Logic for when the menu is the delete specific session menu.
+    // navigate to clear menu
+    if (masterMenu->getChildMenu(index)->getName() == "CLEAR") {
+        masterMenu = masterMenu->getChildMenu(index);
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
+    }
 
-    if (masterMenu->getName() == "DELETE") {
+    // fucntionality of the clear menu
+    if (masterMenu->getParent()->getName() == "CLEAR"){
         if (masterMenu->getMenuItems()[index] == "YES") {
-            Session* session = db->getSesionByName(masterMenu->getParent()->getName());
-            db->deleteSession(session);
-
+            dbmanager->deleteLogs();
             navigateBack();
             return;
         }
@@ -224,30 +299,26 @@ void MainWindow::navigateSubMenu() {
         }
     }
 
-    if (masterMenu->getName() == "CHALLENGE LEVEL") {
-        challenge_level = index + 1;
-
-        // TODO: reset to 1 after 4
+    // navigate to settings menu
+    if (masterMenu->getChildMenu(index)->getName() == "SETTINGS") {
+        masterMenu = masterMenu->getChildMenu(index);
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
     }
 
-    if (masterMenu->getName() == "PACER DURATION") {
-        pacer_dur = index + 1;
-
-        // TODO: reset to 1 after 30
+    // navigate to Reset menu
+    if (masterMenu->getChildMenu(index)->getName() == "RESET") {
+        masterMenu = masterMenu->getChildMenu(index);
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
     }
 
-    if (masterMenu->getName() == "RESET") {
+    // fucntionality of the reset menu
+    if(masterMenu->getParent()->getName() == "RESET"){
         if (masterMenu->getMenuItems()[index] == "YES") {
+            dbmanager->deleteLogs();
             challenge_level = 1;
             pacer_dur = 10;
-            db->deleteProfiles();
-            profile = db->getProfile(1);
-
-            // TURN OFF
-            MainWindow::powerChange();
-            // TURN ON
-            MainWindow::powerChange();    
-
             navigateBack();
             return;
         }
@@ -257,23 +328,32 @@ void MainWindow::navigateSubMenu() {
         }
     }
 
-    //If the menu is a parent and clicking on it should display more menus.
-    if (masterMenu->getChildMenu(index)->getMenuItems().length() > 0) {
+    // navigate to challenge menu
+    if (masterMenu->getChildMenu(index)->getName() == "CHALLENGE LEVEL") {
         masterMenu = masterMenu->getChildMenu(index);
-        MainWindow::updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
     }
 
-    //If the menu is not a parent and clicking on it should start a Session
-    else if (masterMenu->getChildMenu(index)->getMenuItems().length() == 0 && (masterMenu->getName() == "BEGIN SESSION")) {
-        //Update new menu info
-        masterMenu = masterMenu->getChildMenu(index);
-        MainWindow::updateMenu(masterMenu->getName(), {});
-        MainWindow::beginSession();
+    // navigate to challenge menu
+    if(masterMenu->getParent()->getName() == "CHALLENGE LEVEL"){
+        challenge_level = index + 1;
+    }
 
+    // navigate to Pacer duration menu
+    if (masterMenu->getChildMenu(index)->getName() == "PACER DURATION") {
+        masterMenu = masterMenu->getChildMenu(index);
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
+    }
+
+    // navigate to Pacer duration menu
+    if(masterMenu->getParent()->getName() == "PACER DURATION"){
+        pacer_dur = index + 1;
     }
 }
 
-void MainWindow::updateMenu(const QString selectedMenuItem, const QStringList menuItems) {
+void MainWindow::updateMenu(const QString &selectedMenuItem, const QStringList &menuItems) {
 
     activeQListWidget->clear();
     activeQListWidget->addItems(menuItems);
@@ -299,9 +379,9 @@ void MainWindow::changeBatteryLevel(double newLevel) {
             profile->setBLvl(newLevel);
         }
 
-        ui->batteryLevelAdminSpinBox->setValue(newLevel);
+        //ui->batteryLevelAdminSpinBox->setValue(newLevel);
         int newLevelInt = int(newLevel);
-        ui->batteryLevelBar->setValue(newLevelInt);
+        //ui->batteryLevelBar->setValue(newLevelInt);
 
         // does this even work?
         QString highBatteryHealth = "QProgressBar { selection-background-color: rgb(78, 154, 6); background-color: rgb(0, 0, 0); }";
@@ -309,13 +389,13 @@ void MainWindow::changeBatteryLevel(double newLevel) {
         QString lowBatteryHealth = "QProgressBar { selection-background-color: rgb(164, 0, 0); background-color: rgb(0, 0, 0); }";
 
         if (newLevelInt >= 50) {
-            ui->batteryLevelBar->setStyleSheet(highBatteryHealth);
+            //ui->batteryLevelBar->setStyleSheet(highBatteryHealth);
         }
         else if (newLevelInt >= 20) {
-            ui->batteryLevelBar->setStyleSheet(mediumBatteryHealth);
+            //ui->batteryLevelBar->setStyleSheet(mediumBatteryHealth);
         }
         else {
-            ui->batteryLevelBar->setStyleSheet(lowBatteryHealth);
+            //ui->batteryLevelBar->setStyleSheet(lowBatteryHealth);
         }
     }
 }
@@ -333,7 +413,7 @@ void MainWindow::powerChange(){
     // if in the middle of a session
     if (currentTimerCount != -1){
         //Save Session
-        applyToSkin(false)
+        applyToSkin(false);
     }
 }
 
@@ -355,8 +435,9 @@ void MainWindow::start_session(){
     // initialize the timer
     timer = new QTimer(this);
     timeString = QString::number(currentTimerCount) + "s";
-    scene->addText(timeString);
-    initializeTimer(timer);
+    // TODO: update screen
+    //scene->addText(timeString);
+    init_timer(timer);
 
     // create session
     currentSession = new Session(profile->getSessAmt(), challenge_level, pacer_dur, QDateTime::currentDateTime());
@@ -371,13 +452,13 @@ void MainWindow::init_timer(QTimer* timer){
 }
 
 void MainWindow::update_timer(){
-    DrainBattery();
+    drainBattery();
     timeString = QString::number(currentTimerCount) + "s";
-    ui->treatmentView->scene()->clear();
-    ui->treatmentView->scene()->addText(timeString);
+    //ui->treatmentView->scene()->clear();
+    //ui->treatmentView->scene()->addText(timeString);
 
     currentTimerCount++;
-    
+
     // TODO: update pacer
 
 
@@ -403,46 +484,38 @@ void MainWindow::drainBattery() {
 
 
 
-// TODO: IMPLEMENT DB functinality
+// TODO?:
 void MainWindow::applyToSkin(bool checked) {
-
+    // TODO: update screen
     // ui->electrodeLabel->setPixmap(QPixmap(checked ? ":/icons/electrodeOn.svg" : ":/icons/electrodeOff.svg"));
-    ui->applyToSkinAdminBox->setCurrentIndex(checked ? 1 : 0);
+    // ui->applyToSkinAdminBox->setCurrentIndex(checked ? 1 : 0);
     bool onSkin = checked; // why?
 
-    if (this->currentTimerCount != -1) {
+    // if the timer is not running
+    if (currentTimerCount != -1) {
+
+        // is it on skin
         if (!onSkin) {
             displaySummary();
         }
         else {
-            currentTherapy->getTimer()->start(1000);
+            currentSession->getTimer()->start(1000);
         }
     }
 }
 
 void MainWindow::displaySummary() {
-    currentTherapy->getTimer()->stop();
-    // TODO: save session into db
-    Log *log = new Log(this->currentSession)
-                   db->addlog(
-                       log->getId(),
-                       log->getProfileId(),
-                       log->getChallengeLevel(),
-                       log->getIsLow(),
-                       log->getIsMed(),
-                       log->getIsHigh()
-                           log->getAvgCoherence(),
-                       log->getLogTime(),
-                       log->getAchievementScore(),
-                       log->getGraph(),
-                       log->getDate());
+    currentSession->getTimer()->stop();
+    // TODO: save session into dbmanager
+    Log *log = new Log(this->currentSession, profile->getId());
+    dbmanager->addLog(log);
 
     delete log;
     // reset timer
     this->currentTimerCount = -1;
 
-    currentTherapy->getTimer()->stop();
-    currentTherapy->getTimer()->disconnect();
+    currentSession->getTimer()->stop();
+    currentSession->getTimer()->disconnect();
     // TODO: session data varaibles to 0
     // need to take in data for this
 

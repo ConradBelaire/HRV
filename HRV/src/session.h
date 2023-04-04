@@ -3,6 +3,7 @@
 
 #include <QDateTime>
 #include <QTimer>
+#include <QVector>
 
 class Session {
 
@@ -21,6 +22,15 @@ class Session {
         float getAchievementScore() const;
         QDateTime getStartTime() const;
         QTimer* getTimer();
+        int getTimeLow() const;
+        int getTimeMed() const;
+        int getTimeHigh() const;
+        QVector<int> getGraph() const;
+
+        // setters
+        void addToLow();
+        void addToMed();
+        void addToHigh();
 
         // functions
         void updateReading(int hr);
@@ -37,8 +47,14 @@ class Session {
         int coherence_count;
         float current_coherence;
         int current_heart_rate;
-        int eleapsed_time
+        int eleapsed_time;
         float achievement_score;
+
+        int time_in_low;
+        int time_in_med;
+        int time_in_high;
+
+        QVector<int> recordedHR;
 };
 
-#endif // PROFILE_H
+#endif // PROFILE_H-

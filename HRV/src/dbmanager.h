@@ -23,28 +23,18 @@ public:
     bool addProfile(int id, double batterLvl, int sessionAmt);
     Profile* getProfile(int id);
     bool deleteProfile(int id);
-    bool addLog(int profileId,
-                int sessionNum,
-                int challengeLevel,
-                float isLow,
-                float isMed,
-                float isHigh,
-                float avgCoherence,
-                int sessionTime,
-                float achievementScore,
-                QString graph,
-                QString date
-    );
     Log* getLog(int id);
-    Log** getProfileLogs(int profileId);
+    bool addLog(Log* log);
+    QVector<Log*>* getLogs(int id);
     bool deleteLog(int id);
     bool deleteLogs();
+    bool doesLogExist(int id);
 
 private:
-    QSqlDatabase denasDB;
+    QSqlDatabase hrvDB;
 
     bool DBInit();
 
 };
 
-#endif // DBMANAGER_
+#endif // DBMANAGER_H

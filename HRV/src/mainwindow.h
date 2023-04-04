@@ -8,6 +8,8 @@
 #include <iostream>
 #include <QtGlobal>
 #include <QObject>
+#include <sstream>
+#include <iomanip>
 
 #include "session.h"
 #include "menu.h"
@@ -47,12 +49,12 @@ class MainWindow : public QMainWindow
         bool powerStatus;
 
         void changePowerStatus();
-        void powerChange();
+        //void powerChange();
         QVector<Log*> sessions;
 
         QTimer* timer;
         QString timeString;
-        
+
         int currentTimerCount;
         bool connectedStatus;
         // int currentDurationCount;
@@ -65,12 +67,36 @@ class MainWindow : public QMainWindow
 
         QStringList allLogs;
         void updateMenu(const QString&, const QStringList&);
-        // void initMainMenu(Menu*);
+        void initializeMainMenu(Menu*);
         void init_timer(QTimer* timer);
         void update_timer();
+        void applyToSkin(bool checked);
+        void start_session();
+        void changeBatteryLevel(double newLevel);
+        void rechargeBattery();
+
 
         void displaySummary();
-    private slots:
 
+        // util fucntions
+        Menu* create_history_menu(Menu* m);
+        Menu* create_settings_menu(Menu* m);
+        bool is_session_num(QString log_id);
+        QString floatToStringWithOneDecimalPlace(float value);
+
+        // For testing purposes!
+        bool redLED;
+        bool greenLED;
+        bool blueLED;
+
+    private slots:
+        void navigateDownMenu();
+        void navigateUpMenu();
+        void navigateSubMenu();
+        void navigateToMainMenu();
+        void navigateBack();
+        void toggleRedLED();
+        void toggleGreenLED();
+        void toggleBlueLED();
 };
 #endif // MAINWINDOW_H

@@ -21,6 +21,6 @@ class Menu {
         Menu* parent;
         QVector<Menu*> childMenus;
 
-}
+};
 
 #endif

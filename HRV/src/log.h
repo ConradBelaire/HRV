@@ -4,57 +4,54 @@
 #include <QString>
 #include <QVector>
 #include <QDateTime>
-#include "sesshion.h"
+#include "session.h"
 
 
 class DBManager;
 
 class Log {
     public:
-        // Log(Session*);
-        Log(int, int, int, float, float, float, float, int, float, const QString&, const QString&);
-        Log(int, int, int, float, float, float, float, int, float, QVector<int>, const QDateTime&);
-        Log(Session*);
+        Log(
+            int sessionNum,
+            int profileId,
+            int challengeLevel,
+            int isLow,
+            int isMed,
+            int isHigh,
+            float avgCoherence,
+            int sessionTime,
+            int pacer_duration,
+            float achievementScore,
+            QString date);
+        Log(Session*, int);
 
         int getId();
         int getProfileId();
         int getChallengeLevel();
-        float getIsLow();
-        float getIsMed();
-        float getIsHigh();
+        int getIsLow();
+        int getIsMed();
+        int getIsHigh();
         float getAvgCoherence();
-        int getLogTime();
+        int getSessionTime();
+        int getPacerDuration();
         float getAchievementScore();
-        const QString& getGraph();
-        const QString& getDate();
-
-        void setId(int);
-        void setProfileId(int);
-        void setChallengeLevel(int);
-        void setIsLow(float);
-        void setIsMed(float);
-        void setIsHigh(float);
-        void setAvgCoherence(float);
-        void setLogTime(int);
-        void setAchievementScore(float);
-        void setGraph(const QString&);
-        void setDate(const QString&);
-        void setGraph(QVector<int> arr);
-        void setDate(const QDateTime& date);
-
-        QString toString();
+        QString getDate();
+        float getLowCoherencePercentage();
+        float getMedCoherencePercentage();
+        float getHighCoherencePercentage();
 
     private:
-        int session_num;
-        int profile_id;
-        int challenge_level;
-        float is_low;
-        float is_med;
-        float is_high;
-        float avg_coherence;
-        int session_time;
-        float achievement_score;
-        QString graph;
+
+        int sessionNum;
+        int profileId;
+        int challengeLevel;
+        int isLow;
+        int isMed;
+        int isHigh;
+        float avgCoherence;
+        int sessionTime;
+        int pacerDuration;
+        float achievementScore;
         QString date;
 };
 

@@ -9,7 +9,7 @@ public:
     double getBLvl();
     void setBLvl(double);
     int getSessAmt();
-    void increaseSessAmt() { sessionAmt++; }
+    int increaseSessAmt();
 
 private:
     int id;

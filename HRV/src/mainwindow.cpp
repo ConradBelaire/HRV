@@ -430,6 +430,20 @@ void MainWindow::changePowerStatus() {
     //activeQListWidget->setVisible(powerStatus);
     //ui->menuLabel->setVisible(powerStatus);
     ui->screen->setVisible(powerStatus);
+
+    //Remove this if we want the menu to stay in the same position when the power is off
+    if (powerStatus) {
+        MainWindow::navigateToMainMenu();
+        //applyToSkin(false);
+    }
+
+    ui->upButton->setEnabled(powerStatus);
+    ui->downButton->setEnabled(powerStatus);
+    ui->leftButton->setEnabled(powerStatus);
+    ui->rightButton->setEnabled(powerStatus);
+    ui->menuButton->setEnabled(powerStatus);
+    ui->okButton->setEnabled(powerStatus);
+    ui->backButton->setEnabled(powerStatus);
 }
 
 void MainWindow::start_session(){

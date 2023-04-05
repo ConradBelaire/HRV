@@ -67,6 +67,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // TODO: add session ui items
     //ui->programViewWidget->setVisible(false);
     //ui->electrodeLabel->setVisible(false);
+    std::srand(static_cast<unsigned>(std::time(0)));
 }
 
 
@@ -460,7 +461,7 @@ void MainWindow::update_timer(){
     currentTimerCount++;
 
     // TODO: get new heart rate from table?
-    int newHeartRate = 0;   // some function should be here to set this value. the function could look up an array heart rates based of currentTimerCount
+    int newHeartRate = generateHR();   // some function should be here to set this value. the function could look up an array heart rates based of currentTimerCount
     // calculate new coherence score
     float newCoherenceScore = currentSession->updateSession(newHeartRate);
 
@@ -553,4 +554,12 @@ void MainWindow::updatePacer() {
     int pacerBarValue = currentTimerCount / currentSession->getPacerDuration();
     // TODO: set progress bar here
 
+}
+
+
+int MainWindow::generateHR() {
+    int min = 60;
+    int max = 100;
+    int randomNumberInRange = min + (std::rand() % (max - min + 1));
+    return randomNumberInRange;
 }

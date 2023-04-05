@@ -85,11 +85,14 @@ class MainWindow : public QMainWindow
         QString floatToStringWithOneDecimalPlace(float value);
         void updatePacer();
 
-
         // For testing purposes!
         bool redLED;
         bool greenLED;
         bool blueLED;
+
+        // HRV data (maybe temp)
+        int generateHR();
+        float generateCS();
 
     private slots:
         void navigateDownMenu();

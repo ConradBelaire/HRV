@@ -20,7 +20,9 @@ Session::Session(
     coherenceSum(0),
     currentCoherence(0),
     achievementScore(0),
-    timer(timer)   {}
+    timer(timer)   {
+    std::srand(static_cast<unsigned>(std::time(0)));
+}
 
 // getters
 int Session::getTimeLow() const {return timeInLow;}
@@ -96,9 +98,10 @@ void Session::addCoherenceScore(float newCoherenceScore) {
 }
 
 float Session::calculateCoherenceScore() {
-    currentCoherence = 0; // temp
+//    currentCoherence = 0; // temp
 
     // TODO: Figure out how to calculate this shit
+    currentCoherence = generateCS();
 
     int rank = determineScoreLevel(currentCoherence);
     switch(rank) {
@@ -115,3 +118,12 @@ float Session::calculateCoherenceScore() {
     addCoherenceScore(currentCoherence);
     return currentCoherence;
 }
+
+float Session::generateCS() {
+    float min = 0.0;
+    float max = 16.0;
+    float randomFraction = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+    float randomNumberInRange = min + (randomFraction * (max - min));
+    return randomNumberInRange;
+}
+

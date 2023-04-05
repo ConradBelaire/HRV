@@ -40,10 +40,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->powerButton, &QPushButton::released, this, &MainWindow::powerChange);
 
     // TODO: connect charge button
-    //connect(ui->chargeAdminButton, &QPushButton::released, this, &MainWindow::rechargeBattery);
+    connect(ui->chargeBatteryButton, &QPushButton::released, this, &MainWindow::rechargeBattery);
 
     // TODO: connect SpinBox to set the battery level
-    //connect(ui->batteryLevelAdminSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryLevel);
+    connect(ui->batteryLevelAdminSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryLevel);
 
     // TODO: connect the menu buttons
     // TODO?: maybe apply a skin to these buttons
@@ -61,7 +61,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // Initialize battery levels
     //ui->powerLevelAdminSpinBox->setValue(profile->getPLvl());
-    //ui->batteryLevelAdminSpinBox->setValue(profile->getBLvl());
+    ui->batteryLevelAdminSpinBox->setValue(profile->getBLvl());
 
     // Admin extra buttons
     connect(ui->redButton, SIGNAL(released()), this, SLOT (toggleRedLED()));
@@ -387,9 +387,9 @@ void MainWindow::changeBatteryLevel(double newLevel) {
             profile->setBLvl(newLevel);
         }
 
-        //ui->batteryLevelAdminSpinBox->setValue(newLevel);
+        ui->batteryLevelAdminSpinBox->setValue(newLevel);
         int newLevelInt = int(newLevel);
-        //ui->batteryLevelBar->setValue(newLevelInt);
+        ui->batteryLevelBar->setValue(newLevelInt);
 
         // does this even work?
         QString highBatteryHealth = "QProgressBar { selection-background-color: rgb(78, 154, 6); background-color: rgb(0, 0, 0); }";
@@ -397,13 +397,13 @@ void MainWindow::changeBatteryLevel(double newLevel) {
         QString lowBatteryHealth = "QProgressBar { selection-background-color: rgb(164, 0, 0); background-color: rgb(0, 0, 0); }";
 
         if (newLevelInt >= 50) {
-            //ui->batteryLevelBar->setStyleSheet(highBatteryHealth);
+            ui->batteryLevelBar->setStyleSheet(highBatteryHealth);
         }
         else if (newLevelInt >= 20) {
-            //ui->batteryLevelBar->setStyleSheet(mediumBatteryHealth);
+            ui->batteryLevelBar->setStyleSheet(mediumBatteryHealth);
         }
         else {
-            //ui->batteryLevelBar->setStyleSheet(lowBatteryHealth);
+            ui->batteryLevelBar->setStyleSheet(lowBatteryHealth);
         }
     }
 }
@@ -427,8 +427,9 @@ void MainWindow::powerChange(){
 
 // Toggle visibilty of the menu
 void MainWindow::changePowerStatus() {
-    activeQListWidget->setVisible(powerStatus);
-    ui->menuLabel->setVisible(powerStatus);
+    //activeQListWidget->setVisible(powerStatus);
+    //ui->menuLabel->setVisible(powerStatus);
+    ui->screen->setVisible(powerStatus);
 }
 
 void MainWindow::start_session(){

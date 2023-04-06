@@ -8,6 +8,7 @@
 #include <iostream>
 #include <QtGlobal>
 #include <QObject>
+#include <QLabel>
 #include <sstream>
 #include <iomanip>
 
@@ -70,7 +71,6 @@ class MainWindow : public QMainWindow
         void updateMenu(const QString&, const QStringList&);
         void initializeMainMenu(Menu*);
         void init_timer(QTimer* timer);
-        void update_timer();
         void applyToSkin(bool checked);
         void start_session();
         void changeBatteryLevel(double newLevel);
@@ -85,15 +85,17 @@ class MainWindow : public QMainWindow
         bool is_session_num(QString log_id);
         QString floatToStringWithOneDecimalPlace(float value);
         void updatePacer();
+        void turnOffLights();
 
         // For testing purposes!
         bool redLED;
         bool greenLED;
         bool blueLED;
 
-        // HRV data (maybe temp)
+        // HRV data
         int generateHR();
         float generateCS();
+
 
     private slots:
         void navigateDownMenu();
@@ -104,5 +106,6 @@ class MainWindow : public QMainWindow
         void toggleRedLED();
         void toggleBlueLED();
         void toggleGreenLED();
+        void update_timer();
 };
 #endif // MAINWINDOW_H

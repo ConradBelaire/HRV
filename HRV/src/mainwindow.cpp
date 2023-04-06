@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QObject>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 
@@ -77,34 +76,34 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // add custom plot example
     // Instantiate QCustomPlot widget
-    QCustomPlot *customPlot = new QCustomPlot(this);
-    setCentralWidget(customPlot);
+//    QCustomPlot *customPlot = new QCustomPlot(this);
+//    setCentralWidget(customPlot);
 
-//     Create example data for the graph
-    QVector<double> x(101), y(101);
-    for (int i=0; i<101; ++i)
-    {
-      x[i] = i/50.0 - 1;
-      y[i] = x[i]*x[i];
-    }
+////     Create example data for the graph
+//    QVector<double> x(101), y(101);
+//    for (int i=0; i<101; ++i)
+//    {
+//      x[i] = i/50.0 - 1;
+//      y[i] = x[i]*x[i];
+//    }
 
-    // Create a graph and set example data
-    customPlot->addGraph();
-    customPlot->graph(0)->setData(x, y);
+//    // Create a graph and set example data
+//    customPlot->addGraph();
+//    customPlot->graph(0)->setData(x, y);
 
-    // Set axes labels and ranges
-    customPlot->xAxis->setLabel("x");
-    customPlot->yAxis->setLabel("y");
-    customPlot->xAxis->setRange(-1, 1);
-    customPlot->yAxis->setRange(0, 1);
+//    // Set axes labels and ranges
+//    customPlot->xAxis->setLabel("x");
+//    customPlot->yAxis->setLabel("y");
+//    customPlot->xAxis->setRange(-1, 1);
+//    customPlot->yAxis->setRange(0, 1);
 
-    // Set the plot title
-    customPlot->plotLayout()->insertRow(0);
-    QCPTextElement *title = new QCPTextElement(customPlot, "Simple Graph Example", QFont("sans", 12, QFont::Bold));
-    customPlot->plotLayout()->addElement(0, 0, title);
+//    // Set the plot title
+//    customPlot->plotLayout()->insertRow(0);
+//    QCPTextElement *title = new QCPTextElement(customPlot, "Simple Graph Example", QFont("sans", 12, QFont::Bold));
+//    customPlot->plotLayout()->addElement(0, 0, title);
 
-    // Replot the graph
-    customPlot->replot();
+//    // Replot the graph
+//    customPlot->replot();
 
 }
 
@@ -458,6 +457,7 @@ void MainWindow::powerChange(){
 
 // Toggle visibilty of the menu
 void MainWindow::changePowerStatus() {
+    if (!powerStatus) {turnOffLights();}
     activeQListWidget->setVisible(powerStatus);
     ui->menuLabel->setVisible(powerStatus);
 }
@@ -560,6 +560,8 @@ void MainWindow::displaySummary() {
 
     currentSession->getTimer()->stop();
     currentSession->getTimer()->disconnect();
+
+    turnOffLights();
     // TODO: session data varaibles to 0
     // need to take in data for this
 
@@ -569,20 +571,30 @@ void MainWindow::displaySummary() {
 
 void MainWindow::toggleRedLED() {
     // TODO: Change colour of red led to on
+    ui->redLED->setStyleSheet("color: rgb(255, 0, 0)");
 
     // TODO: change colour of green and blue led to off
+    ui->greenLED->setStyleSheet("color: rgb(0, 142, 0)");
+    ui->blueLED->setStyleSheet("color: rgb(0, 0, 142)");
+
 }
 
 void MainWindow::toggleBlueLED() {
     // TODO: Change colour of blue led to on
+    ui->blueLED->setStyleSheet("color: rgb(0, 0, 255)");
 
     // TODO: change colour of red and green led to off
+    ui->greenLED->setStyleSheet("color: rgb(0, 142, 0)");
+    ui->redLED->setStyleSheet("color: rgb(142, 0, 0)");
 }
 
 void MainWindow::toggleGreenLED() {
     // TODO: Change colour of green led to on
+    ui->greenLED->setStyleSheet("color: rgb(0, 255, 0)");
 
     // TODO: change colour of red and blue led to off
+    ui->redLED->setStyleSheet("color: rgb(142, 0, 0)");
+    ui->blueLED->setStyleSheet("color: rgb(0, 0, 142)");
 }
 
 void MainWindow::updatePacer() {
@@ -600,4 +612,10 @@ int MainWindow::generateHR() {
     int max = 100;
     int randomNumberInRange = min + (std::rand() % (max - min + 1));
     return randomNumberInRange;
+}
+
+void MainWindow::turnOffLights() {
+    ui->redLED->setStyleSheet("color: rgb(142, 0, 0)");
+    ui->blueLED->setStyleSheet("color: rgb(0, 0, 142)");
+    ui->greenLED->setStyleSheet("color: rgb(0, 142, 0)");
 }

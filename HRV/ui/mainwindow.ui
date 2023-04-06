@@ -1429,6 +1429,19 @@
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
+     <widget class="QProgressBar" name="pacerBar">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>170</y>
+        <width>118</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
     </widget>
     <widget class="QPushButton" name="backButton">
      <property name="geometry">
@@ -1619,7 +1632,7 @@
          </size>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color:red;</string>
+         <string notr="true">background-color:rgb(142,0,0)</string>
         </property>
         <property name="text">
          <string>RED</string>
@@ -1641,7 +1654,7 @@
          </size>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color:blue</string>
+         <string notr="true">background-color:rgb(0, 0, 142)</string>
         </property>
         <property name="text">
          <string>BLUE</string>
@@ -1663,7 +1676,7 @@
          </size>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color:green</string>
+         <string notr="true">background-color:rgb(0, 142, 0)</string>
         </property>
         <property name="text">
          <string>GREEN</string>

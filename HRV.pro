@@ -1,6 +1,10 @@
 QT       += core gui sql
+#LIBS     += -lqcustomplot
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+#greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
+
+lessThan(QT_MAJOR_VERSION, 5): QMAKE_CXXFLAGS += -std=c++11
 
 TARGET = HRV
 TEMPLATE = app
@@ -31,7 +35,8 @@ SOURCES += \
     $${source_dir}/profile.cpp \
     $${source_dir}/session.cpp \
     $${source_dir}/menu.cpp  \
-    $${source_dir}/log.cpp
+    $${source_dir}/log.cpp \
+    $${source_dir}/qcustomplot.cpp
 
 HEADERS += \
     $${source_dir}/dbmanager.h \
@@ -39,7 +44,8 @@ HEADERS += \
     $${source_dir}/session.h \
     $${source_dir}/mainwindow.h \
     $${source_dir}/menu.h \
-    $${source_dir}/log.h
+    $${source_dir}/log.h \
+    $${source_dir}/qcustomplot.h
 
 FORMS += \
     $${forms_dir}/mainwindow.ui

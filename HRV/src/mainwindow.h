@@ -16,6 +16,7 @@
 #include "dbmanager.h"
 #include "log.h"
 #include "profile.h"
+#include "qcustomplot.h"
 
 
 QT_BEGIN_NAMESPACE

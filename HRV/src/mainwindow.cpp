@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QObject>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 
@@ -68,6 +69,43 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     //ui->programViewWidget->setVisible(false);
     //ui->electrodeLabel->setVisible(false);
     std::srand(static_cast<unsigned>(std::time(0)));
+
+
+
+
+
+
+    // add custom plot example
+    // Instantiate QCustomPlot widget
+    QCustomPlot *customPlot = new QCustomPlot(this);
+    setCentralWidget(customPlot);
+
+//     Create example data for the graph
+    QVector<double> x(101), y(101);
+    for (int i=0; i<101; ++i)
+    {
+      x[i] = i/50.0 - 1;
+      y[i] = x[i]*x[i];
+    }
+
+    // Create a graph and set example data
+    customPlot->addGraph();
+    customPlot->graph(0)->setData(x, y);
+
+    // Set axes labels and ranges
+    customPlot->xAxis->setLabel("x");
+    customPlot->yAxis->setLabel("y");
+    customPlot->xAxis->setRange(-1, 1);
+    customPlot->yAxis->setRange(0, 1);
+
+    // Set the plot title
+    customPlot->plotLayout()->insertRow(0);
+    QCPTextElement *title = new QCPTextElement(customPlot, "Simple Graph Example", QFont("sans", 12, QFont::Bold));
+    customPlot->plotLayout()->addElement(0, 0, title);
+
+    // Replot the graph
+    customPlot->replot();
+
 }
 
 

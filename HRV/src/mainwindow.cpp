@@ -69,6 +69,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     //ui->electrodeLabel->setVisible(false);
     std::srand(static_cast<unsigned>(std::time(0)));
 
+    ui->sessionFrame->setVisible(false);
 
 
 
@@ -463,11 +464,9 @@ void MainWindow::changePowerStatus() {
 }
 
 void MainWindow::start_session(){
-    //make whatever sesions ui visible
-    // ui->electrodeLabel->setVisible(true);
+    //make sesions ui visible
+    ui->sessionFrame->setVisible(true);
 
-
-    profile->increaseSessAmt();
 
     currentTimerCount = 0;
 
@@ -479,7 +478,8 @@ void MainWindow::start_session(){
     init_timer(timer);
 
     // create session
-    currentSession = new Session(profile->getSessAmt(), challenge_level, pacer_dur, QDateTime::currentDateTime(), timer);
+    int thisSessionID = profile->increaseSessAmt();
+    currentSession = new Session(thisSessionID, challenge_level, pacer_dur, QDateTime::currentDateTime(), timer);
 }
 
 void MainWindow::init_timer(QTimer* timer){
@@ -492,7 +492,7 @@ void MainWindow::init_timer(QTimer* timer){
 
 void MainWindow::update_timer(){
     drainBattery();
-    timeString = QString::number(currentTimerCount) + "s";
+    ui->lengthBar->setText(QString::number(currentTimerCount) + "s");
     //ui->treatmentView->scene()->clear();
     //ui->treatmentView->scene()->addText(timeString);
 
@@ -550,6 +550,10 @@ void MainWindow::applyToSkin(bool checked) {
 
 void MainWindow::displaySummary() {
     currentSession->getTimer()->stop();
+    currentSession->getTimer()->disconnect();
+
+    ui->sessionFrame->setVisible(false);
+
     // TODO: save session into dbmanager
     Log *log = new Log(this->currentSession, profile->getId());
     dbmanager->addLog(log);
@@ -558,8 +562,7 @@ void MainWindow::displaySummary() {
     // reset timer
     this->currentTimerCount = -1;
 
-    currentSession->getTimer()->stop();
-    currentSession->getTimer()->disconnect();
+
 
     turnOffLights();
     // TODO: session data varaibles to 0

@@ -498,7 +498,6 @@ void MainWindow::init_timer(QTimer* timer){
 }
 
 void MainWindow::update_timer(){
-    qDebug() << "Running update_timer()";
     drainBattery();
     ui->lengthBar->setText(QString::number(currentTimerCount) + "s");
     //ui->treatmentView->scene()->clear();
@@ -508,6 +507,8 @@ void MainWindow::update_timer(){
 
     // TODO: get new heart rate from table?
     int newHeartRate = generateHR();   // some function should be here to set this value. the function could look up an array heart rates based of currentTimerCount
+
+
 
     // calculate new coherence score
     float newCoherenceScore = currentSession->updateSession(newHeartRate);
@@ -525,7 +526,6 @@ void MainWindow::update_timer(){
             break;
     }
 
-    // TODO: update pacer
     updatePacer();
 
 }

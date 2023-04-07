@@ -1,4 +1,5 @@
 QT       += core gui sql
+INCLUDEPATH += HRV/libs
 #LIBS     += -lqcustomplot
 
 #greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -24,6 +25,7 @@ CONFIG += c++11
 
 source_dir = HRV/src
 forms_dir = HRV/ui
+libs_dir = HRV/libs
 resources_dir = res
 
 QMAKE_CLEAN += hrv.sqlite
@@ -36,7 +38,7 @@ SOURCES += \
     $${source_dir}/session.cpp \
     $${source_dir}/menu.cpp  \
     $${source_dir}/log.cpp \
-    $${source_dir}/qcustomplot.cpp
+    $${libs_dir}/qcustomplot.cpp
 
 HEADERS += \
     $${source_dir}/dbmanager.h \
@@ -45,7 +47,7 @@ HEADERS += \
     $${source_dir}/mainwindow.h \
     $${source_dir}/menu.h \
     $${source_dir}/log.h \
-    $${source_dir}/qcustomplot.h
+    $${libs_dir}/qcustomplot.h
 
 FORMS += \
     $${forms_dir}/mainwindow.ui

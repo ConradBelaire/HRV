@@ -93,10 +93,13 @@ class MainWindow : public QMainWindow
         void updatePacer();
         void turnOffLights();
 
-        // For testing purposes!
-        bool redLED;
-        bool greenLED;
-        bool blueLED;
+        // Holds CSS strings for colouring top LEDs
+        QString redOn;
+        QString redOff;
+        QString greenOn;
+        QString greenOff;
+        QString blueOn;
+        QString blueOff;
 
         // HRV data
         int generateHR();

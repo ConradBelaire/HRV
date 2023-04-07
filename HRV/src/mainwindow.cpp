@@ -41,10 +41,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->powerButton, &QPushButton::released, this, &MainWindow::powerChange);
 
     // TODO: connect charge button
-    //connect(ui->chargeAdminButton, &QPushButton::released, this, &MainWindow::rechargeBattery);
+    connect(ui->chargeBatteryButton, &QPushButton::released, this, &MainWindow::rechargeBattery);
 
     // TODO: connect SpinBox to set the battery level
-    //connect(ui->batteryLevelAdminSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryLevel);
+    connect(ui->batteryLevelAdminSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryLevel);
 
     // TODO: connect the menu buttons
     // TODO?: maybe apply a skin to these buttons
@@ -62,7 +62,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // Initialize battery levels
     //ui->powerLevelAdminSpinBox->setValue(profile->getPLvl());
-    //ui->batteryLevelAdminSpinBox->setValue(profile->getBLvl());
+    ui->batteryLevelAdminSpinBox->setValue(profile->getBLvl());
+
+    connect(ui->redButton, SIGNAL(released()), this, SLOT (toggleRedLED()));
+    connect(ui->greenButton, SIGNAL(released()), this, SLOT (toggleGreenLED()));
+    connect(ui->blueButton, SIGNAL(released()), this, SLOT (toggleBlueLED()));
+    redOn = "background-color: rgb(220, 0, 0)";
+    redOff = "background-color: rgb(80, 0, 0)";
+    greenOn = "background-color: rgb(0, 170, 0)";
+    greenOff = "background-color: rgb(0, 50, 0)";
+    blueOn = "background-color: rgb(0, 0, 230)";
+    blueOff = "background-color: rgb(0, 0, 80)";
+    turnOffLights();
 
     // set session ui to invisible
     // TODO: add session ui items
@@ -419,23 +430,23 @@ void MainWindow::changeBatteryLevel(double newLevel) {
             profile->setBLvl(newLevel);
         }
 
-        //ui->batteryLevelAdminSpinBox->setValue(newLevel);
+        ui->batteryLevelAdminSpinBox->setValue(newLevel);
         int newLevelInt = int(newLevel);
-        //ui->batteryLevelBar->setValue(newLevelInt);
+        ui->batteryLevelBar->setValue(newLevelInt);
 
-        // does this even work?
+        // Sets 3 different CSS stylings for green, yellow, red battery levels
         QString highBatteryHealth = "QProgressBar { selection-background-color: rgb(78, 154, 6); background-color: rgb(0, 0, 0); }";
         QString mediumBatteryHealth = "QProgressBar { selection-background-color: rgb(196, 160, 0); background-color: rgb(0, 0, 0); }";
         QString lowBatteryHealth = "QProgressBar { selection-background-color: rgb(164, 0, 0); background-color: rgb(0, 0, 0); }";
 
         if (newLevelInt >= 50) {
-            //ui->batteryLevelBar->setStyleSheet(highBatteryHealth);
+            ui->batteryLevelBar->setStyleSheet(highBatteryHealth);
         }
         else if (newLevelInt >= 20) {
-            //ui->batteryLevelBar->setStyleSheet(mediumBatteryHealth);
+            ui->batteryLevelBar->setStyleSheet(mediumBatteryHealth);
         }
         else {
-            //ui->batteryLevelBar->setStyleSheet(lowBatteryHealth);
+            ui->batteryLevelBar->setStyleSheet(lowBatteryHealth);
         }
     }
 }
@@ -460,8 +471,24 @@ void MainWindow::powerChange(){
 // Toggle visibilty of the menu
 void MainWindow::changePowerStatus() {
     if (!powerStatus) {turnOffLights();}
-    activeQListWidget->setVisible(powerStatus);
-    ui->menuLabel->setVisible(powerStatus);
+    //activeQListWidget->setVisible(powerStatus);
+    //ui->menuLabel->setVisible(powerStatus);
+
+    ui->screen->setVisible(powerStatus); // Sets the whole screen widget's and all children's visibility
+
+    //Remove this if we want the menu to stay in the same position when the power is off
+    if (powerStatus) {
+        MainWindow::navigateToMainMenu();
+        //applyToSkin(false);
+    }
+
+    ui->upButton->setEnabled(powerStatus);
+    ui->downButton->setEnabled(powerStatus);
+    ui->leftButton->setEnabled(powerStatus);
+    ui->rightButton->setEnabled(powerStatus);
+    ui->menuButton->setEnabled(powerStatus);
+    ui->okButton->setEnabled(powerStatus);
+    ui->backButton->setEnabled(powerStatus);
 }
 
 void MainWindow::start_session(){
@@ -589,30 +616,30 @@ void MainWindow::displaySummary() {
 
 void MainWindow::toggleRedLED() {
     // TODO: Change colour of red led to on
-    ui->redLED->setStyleSheet("color: rgb(255, 0, 0)");
+    ui->redLED->setStyleSheet(redOn);
 
     // TODO: change colour of green and blue led to off
-    ui->greenLED->setStyleSheet("color: rgb(0, 142, 0)");
-    ui->blueLED->setStyleSheet("color: rgb(0, 0, 142)");
+    ui->greenLED->setStyleSheet(greenOff);
+    ui->blueLED->setStyleSheet(blueOff);
 
 }
 
 void MainWindow::toggleBlueLED() {
     // TODO: Change colour of blue led to on
-    ui->blueLED->setStyleSheet("color: rgb(0, 0, 255)");
+    ui->blueLED->setStyleSheet(blueOn);
 
     // TODO: change colour of red and green led to off
-    ui->greenLED->setStyleSheet("color: rgb(0, 142, 0)");
-    ui->redLED->setStyleSheet("color: rgb(142, 0, 0)");
+    ui->greenLED->setStyleSheet(greenOff);
+    ui->redLED->setStyleSheet(redOff);
 }
 
 void MainWindow::toggleGreenLED() {
     // TODO: Change colour of green led to on
-    ui->greenLED->setStyleSheet("color: rgb(0, 255, 0)");
+    ui->greenLED->setStyleSheet(greenOn);
 
     // TODO: change colour of red and blue led to off
-    ui->redLED->setStyleSheet("color: rgb(142, 0, 0)");
-    ui->blueLED->setStyleSheet("color: rgb(0, 0, 142)");
+    ui->redLED->setStyleSheet(redOff);
+    ui->blueLED->setStyleSheet(blueOff);
 }
 
 void MainWindow::updatePacer() {
@@ -655,7 +682,7 @@ int MainWindow::generateHR() {
 }
 
 void MainWindow::turnOffLights() {
-    ui->redLED->setStyleSheet("color: rgb(142, 0, 0)");
-    ui->blueLED->setStyleSheet("color: rgb(0, 0, 142)");
-    ui->greenLED->setStyleSheet("color: rgb(0, 142, 0)");
+    ui->redLED->setStyleSheet(redOff);
+    ui->blueLED->setStyleSheet(blueOff);
+    ui->greenLED->setStyleSheet(greenOff);
 }

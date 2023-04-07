@@ -19,6 +19,8 @@
 #include "profile.h"
 #include "qcustomplot.h"
 
+#include <QDebug>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -58,6 +60,10 @@ class MainWindow : public QMainWindow
         QString timeString;
 
         int currentTimerCount;
+        int pacerCounter;
+        bool pacerCountUp;
+        bool pacerWait;
+        bool pacerCountDown;
         bool connectedStatus;
         // int currentDurationCount;
         Session* currentSession;

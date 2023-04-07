@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // init settings
     pacer_dur = 10;
     challenge_level = 1;
+    pacerCounter = -1;
 
     // Set initial Skin status
     connectedStatus = false;
@@ -72,7 +73,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->sessionFrame->setVisible(false);
 
 
-
+    connectedStatus = true;
 
 
     // add custom plot example
@@ -465,10 +466,15 @@ void MainWindow::changePowerStatus() {
 
 void MainWindow::start_session(){
     //make sesions ui visible
+    ui->pacerBar->setValue(0);
     ui->sessionFrame->setVisible(true);
 
 
     currentTimerCount = 0;
+    pacerCounter = 0;
+    pacerCountUp = true;
+    pacerWait = false;
+    pacerCountDown = false;
 
     // initialize the timer
     timer = new QTimer(this);
@@ -480,6 +486,7 @@ void MainWindow::start_session(){
     // create session
     int thisSessionID = profile->increaseSessAmt();
     currentSession = new Session(thisSessionID, challenge_level, pacer_dur, QDateTime::currentDateTime(), timer);
+    qDebug() << currentSession->getSessionNum();
 }
 
 void MainWindow::init_timer(QTimer* timer){
@@ -491,6 +498,7 @@ void MainWindow::init_timer(QTimer* timer){
 }
 
 void MainWindow::update_timer(){
+    qDebug() << "Running update_timer()";
     drainBattery();
     ui->lengthBar->setText(QString::number(currentTimerCount) + "s");
     //ui->treatmentView->scene()->clear();
@@ -500,6 +508,7 @@ void MainWindow::update_timer(){
 
     // TODO: get new heart rate from table?
     int newHeartRate = generateHR();   // some function should be here to set this value. the function could look up an array heart rates based of currentTimerCount
+
     // calculate new coherence score
     float newCoherenceScore = currentSession->updateSession(newHeartRate);
 
@@ -543,12 +552,14 @@ void MainWindow::applyToSkin(bool checked) {
             displaySummary();
         }
         else {
+            qDebug() << "Starting timer";
             currentSession->getTimer()->start(1000);
         }
     }
 }
 
 void MainWindow::displaySummary() {
+
     currentSession->getTimer()->stop();
     currentSession->getTimer()->disconnect();
 
@@ -561,6 +572,10 @@ void MainWindow::displaySummary() {
     delete log;
     // reset timer
     this->currentTimerCount = -1;
+    pacerCounter = -1;
+    pacerCountDown = false;
+    pacerWait = false;
+    pacerCountUp = true;
 
 
 
@@ -601,12 +616,34 @@ void MainWindow::toggleGreenLED() {
 }
 
 void MainWindow::updatePacer() {
-    // TODO: connect pacer once implemented
-
-    // math for paccer
-    int pacerBarValue = currentTimerCount / currentSession->getPacerDuration();
-    // TODO: set progress bar here
-
+    // TODO: timing seems a little off might wanna look into it
+    if (pacerCountUp) {
+        if (pacerCounter < 6) {
+            ui->pacerBar->setValue(pacerCounter*20);
+            pacerCounter++;
+        } else {
+            pacerCountUp = false;
+            pacerWait = true;
+            pacerCounter = 0;
+        }
+    } else if (pacerWait) {
+        if (pacerCounter != pacer_dur) {
+            pacerCounter++;
+        } else {
+            pacerWait = false;
+            pacerCountDown = true;
+            pacerCounter = 5;
+        }
+    } else if (pacerCountDown) {
+        if (pacerCounter != 0) {
+            pacerCounter--;
+            ui->pacerBar->setValue(pacerCounter*20);
+        } else {
+            pacerCountDown = false;
+            pacerCountUp = true;
+            pacerCounter = 0;
+        }
+    }
 }
 
 

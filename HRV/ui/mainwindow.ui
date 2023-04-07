@@ -1456,7 +1456,7 @@
          <x>0</x>
          <y>0</y>
          <width>351</width>
-         <height>201</height>
+         <height>206</height>
         </rect>
        </property>
        <layout class="QFormLayout" name="sessionForm">
@@ -1547,7 +1547,7 @@
              <string notr="true">color:black</string>
             </property>
             <property name="text">
-             <string>0.0</string>
+             <string>0s</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -2271,41 +2271,17 @@
      <enum>Qt::LeftToRight</enum>
     </property>
     <layout class="QFormLayout" name="formLayout">
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>TextLabel</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="lineEdit"/>
-     </item>
-     <item row="2" column="1">
-      <widget class="QPushButton" name="redButton">
+      <widget class="QPushButton" name="skinToggle">
        <property name="text">
-        <string>Red</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QPushButton" name="blueButton">
-       <property name="text">
-        <string>Blue</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QPushButton" name="greenButton">
-       <property name="text">
-        <string>Green</string>
+        <string>Toggle Skin Connection</string>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="greenButton">
        <property name="text">
-        <string>PushButton</string>
+        <string>Green</string>
        </property>
       </widget>
      </item>
@@ -2318,7 +2294,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>24</height>
+     <height>36</height>
     </rect>
    </property>
   </widget>

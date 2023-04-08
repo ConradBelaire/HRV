@@ -7,7 +7,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // init settings
     pacer_dur = 10;
-    challenge_level = 1;
+//    challenge_level = 1;
+    challenge_level = 4; // delete this before we hand it in lol
     pacerCounter = -1;
 
     // Set initial Skin status
@@ -224,6 +225,8 @@ void MainWindow::navigateToMainMenu() {
 
     if (currentTimerCount != -1) {
         displaySummary();
+    } else if (sessionSummaryVisible) {
+        clearSessionSummary();
     }
 
     // go to main menu
@@ -240,6 +243,8 @@ void MainWindow::navigateBack() {
     if (currentTimerCount != -1) {
         displaySummary();
 
+    } else if (sessionSummaryVisible) {
+        clearSessionSummary();
     }
 
     if (masterMenu->getName() == "MAIN MENU") {
@@ -451,6 +456,8 @@ void MainWindow::powerChange(){
     if (currentTimerCount != -1){
         //Save Session
         applyToSkin(false);
+        displaySummary();
+        clearSessionSummary();
     }
 }
 
@@ -602,7 +609,6 @@ void MainWindow::displaySummary() {
 
     // display summary graph
     ui->sessionFrame->setVisible(false);
-    ui->summaryFrame->setVisible(true);
     ui->customPlot_2->xAxis->setRange(0, currentTimerCount);
     ui->customPlot_2->yAxis->setRange(minHR, maxHR);
     QVector<double> emptyData;
@@ -618,7 +624,22 @@ void MainWindow::displaySummary() {
     Log *log = new Log(this->currentSession, profile->getId());
     dbmanager->addLog(log);
 
+    // update labels
+    float avgScore = (currentSession->getAchievementScore()/currentSession->getCoherenceCount());
+    float rounded = round(avgScore * 10.0f) / 10.0f;
+    ui->avgScore->setText("Avg Score: "+ QString::number(rounded));
+    ui->challengeLvlBar->setText(QString::number(currentSession->getChallengeLevel()));
+    rounded = round(currentSession->getAchievementScore() * 10.0f) / 10.0f;
+    ui->achvScoreBar_2->setText(QString::number(rounded));
+    ui->lengthBar_2->setText(QString::number(currentSession->getElapsedTime()) + "s");
+    ui->timeInHigh->setText("% High: " + QString::number(log->getHighCoherencePercentage()));
+    ui->timeInMed->setText("% Med: " + QString::number(log->getMedCoherencePercentage()));
+    ui->timeInLow->setText("% Low: " + QString::number(log->getLowCoherencePercentage()));
+
     delete log;
+
+    ui->summaryFrame->setVisible(true);
+
     // reset timer
     this->currentTimerCount = -1;
     pacerCounter = -1;
@@ -630,15 +651,11 @@ void MainWindow::displaySummary() {
 
     turnOffLights();
     // TODO: session data varaibles to 0
-    // need to take in data for this
-
-    // TODO: make session ui to invisible
-    // TODO: make session summary visible
 }
 
 void MainWindow::clearSessionSummary() {
 
-
+    ui->summaryFrame->setVisible(false);
     sessionSummaryVisible = false;
     ui->coherenceBar->setText("0.0");
     ui->lengthBar->setText("0s");
@@ -648,7 +665,7 @@ void MainWindow::clearSessionSummary() {
     ui->customPlot->xAxis->setRange(0, 5);
     ui->customPlot->yAxis->setRange(minHR, maxHR);
     QVector<double> emptyData;
-    ui->customPlot->graph(1)->setData(emptyData, emptyData);
+    ui->customPlot->graph(0)->setData(emptyData, emptyData);
     ui->customPlot->replot();
 }
 

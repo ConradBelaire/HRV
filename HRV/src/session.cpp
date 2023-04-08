@@ -99,6 +99,7 @@ float Session::calculateCoherenceScore() {
 
     // TODO: Figure out how to calculate this shit
     currentCoherence = generateCS();
+    qDebug() << "New Coherence Score: " + QString::number(currentCoherence);
 
     int rank = determineScoreLevel(currentCoherence);
     switch(rank) {
@@ -118,7 +119,7 @@ float Session::calculateCoherenceScore() {
 
 float Session::generateCS() {
     float min = 0.0;
-    float max = 16.0;
+    float max = 7.0;
     float randomFraction = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
     float randomNumberInRange = min + (randomFraction * (max - min));
     return randomNumberInRange;

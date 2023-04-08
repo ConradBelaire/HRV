@@ -8,6 +8,7 @@
 #include <iostream>
 #include <QtGlobal>
 #include <QObject>
+#include <QLabel>
 #include <sstream>
 #include <iomanip>
 
@@ -16,6 +17,9 @@
 #include "dbmanager.h"
 #include "log.h"
 #include "profile.h"
+#include "qcustomplot.h"
+
+#include <QDebug>
 
 
 QT_BEGIN_NAMESPACE
@@ -56,6 +60,10 @@ class MainWindow : public QMainWindow
         QString timeString;
 
         int currentTimerCount;
+        int pacerCounter;
+        bool pacerCountUp;
+        bool pacerWait;
+        bool pacerCountDown;
         bool connectedStatus;
         // int currentDurationCount;
         Session* currentSession;
@@ -69,7 +77,6 @@ class MainWindow : public QMainWindow
         void updateMenu(const QString&, const QStringList&);
         void initializeMainMenu(Menu*);
         void init_timer(QTimer* timer);
-        void update_timer();
         void applyToSkin(bool checked);
         void start_session();
         void changeBatteryLevel(double newLevel);
@@ -83,11 +90,21 @@ class MainWindow : public QMainWindow
         Menu* create_settings_menu(Menu* m);
         bool is_session_num(QString log_id);
         QString floatToStringWithOneDecimalPlace(float value);
+        void updatePacer();
+        void turnOffLights();
 
-        // For testing purposes!
-        bool redLED;
-        bool greenLED;
-        bool blueLED;
+        // Holds CSS strings for colouring top LEDs
+        QString redOn;
+        QString redOff;
+        QString greenOn;
+        QString greenOff;
+        QString blueOn;
+        QString blueOff;
+
+        // HRV data
+        int generateHR();
+        float generateCS();
+
 
     private slots:
         void navigateDownMenu();
@@ -96,7 +113,8 @@ class MainWindow : public QMainWindow
         void navigateToMainMenu();
         void navigateBack();
         void toggleRedLED();
-        void toggleGreenLED();
         void toggleBlueLED();
+        void toggleGreenLED();
+        void update_timer();
 };
 #endif // MAINWINDOW_H

@@ -70,6 +70,8 @@ class Session {
 
         void addCoherenceScore(float newCoherenceScore);
         float calculateCoherenceScore();
+
+        float generateCS();
 };
 
 #endif // SESSION_H

@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // init settings
     pacer_dur = 10;
     challenge_level = 1;
+    pacerCounter = -1;
 
     // Set initial Skin status
     connectedStatus = false;
@@ -40,10 +41,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->powerButton, &QPushButton::released, this, &MainWindow::powerChange);
 
     // TODO: connect charge button
-    //connect(ui->chargeAdminButton, &QPushButton::released, this, &MainWindow::rechargeBattery);
+    connect(ui->chargeBatteryButton, &QPushButton::released, this, &MainWindow::rechargeBattery);
 
     // TODO: connect SpinBox to set the battery level
-    //connect(ui->batteryLevelAdminSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryLevel);
+    connect(ui->batteryLevelAdminSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryLevel);
 
     // TODO: connect the menu buttons
     // TODO?: maybe apply a skin to these buttons
@@ -61,12 +62,62 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // Initialize battery levels
     //ui->powerLevelAdminSpinBox->setValue(profile->getPLvl());
-    //ui->batteryLevelAdminSpinBox->setValue(profile->getBLvl());
+    ui->batteryLevelAdminSpinBox->setValue(profile->getBLvl());
+
+    connect(ui->redButton, SIGNAL(released()), this, SLOT (toggleRedLED()));
+    connect(ui->greenButton, SIGNAL(released()), this, SLOT (toggleGreenLED()));
+    connect(ui->blueButton, SIGNAL(released()), this, SLOT (toggleBlueLED()));
+    redOn = "background-color: rgb(220, 0, 0)";
+    redOff = "background-color: rgb(80, 0, 0)";
+    greenOn = "background-color: rgb(0, 170, 0)";
+    greenOff = "background-color: rgb(0, 50, 0)";
+    blueOn = "background-color: rgb(0, 0, 230)";
+    blueOff = "background-color: rgb(0, 0, 80)";
+    turnOffLights();
 
     // set session ui to invisible
     // TODO: add session ui items
     //ui->programViewWidget->setVisible(false);
     //ui->electrodeLabel->setVisible(false);
+    std::srand(static_cast<unsigned>(std::time(0)));
+
+    ui->sessionFrame->setVisible(false);
+
+
+    connectedStatus = true;
+
+
+    // add custom plot example
+    // Instantiate QCustomPlot widget
+//    QCustomPlot *customPlot = new QCustomPlot(this);
+//    setCentralWidget(customPlot);
+
+////     Create example data for the graph
+//    QVector<double> x(101), y(101);
+//    for (int i=0; i<101; ++i)
+//    {
+//      x[i] = i/50.0 - 1;
+//      y[i] = x[i]*x[i];
+//    }
+
+//    // Create a graph and set example data
+//    customPlot->addGraph();
+//    customPlot->graph(0)->setData(x, y);
+
+//    // Set axes labels and ranges
+//    customPlot->xAxis->setLabel("x");
+//    customPlot->yAxis->setLabel("y");
+//    customPlot->xAxis->setRange(-1, 1);
+//    customPlot->yAxis->setRange(0, 1);
+
+//    // Set the plot title
+//    customPlot->plotLayout()->insertRow(0);
+//    QCPTextElement *title = new QCPTextElement(customPlot, "Simple Graph Example", QFont("sans", 12, QFont::Bold));
+//    customPlot->plotLayout()->addElement(0, 0, title);
+
+//    // Replot the graph
+//    customPlot->replot();
+
 }
 
 
@@ -379,23 +430,23 @@ void MainWindow::changeBatteryLevel(double newLevel) {
             profile->setBLvl(newLevel);
         }
 
-        //ui->batteryLevelAdminSpinBox->setValue(newLevel);
+        ui->batteryLevelAdminSpinBox->setValue(newLevel);
         int newLevelInt = int(newLevel);
-        //ui->batteryLevelBar->setValue(newLevelInt);
+        ui->batteryLevelBar->setValue(newLevelInt);
 
-        // does this even work?
+        // Sets 3 different CSS stylings for green, yellow, red battery levels
         QString highBatteryHealth = "QProgressBar { selection-background-color: rgb(78, 154, 6); background-color: rgb(0, 0, 0); }";
         QString mediumBatteryHealth = "QProgressBar { selection-background-color: rgb(196, 160, 0); background-color: rgb(0, 0, 0); }";
         QString lowBatteryHealth = "QProgressBar { selection-background-color: rgb(164, 0, 0); background-color: rgb(0, 0, 0); }";
 
         if (newLevelInt >= 50) {
-            //ui->batteryLevelBar->setStyleSheet(highBatteryHealth);
+            ui->batteryLevelBar->setStyleSheet(highBatteryHealth);
         }
         else if (newLevelInt >= 20) {
-            //ui->batteryLevelBar->setStyleSheet(mediumBatteryHealth);
+            ui->batteryLevelBar->setStyleSheet(mediumBatteryHealth);
         }
         else {
-            //ui->batteryLevelBar->setStyleSheet(lowBatteryHealth);
+            ui->batteryLevelBar->setStyleSheet(lowBatteryHealth);
         }
     }
 }
@@ -419,18 +470,38 @@ void MainWindow::powerChange(){
 
 // Toggle visibilty of the menu
 void MainWindow::changePowerStatus() {
-    activeQListWidget->setVisible(powerStatus);
-    ui->menuLabel->setVisible(powerStatus);
+    if (!powerStatus) {turnOffLights();}
+    //activeQListWidget->setVisible(powerStatus);
+    //ui->menuLabel->setVisible(powerStatus);
+
+    ui->screen->setVisible(powerStatus); // Sets the whole screen widget's and all children's visibility
+
+    //Remove this if we want the menu to stay in the same position when the power is off
+    if (powerStatus) {
+        MainWindow::navigateToMainMenu();
+        //applyToSkin(false);
+    }
+
+    ui->upButton->setEnabled(powerStatus);
+    ui->downButton->setEnabled(powerStatus);
+    ui->leftButton->setEnabled(powerStatus);
+    ui->rightButton->setEnabled(powerStatus);
+    ui->menuButton->setEnabled(powerStatus);
+    ui->okButton->setEnabled(powerStatus);
+    ui->backButton->setEnabled(powerStatus);
 }
 
 void MainWindow::start_session(){
-    //make whatever sesions ui visible
-    // ui->electrodeLabel->setVisible(true);
+    //make sesions ui visible
+    ui->pacerBar->setValue(0);
+    ui->sessionFrame->setVisible(true);
 
-
-    profile->increaseSessAmt();
 
     currentTimerCount = 0;
+    pacerCounter = 0;
+    pacerCountUp = true;
+    pacerWait = false;
+    pacerCountDown = false;
 
     // initialize the timer
     timer = new QTimer(this);
@@ -440,7 +511,9 @@ void MainWindow::start_session(){
     init_timer(timer);
 
     // create session
-    currentSession = new Session(profile->getSessAmt(), challenge_level, pacer_dur, QDateTime::currentDateTime(), timer);
+    int thisSessionID = profile->increaseSessAmt();
+    currentSession = new Session(thisSessionID, challenge_level, pacer_dur, QDateTime::currentDateTime(), timer);
+    qDebug() << currentSession->getSessionNum();
 }
 
 void MainWindow::init_timer(QTimer* timer){
@@ -453,27 +526,34 @@ void MainWindow::init_timer(QTimer* timer){
 
 void MainWindow::update_timer(){
     drainBattery();
-    timeString = QString::number(currentTimerCount) + "s";
+    ui->lengthBar->setText(QString::number(currentTimerCount) + "s");
     //ui->treatmentView->scene()->clear();
     //ui->treatmentView->scene()->addText(timeString);
 
     currentTimerCount++;
 
-    // TODO: update pacer
+    // TODO: get new heart rate from table?
+    int newHeartRate = generateHR();   // some function should be here to set this value. the function could look up an array heart rates based of currentTimerCount
 
 
-    // TODO: get heart rate
 
+    // calculate new coherence score
+    float newCoherenceScore = currentSession->updateSession(newHeartRate);
 
-    // TODO: calculate/get coherence score
+    // determine light to turn on
+    switch(currentSession->determineScoreLevel(newCoherenceScore)) {
+        case 0:
+            toggleRedLED();
+            break;
+        case 1:
+            toggleBlueLED();
+            break;
+        case 2:
+            toggleGreenLED();
+            break;
+    }
 
-
-    // TODO: update the currentSession object
-    //currentSession->
-
-    // TODO: change coherence lights
-
-
+    updatePacer();
 
 }
 
@@ -499,13 +579,19 @@ void MainWindow::applyToSkin(bool checked) {
             displaySummary();
         }
         else {
+            qDebug() << "Starting timer";
             currentSession->getTimer()->start(1000);
         }
     }
 }
 
 void MainWindow::displaySummary() {
+
     currentSession->getTimer()->stop();
+    currentSession->getTimer()->disconnect();
+
+    ui->sessionFrame->setVisible(false);
+
     // TODO: save session into dbmanager
     Log *log = new Log(this->currentSession, profile->getId());
     dbmanager->addLog(log);
@@ -513,12 +599,90 @@ void MainWindow::displaySummary() {
     delete log;
     // reset timer
     this->currentTimerCount = -1;
+    pacerCounter = -1;
+    pacerCountDown = false;
+    pacerWait = false;
+    pacerCountUp = true;
 
-    currentSession->getTimer()->stop();
-    currentSession->getTimer()->disconnect();
+
+
+    turnOffLights();
     // TODO: session data varaibles to 0
     // need to take in data for this
 
     // TODO: make session ui to invisible
     // TODO: make session summary visible
+}
+
+void MainWindow::toggleRedLED() {
+    // TODO: Change colour of red led to on
+    ui->redLED->setStyleSheet(redOn);
+
+    // TODO: change colour of green and blue led to off
+    ui->greenLED->setStyleSheet(greenOff);
+    ui->blueLED->setStyleSheet(blueOff);
+
+}
+
+void MainWindow::toggleBlueLED() {
+    // TODO: Change colour of blue led to on
+    ui->blueLED->setStyleSheet(blueOn);
+
+    // TODO: change colour of red and green led to off
+    ui->greenLED->setStyleSheet(greenOff);
+    ui->redLED->setStyleSheet(redOff);
+}
+
+void MainWindow::toggleGreenLED() {
+    // TODO: Change colour of green led to on
+    ui->greenLED->setStyleSheet(greenOn);
+
+    // TODO: change colour of red and blue led to off
+    ui->redLED->setStyleSheet(redOff);
+    ui->blueLED->setStyleSheet(blueOff);
+}
+
+void MainWindow::updatePacer() {
+    // TODO: timing seems a little off might wanna look into it
+    if (pacerCountUp) {
+        if (pacerCounter < 6) {
+            ui->pacerBar->setValue(pacerCounter*20);
+            pacerCounter++;
+        } else {
+            pacerCountUp = false;
+            pacerWait = true;
+            pacerCounter = 0;
+        }
+    } else if (pacerWait) {
+        if (pacerCounter != pacer_dur) {
+            pacerCounter++;
+        } else {
+            pacerWait = false;
+            pacerCountDown = true;
+            pacerCounter = 5;
+        }
+    } else if (pacerCountDown) {
+        if (pacerCounter != 0) {
+            pacerCounter--;
+            ui->pacerBar->setValue(pacerCounter*20);
+        } else {
+            pacerCountDown = false;
+            pacerCountUp = true;
+            pacerCounter = 0;
+        }
+    }
+}
+
+
+int MainWindow::generateHR() {
+    int min = 60;
+    int max = 100;
+    int randomNumberInRange = min + (std::rand() % (max - min + 1));
+    return randomNumberInRange;
+}
+
+void MainWindow::turnOffLights() {
+    ui->redLED->setStyleSheet(redOff);
+    ui->blueLED->setStyleSheet(blueOff);
+    ui->greenLED->setStyleSheet(greenOff);
 }

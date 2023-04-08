@@ -22,8 +22,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // create profile
     profile = dbmanager->getProfile(1);
 
-    //maxPower = 100;
-
     // Initialize the menu
     masterMenu = new Menu("MAIN MENU", {"BEGIN SESSION","HISTORY","SETTINGS"}, nullptr);
     mainMenuOG = masterMenu;
@@ -81,43 +79,31 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     //ui->electrodeLabel->setVisible(false);
     std::srand(static_cast<unsigned>(std::time(0)));
 
-    ui->sessionFrame->setVisible(false);
-
-
+    // temp
     connectedStatus = true;
 
+    // setup graphs
+    ui->sessionFrame->setVisible(false);
+    ui->summaryFrame->setVisible(false);
+    maxHR = 110;
+    minHR = 50;
+    ui->customPlot->xAxis->setRange(0, 5);
+    ui->customPlot->yAxis->setRange(minHR, maxHR);
+    ui->customPlot->xAxis->setLabel("Time (s)");
+    ui->customPlot->yAxis->setLabel("HR");
+    ui->customPlot->addGraph(); // active session graph
+    ui->customPlot->graph(0)->setPen(QPen(Qt::red)); // set the pen color
+    ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine); // set the line style
+    ui->customPlot->graph(0)->setScatterStyle(QCPScatterStyle::ssNone);
 
-    // add custom plot example
-    // Instantiate QCustomPlot widget
-//    QCustomPlot *customPlot = new QCustomPlot(this);
-//    setCentralWidget(customPlot);
+    ui->customPlot_2->xAxis->setLabel("Time (s)");
+    ui->customPlot_2->yAxis->setLabel("HR");
+    ui->customPlot_2->addGraph(); // active session graph
+    ui->customPlot_2->graph(0)->setPen(QPen(Qt::red)); // set the pen color
+    ui->customPlot_2->graph(0)->setLineStyle(QCPGraph::lsLine); // set the line style
+    ui->customPlot_2->graph(0)->setScatterStyle(QCPScatterStyle::ssNone);
 
-////     Create example data for the graph
-//    QVector<double> x(101), y(101);
-//    for (int i=0; i<101; ++i)
-//    {
-//      x[i] = i/50.0 - 1;
-//      y[i] = x[i]*x[i];
-//    }
-
-//    // Create a graph and set example data
-//    customPlot->addGraph();
-//    customPlot->graph(0)->setData(x, y);
-
-//    // Set axes labels and ranges
-//    customPlot->xAxis->setLabel("x");
-//    customPlot->yAxis->setLabel("y");
-//    customPlot->xAxis->setRange(-1, 1);
-//    customPlot->yAxis->setRange(0, 1);
-
-//    // Set the plot title
-//    customPlot->plotLayout()->insertRow(0);
-//    QCPTextElement *title = new QCPTextElement(customPlot, "Simple Graph Example", QFont("sans", 12, QFont::Bold));
-//    customPlot->plotLayout()->addElement(0, 0, title);
-
-//    // Replot the graph
-//    customPlot->replot();
-
+    sessionSummaryVisible = false;
 }
 
 
@@ -526,6 +512,8 @@ void MainWindow::init_timer(QTimer* timer){
 
 void MainWindow::update_timer(){
     drainBattery();
+
+    // update duration text
     ui->lengthBar->setText(QString::number(currentTimerCount) + "s");
     //ui->treatmentView->scene()->clear();
     //ui->treatmentView->scene()->addText(timeString);
@@ -535,24 +523,44 @@ void MainWindow::update_timer(){
     // TODO: get new heart rate from table?
     int newHeartRate = generateHR();   // some function should be here to set this value. the function could look up an array heart rates based of currentTimerCount
 
+    // update y axis
+    if (newHeartRate < minHR) {
+        minHR = newHeartRate-10;
+    } else if (newHeartRate > maxHR) {
+        maxHR = newHeartRate+10;
+    }
+    ui->customPlot->yAxis->setRange(minHR, maxHR);
 
+    // should we update x axis?
+    if (currentTimerCount > 5) {
+        ui->customPlot->xAxis->setRange(currentTimerCount-5, 1+currentTimerCount);
+    }
+
+    // add in data and replot
+    ui->customPlot->graph(0)->addData(currentTimerCount, newHeartRate);
+    ui->customPlot->replot();
 
     // calculate new coherence score
     float newCoherenceScore = currentSession->updateSession(newHeartRate);
 
-    // determine light to turn on
-    switch(currentSession->determineScoreLevel(newCoherenceScore)) {
-        case 0:
-            toggleRedLED();
-            break;
-        case 1:
-            toggleBlueLED();
-            break;
-        case 2:
-            toggleGreenLED();
-            break;
-    }
+    // update achievement score text
+    if (newCoherenceScore != -1) {
+        float rounded = round(currentSession->getAchievementScore() * 10.0f) / 10.0f;
+        ui->achvScoreBar->setText(QString::number(rounded));
 
+        // determine light to turn on
+        switch(currentSession->determineScoreLevel(newCoherenceScore)) {
+            case 0:
+                toggleRedLED();
+                break;
+            case 1:
+                toggleBlueLED();
+                break;
+            case 2:
+                toggleGreenLED();
+                break;
+        }
+    }
     updatePacer();
 
 }
@@ -586,11 +594,25 @@ void MainWindow::applyToSkin(bool checked) {
 }
 
 void MainWindow::displaySummary() {
-
+    // stop timer
     currentSession->getTimer()->stop();
     currentSession->getTimer()->disconnect();
 
+    sessionSummaryVisible = true;
+
+    // display summary graph
     ui->sessionFrame->setVisible(false);
+    ui->summaryFrame->setVisible(true);
+    ui->customPlot_2->xAxis->setRange(0, currentTimerCount);
+    ui->customPlot_2->yAxis->setRange(minHR, maxHR);
+    QVector<double> emptyData;
+    ui->customPlot_2->graph(0)->setData(emptyData, emptyData);
+    QVector<double> seconds;
+    for (int i = 0; i <= currentTimerCount; ++i) {
+        seconds.append(static_cast<double>(i));
+    }
+    ui->customPlot_2->graph(0)->setData(seconds, currentSession->getGraph());
+    ui->customPlot_2->replot();
 
     // TODO: save session into dbmanager
     Log *log = new Log(this->currentSession, profile->getId());
@@ -612,6 +634,22 @@ void MainWindow::displaySummary() {
 
     // TODO: make session ui to invisible
     // TODO: make session summary visible
+}
+
+void MainWindow::clearSessionSummary() {
+
+
+    sessionSummaryVisible = false;
+    ui->coherenceBar->setText("0.0");
+    ui->lengthBar->setText("0s");
+    ui->achvScoreBar->setText("0.0");
+    maxHR = 103;
+    minHR = 57;
+    ui->customPlot->xAxis->setRange(0, 5);
+    ui->customPlot->yAxis->setRange(minHR, maxHR);
+    QVector<double> emptyData;
+    ui->customPlot->graph(1)->setData(emptyData, emptyData);
+    ui->customPlot->replot();
 }
 
 void MainWindow::toggleRedLED() {
@@ -675,8 +713,8 @@ void MainWindow::updatePacer() {
 
 
 int MainWindow::generateHR() {
-    int min = 60;
-    int max = 100;
+    int min = 50;
+    int max = 120;
     int randomNumberInRange = min + (std::rand() % (max - min + 1));
     return randomNumberInRange;
 }

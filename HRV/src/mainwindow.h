@@ -101,9 +101,16 @@ class MainWindow : public QMainWindow
         QString blueOn;
         QString blueOff;
 
+        int maxHR;
+        int minHR;
+
+        bool sessionSummaryVisible;
+
         // HRV data
         int generateHR();
         float generateCS();
+
+        void clearSessionSummary();
 
 
     private slots:

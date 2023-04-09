@@ -52,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->okButton, &QPushButton::pressed, this, &MainWindow::navigateSubMenu);
     connect(ui->menuButton, &QPushButton::pressed, this, &MainWindow::navigateToMainMenu);
     connect(ui->backButton, &QPushButton::pressed, this, &MainWindow::navigateBack);
+    connect(ui->skinToggle, &QPushButton::pressed, this, &MainWindow::toggleSkin);
 
 
     // TODO?: apply more skins
@@ -79,9 +80,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     //ui->programViewWidget->setVisible(false);
     //ui->electrodeLabel->setVisible(false);
     std::srand(static_cast<unsigned>(std::time(0)));
-
-    // temp
-    connectedStatus = true;
 
     // setup graphs
     ui->sessionFrame->setVisible(false);
@@ -308,7 +306,7 @@ void MainWindow::navigateSubMenu() {
     }
 
     // fucntionality of the delete menu
-    if(masterMenu->getParent()->getName() == "DELETE"){
+    if(masterMenu->getParent() != nullptr && masterMenu->getParent()->getName() == "DELETE"){
         if (masterMenu->getMenuItems()[index] == "YES") {
             int log_id = masterMenu->getParent()->getParent()->getName().toInt();
             dbmanager->deleteLog(log_id);
@@ -329,7 +327,7 @@ void MainWindow::navigateSubMenu() {
     }
 
     // fucntionality of the clear menu
-    if (masterMenu->getParent()->getName() == "CLEAR"){
+    if (masterMenu->getParent() != nullptr && masterMenu->getParent()->getName() == "CLEAR"){
         if (masterMenu->getMenuItems()[index] == "YES") {
             dbmanager->deleteLogs();
             navigateBack();
@@ -356,12 +354,13 @@ void MainWindow::navigateSubMenu() {
     }
 
     // fucntionality of the reset menu
-    if(masterMenu->getParent()->getName() == "RESET"){
+    if(masterMenu->getParent() != nullptr && masterMenu->getParent()->getName() == "RESET"){
         if (masterMenu->getMenuItems()[index] == "YES") {
             dbmanager->deleteLogs();
             challenge_level = 1;
             pacer_dur = 10;
             navigateBack();
+            powerChange();
             return;
         }
         else {
@@ -378,7 +377,7 @@ void MainWindow::navigateSubMenu() {
     }
 
     // navigate to challenge menu
-    if(masterMenu->getParent()->getName() == "CHALLENGE LEVEL"){
+    if(masterMenu->getParent() != nullptr && masterMenu->getParent()->getName() == "CHALLENGE LEVEL"){
         challenge_level = index + 1;
     }
 
@@ -390,7 +389,7 @@ void MainWindow::navigateSubMenu() {
     }
 
     // navigate to Pacer duration menu
-    if(masterMenu->getParent()->getName() == "PACER DURATION"){
+    if(masterMenu->getParent() != nullptr && masterMenu->getParent()->getName() == "PACER DURATION"){
         pacer_dur = index + 1;
     }
 }
@@ -459,6 +458,8 @@ void MainWindow::powerChange(){
         displaySummary();
         clearSessionSummary();
     }
+    ui->sessionFrame->setVisible(false);
+    ui->summaryFrame->setVisible(false);
 }
 
 // Toggle visibilty of the menu
@@ -740,4 +741,9 @@ void MainWindow::turnOffLights() {
     ui->redLED->setStyleSheet(redOff);
     ui->blueLED->setStyleSheet(blueOff);
     ui->greenLED->setStyleSheet(greenOff);
+}
+
+void MainWindow::toggleSkin() {
+    connectedStatus = !connectedStatus;
+    applyToSkin(connectedStatus);
 }

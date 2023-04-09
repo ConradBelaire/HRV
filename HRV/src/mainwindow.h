@@ -123,5 +123,6 @@ class MainWindow : public QMainWindow
         void toggleBlueLED();
         void toggleGreenLED();
         void update_timer();
+        void toggleSkin();
 };
 #endif // MAINWINDOW_H

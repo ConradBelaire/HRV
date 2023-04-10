@@ -5,10 +5,14 @@
 #include <QSqlDatabase>
 #include <QDateTime>
 #include <QDebug>
+#include <QSqlError>
 #include <QSqlQuery>
 #include <QList>
 #include <QApplication>
 #include <string>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonValue>
 
 #include "profile.h"
 #include "log.h"
@@ -22,6 +26,7 @@ public:
     DBManager();
     bool addProfile(int id, double batterLvl, int sessionAmt);
     Profile* getProfile(int id);
+    bool updateProfile(int id, double batteryLvl, int sessionAmt);
     bool deleteProfile(int id);
     Log* getLog(int id);
     bool addLog(Log* log);

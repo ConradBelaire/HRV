@@ -8,22 +8,20 @@ Log::Log(
     int isLow,
     int isMed,
     int isHigh,
-    float avgCoherence,
     int sessionTime,
-    int pacerDuration,
     float achievementScore,
-    QString date) :
+    int coherenceCount,
+    QVector<int> heartRates) :
     sessionNum(sessionNum),
     profileId(profileId),
     challengeLevel(challengeLevel),
     isLow(isLow),
     isMed(isMed),
     isHigh(isHigh),
-    avgCoherence(avgCoherence),
     sessionTime(sessionTime),
-    pacerDuration(pacerDuration),
     achievementScore(achievementScore),
-    date(date) {}
+    coherenceCount(coherenceCount),
+    heartRates(heartRates) {}
 
 // TODO: ADD HRV DATA
 Log::Log(Session* session, int profileId) :
@@ -33,11 +31,10 @@ Log::Log(Session* session, int profileId) :
     isLow(session->getTimeLow()),
     isMed(session->getTimeMed()),
     isHigh(session->getTimeHigh()),
-    avgCoherence(session->getAchievementScore() / session->getElapsedTime()),
     sessionTime(session->getElapsedTime()),
-    pacerDuration(session->getPacerDuration()),
     achievementScore(session->getAchievementScore()),
-    date(session->getStartTime().toString()) {}
+    heartRates(session->getGraph_int()),
+    coherenceCount(session->getCoherenceCount()) {}
 
 int Log::getId() {return sessionNum;}
 
@@ -51,15 +48,9 @@ int Log::getIsMed() {return isMed;}
 
 int Log::getIsHigh() {return isHigh;}
 
-float Log::getAvgCoherence() {return avgCoherence;}
-
-int Log::getPacerDuration() {return pacerDuration;}
-
 int Log::getSessionTime() {return sessionTime;}
 
 float Log::getAchievementScore() {return achievementScore;}
-
-QString Log::getDate() {return date;}
 
 float Log::getLowCoherencePercentage(){
     float total_sum = isLow + isMed + isHigh;
@@ -75,3 +66,14 @@ float Log::getHighCoherencePercentage(){
     float total_sum = isLow + isMed + isHigh;
     return (isHigh / total_sum) * 100;
 }
+
+QVector<int> Log::getHeartRates_int() {return heartRates;}
+QVector<double> Log::getHeartRates_double() {
+    QVector<double> heartRatesDouble;
+    for (int value : heartRates) {
+        heartRatesDouble.append(static_cast<double>(value));
+    }
+    return heartRatesDouble;
+}
+
+int Log::getCoherenceCount(){return coherenceCount;}

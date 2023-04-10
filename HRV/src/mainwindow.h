@@ -54,7 +54,7 @@ class MainWindow : public QMainWindow
 
         void changePowerStatus();
         //void powerChange();
-        QVector<Log*> sessions;
+        QVector<Session*> sessions;
 
         QTimer* timer;
         QString timeString;
@@ -83,7 +83,7 @@ class MainWindow : public QMainWindow
         void rechargeBattery();
 
 
-        void displaySummary();
+        void displaySummary(Session* session, bool is_history);
 
         // util fucntions
         Menu* create_history_menu(Menu* m);

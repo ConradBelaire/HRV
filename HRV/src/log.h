@@ -9,6 +9,7 @@
 
 class DBManager;
 
+class Session;
 class Log {
     public:
         Log(
@@ -18,11 +19,10 @@ class Log {
             int isLow,
             int isMed,
             int isHigh,
-            float avgCoherence,
             int sessionTime,
-            int pacer_duration,
             float achievementScore,
-            QString date);
+            int coherenceCount,
+            QVector<int> heartRates);
         Log(Session*, int);
 
         int getId();
@@ -31,14 +31,14 @@ class Log {
         int getIsLow();
         int getIsMed();
         int getIsHigh();
-        float getAvgCoherence();
         int getSessionTime();
-        int getPacerDuration();
         float getAchievementScore();
-        QString getDate();
+        QVector<int> getHeartRates_int();
+        QVector<double> getHeartRates_double();
         float getLowCoherencePercentage();
         float getMedCoherencePercentage();
         float getHighCoherencePercentage();
+        int getCoherenceCount();
 
     private:
 
@@ -48,11 +48,10 @@ class Log {
         int isLow;
         int isMed;
         int isHigh;
-        float avgCoherence;
         int sessionTime;
-        int pacerDuration;
         float achievementScore;
-        QString date;
+        int coherenceCount;
+        QVector<int> heartRates;
 };
 
 #endif

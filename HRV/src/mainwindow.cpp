@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // init settings
     pacer_dur = 10;
-//    challenge_level = 1;
+    //    challenge_level = 1;
     challenge_level = 4; // delete this before we hand it in lol
     pacerCounter = -1;
 
@@ -27,12 +27,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     masterMenu = new Menu("MAIN MENU", {"BEGIN SESSION","HISTORY","SETTINGS"}, nullptr);
     mainMenuOG = masterMenu;
     initializeMainMenu(masterMenu);
-
-    // Initialize the main menu view
-    activeQListWidget = ui->mainMenuListView;
-    activeQListWidget->addItems(masterMenu->getMenuItems());
-    activeQListWidget->setCurrentRow(0);
-    ui->menuLabel->setText(masterMenu->getName());
 
     powerStatus = false;
     changePowerStatus();
@@ -128,14 +122,21 @@ QString MainWindow::floatToStringWithOneDecimalPlace(float value) {
 }
 
 Menu* MainWindow::create_history_menu(Menu* m) {
+        qDebug() << "in create history menu";
         // initialise session list
         QStringList sessionList;
         sessionList.append("CLEAR");
 
         QVector<Log*>* logs = dbmanager->getLogs(profile->getId());
+
+        qDebug() << "logs size: " + QString::number(logs->size());
+
+
         for (Log* currentLog : *logs) {
-            sessionList.append(QString::number(currentLog->getSessionTime()));
+            qDebug() << "Session Number: " + QString::number(currentLog->getSessionTime());
+            sessionList.append("Session Number: " + QString::number(currentLog->getId()));
         }
+
         //create parent menu
         Menu* history = new Menu("HISTORY", sessionList, m);
 
@@ -144,26 +145,18 @@ Menu* MainWindow::create_history_menu(Menu* m) {
         history->addChildMenu(clearHistory);
 
         for (Log* currentLog : *logs) {
-            Menu* session_menu = new Menu(QString::number(currentLog->getId()), {"VIEW", "DELETE"}, history);
-            Menu* view = new Menu("VIEW", {
-                "Session Number: " + QString::number(currentLog->getId()),
-                "Date: " + currentLog->getDate(),
-                "Session time: " + QString::number(currentLog->getSessionTime()),
-                "Challenge Level: " + QString::number(currentLog->getChallengeLevel()),
-                "Pacer Duration: " + QString::number(currentLog->getPacerDuration()),
-                "Coherence Average: " + floatToStringWithOneDecimalPlace(currentLog->getAvgCoherence()),
-                "Achievement Score: " + floatToStringWithOneDecimalPlace(currentLog->getAchievementScore()),
-                "Low Coherence Percentage: " + floatToStringWithOneDecimalPlace(currentLog->getLowCoherencePercentage()),
-                "Medium Coherence Percentage: " + floatToStringWithOneDecimalPlace(currentLog->getMedCoherencePercentage()),
-                "High Coherence Percentage: " + floatToStringWithOneDecimalPlace(currentLog->getHighCoherencePercentage()),
+            Menu* session_menu = new Menu(""+currentLog->getId(), {"VIEW", "DELETE"}, history);
+            sessions = QVector<Session*>();
+            sessions.append(new Session(currentLog));
 
-            }, session_menu);
+            Menu* view = new Menu("VIEW", {""}, session_menu);
             Menu* delete_menu = new Menu("DELETE", {"YES","NO"}, session_menu);
             session_menu->addChildMenu(view);
             session_menu->addChildMenu(delete_menu);
 
             history->addChildMenu(session_menu);
         }
+        qDebug() << history->getMenuItems();
         return history;
 }
 
@@ -183,6 +176,11 @@ Menu* MainWindow::create_settings_menu(Menu* m){
 }
 
 void MainWindow::initializeMainMenu(Menu* m) {
+    activeQListWidget = ui->mainMenuListView;
+    activeQListWidget->addItems(masterMenu->getMenuItems());
+    activeQListWidget->setCurrentRow(0);
+    ui->menuLabel->setText(masterMenu->getName());
+
     // create begin_session menu
     Menu* begin_session = new Menu("BEGIN SESSION", {}, m);
     m->addChildMenu(begin_session);
@@ -222,15 +220,14 @@ void MainWindow::navigateDownMenu() {
 void MainWindow::navigateToMainMenu() {
 
     if (currentTimerCount != -1) {
-        displaySummary();
+        displaySummary(currentSession, false);
     } else if (sessionSummaryVisible) {
         clearSessionSummary();
     }
 
     // go to main menu
-    while (masterMenu->getName() != "MAIN MENU") {
-        masterMenu = masterMenu->getParent();
-    }
+    masterMenu = new Menu("MAIN MENU", {"BEGIN SESSION","HISTORY","SETTINGS"}, nullptr);
+    initializeMainMenu(masterMenu);
     updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
     //ui->programViewWidget->setVisible(false);
     //ui->electrodeLabel->setVisible(false);
@@ -239,10 +236,26 @@ void MainWindow::navigateToMainMenu() {
 // back button
 void MainWindow::navigateBack() {
     if (currentTimerCount != -1) {
-        displaySummary();
+        displaySummary(currentSession, false);
 
     } else if (sessionSummaryVisible) {
         clearSessionSummary();
+    }
+
+    if(masterMenu->getName() == "BEGIN SESSION") {
+        qDebug() << "in begin session back";
+        masterMenu = new Menu("MAIN MENU", {"BEGIN SESSION","HISTORY","SETTINGS"}, nullptr);
+        initializeMainMenu(masterMenu);
+        updateMenu(mainMenuOG->getName(), mainMenuOG->getMenuItems());
+        return;
+    }
+
+    if(masterMenu->getName() == "CLEAR") {
+        qDebug() << "in clear back";
+        masterMenu = new Menu("MAIN MENU", {"BEGIN SESSION","HISTORY","SETTINGS"}, nullptr);
+        initializeMainMenu(masterMenu);
+        updateMenu(mainMenuOG->getName(), mainMenuOG->getMenuItems());
+        return;
     }
 
     if (masterMenu->getName() == "MAIN MENU") {
@@ -252,10 +265,6 @@ void MainWindow::navigateBack() {
         masterMenu = masterMenu->getParent();
         updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
     }
-
-    // set the session ui to invisible
-    //ui->programViewWidget->setVisible(false);
-    //ui->electrodeLabel->setVisible(false);
 }
 
 // fucntion to determine if session number is real
@@ -265,9 +274,66 @@ bool MainWindow::is_session_num(QString log_id){
 
 // pressing the ok button
 void MainWindow::navigateSubMenu() {
-
     int index = activeQListWidget->currentRow();
     if (index < 0) return;
+
+
+    // fucntionality of the clear menu
+    if (masterMenu->getName() == "CLEAR"){
+        if (masterMenu->getMenuItems().value(index) == "YES") {
+            dbmanager->deleteLogs();
+            navigateBack();
+            return;
+        }
+        else {
+            navigateBack();
+            return;
+        }
+    }
+
+    // fucntionality of the delete menu
+    if(masterMenu->getName() == "DELETE"){
+        if (masterMenu->getMenuItems().value(index) == "YES") {
+            int log_id = masterMenu->getParent()->getParent()->getName().toInt();
+            dbmanager->deleteLog(log_id);
+            navigateBack();
+            return;
+        }
+        else {
+            navigateBack();
+            return;
+        }
+    }
+
+    // fucntionality of the reset menu
+    if(masterMenu->getName() == "RESET"){
+        if (masterMenu->getMenuItems().value(index) == "YES") {
+            dbmanager->deleteLogs();
+            challenge_level = 1;
+            pacer_dur = 10;
+            navigateBack();
+            powerChange();
+            return;
+        }
+        else {
+            navigateBack();
+            return;
+        }
+    }
+
+    // fucntionality of the challenge menu
+    if(masterMenu->getName() == "CHALLENGE LEVEL"){
+        challenge_level = index + 1;
+        navigateBack();
+        return;
+    }
+
+    // navigate to Pacer duration menu
+    if(masterMenu->getName() == "PACER DURATION"){
+        pacer_dur = index + 1;
+        navigateBack();
+        return;
+    }
 
     // navigate to begin_session menu
     if(masterMenu->getChildMenu(index)->getName() == "BEGIN SESSION") {
@@ -293,30 +359,16 @@ void MainWindow::navigateSubMenu() {
 
     // navigate into the view menu
     if (masterMenu->getChildMenu(index)->getName() == "VIEW") {
-        masterMenu = masterMenu->getChildMenu(index);
-        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        displaySummary(sessions[index-1], true);
         return;
     }
+
 
     // navigate into the delete menu
     if (masterMenu->getChildMenu(index)->getName() == "DELETE") {
         masterMenu = masterMenu->getChildMenu(index);
         updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
         return;
-    }
-
-    // fucntionality of the delete menu
-    if(masterMenu->getParent() != nullptr && masterMenu->getParent()->getName() == "DELETE"){
-        if (masterMenu->getMenuItems()[index] == "YES") {
-            int log_id = masterMenu->getParent()->getParent()->getName().toInt();
-            dbmanager->deleteLog(log_id);
-            navigateBack();
-            return;
-        }
-        else {
-            navigateBack();
-            return;
-        }
     }
 
     // navigate to clear menu
@@ -326,17 +378,12 @@ void MainWindow::navigateSubMenu() {
         return;
     }
 
-    // fucntionality of the clear menu
-    if (masterMenu->getParent() != nullptr && masterMenu->getParent()->getName() == "CLEAR"){
-        if (masterMenu->getMenuItems()[index] == "YES") {
-            dbmanager->deleteLogs();
-            navigateBack();
-            return;
-        }
-        else {
-            navigateBack();
-            return;
-        }
+
+    // navigate to clear menu
+    if (masterMenu->getChildMenu(index)->getName() == QString::number(index)) {
+        masterMenu = masterMenu->getChildMenu(index);
+        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        return;
     }
 
     // navigate to settings menu
@@ -353,21 +400,6 @@ void MainWindow::navigateSubMenu() {
         return;
     }
 
-    // fucntionality of the reset menu
-    if(masterMenu->getParent() != nullptr && masterMenu->getParent()->getName() == "RESET"){
-        if (masterMenu->getMenuItems()[index] == "YES") {
-            dbmanager->deleteLogs();
-            challenge_level = 1;
-            pacer_dur = 10;
-            navigateBack();
-            powerChange();
-            return;
-        }
-        else {
-            navigateBack();
-            return;
-        }
-    }
 
     // navigate to challenge menu
     if (masterMenu->getChildMenu(index)->getName() == "CHALLENGE LEVEL") {
@@ -376,21 +408,11 @@ void MainWindow::navigateSubMenu() {
         return;
     }
 
-    // navigate to challenge menu
-    if(masterMenu->getParent() != nullptr && masterMenu->getParent()->getName() == "CHALLENGE LEVEL"){
-        challenge_level = index + 1;
-    }
-
     // navigate to Pacer duration menu
     if (masterMenu->getChildMenu(index)->getName() == "PACER DURATION") {
         masterMenu = masterMenu->getChildMenu(index);
         updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
         return;
-    }
-
-    // navigate to Pacer duration menu
-    if(masterMenu->getParent() != nullptr && masterMenu->getParent()->getName() == "PACER DURATION"){
-        pacer_dur = index + 1;
     }
 }
 
@@ -455,7 +477,7 @@ void MainWindow::powerChange(){
     if (currentTimerCount != -1){
         //Save Session
         applyToSkin(false);
-        displaySummary();
+        displaySummary(currentSession, false);
         clearSessionSummary();
     }
     ui->sessionFrame->setVisible(false);
@@ -507,7 +529,6 @@ void MainWindow::start_session(){
     // create session
     int thisSessionID = profile->increaseSessAmt();
     currentSession = new Session(thisSessionID, challenge_level, pacer_dur, QDateTime::currentDateTime(), timer);
-    qDebug() << currentSession->getSessionNum();
 }
 
 void MainWindow::init_timer(QTimer* timer){
@@ -578,9 +599,6 @@ void MainWindow::drainBattery() {
     changeBatteryLevel(newBatteryLevel);
 }
 
-
-
-// TODO?:
 void MainWindow::applyToSkin(bool checked) {
     // TODO: update screen
     // ui->electrodeLabel->setPixmap(QPixmap(checked ? ":/icons/electrodeOn.svg" : ":/icons/electrodeOff.svg"));
@@ -592,47 +610,73 @@ void MainWindow::applyToSkin(bool checked) {
 
         // is it on skin
         if (!onSkin) {
-            displaySummary();
+            displaySummary(currentSession, false);
         }
         else {
-            qDebug() << "Starting timer";
             currentSession->getTimer()->start(1000);
         }
     }
 }
 
-void MainWindow::displaySummary() {
+void MainWindow::displaySummary(Session* session, bool is_history) {
     // stop timer
-    currentSession->getTimer()->stop();
-    currentSession->getTimer()->disconnect();
+    if (!is_history) {
+        currentSession->getTimer()->stop();
+        currentSession->getTimer()->disconnect();
+    }
 
     sessionSummaryVisible = true;
 
     // display summary graph
     ui->sessionFrame->setVisible(false);
-    ui->customPlot_2->xAxis->setRange(0, currentTimerCount);
-    ui->customPlot_2->yAxis->setRange(minHR, maxHR);
+    ui->customPlot_2->xAxis->setRange(0, session->getElapsedTime());
+
+
+    // calculate min and max
+    int sessionMin;
+    int sessionMax;
+    for (int i = 0; i < session->getGraph_int().size(); i++) {
+        if (i == 0) {
+            sessionMin = session->getGraph_int()[i];
+            sessionMax = session->getGraph_int()[i];
+        } else {
+            if (sessionMin > session->getGraph_int()[i]) {
+                sessionMin = session->getGraph_int()[i];
+            }
+            if (sessionMax < session->getGraph_int()[i]) {
+                sessionMax = session->getGraph_int()[i];
+            }
+        }
+    }
+
+    ui->customPlot_2->yAxis->setRange(sessionMin, sessionMax);
     QVector<double> emptyData;
     ui->customPlot_2->graph(0)->setData(emptyData, emptyData);
     QVector<double> seconds;
-    for (int i = 0; i <= currentTimerCount; ++i) {
+    for (int i = 0; i <= session->getElapsedTime(); ++i) {
         seconds.append(static_cast<double>(i));
     }
-    ui->customPlot_2->graph(0)->setData(seconds, currentSession->getGraph());
+    ui->customPlot_2->graph(0)->setData(seconds, session->getGraph_double());
     ui->customPlot_2->replot();
 
-    // TODO: save session into dbmanager
-    Log *log = new Log(this->currentSession, profile->getId());
-    dbmanager->addLog(log);
+    Log *log = new Log(session, profile->getId());
+    if (!is_history){
+        dbmanager->addLog(log);
+    }
 
     // update labels
-    float avgScore = (currentSession->getAchievementScore()/currentSession->getCoherenceCount());
+    float avgScore = (session->getAchievementScore()/session->getCoherenceCount());
     float rounded = round(avgScore * 10.0f) / 10.0f;
     ui->avgScore->setText("Avg Score: "+ QString::number(rounded));
-    ui->challengeLvlBar->setText(QString::number(currentSession->getChallengeLevel()));
-    rounded = round(currentSession->getAchievementScore() * 10.0f) / 10.0f;
+    ui->challengeLvlBar->setText(QString::number(session->getChallengeLevel()));
+    rounded = round(session->getAchievementScore() * 10.0f) / 10.0f;
     ui->achvScoreBar_2->setText(QString::number(rounded));
-    ui->lengthBar_2->setText(QString::number(currentSession->getElapsedTime()) + "s");
+    ui->lengthBar_2->setText(QString::number(session->getElapsedTime()) + "s");
+
+    // calculate precentages
+
+
+
     ui->timeInHigh->setText("% High: " + QString::number(log->getHighCoherencePercentage()));
     ui->timeInMed->setText("% Med: " + QString::number(log->getMedCoherencePercentage()));
     ui->timeInLow->setText("% Low: " + QString::number(log->getLowCoherencePercentage()));
@@ -642,13 +686,13 @@ void MainWindow::displaySummary() {
     ui->summaryFrame->setVisible(true);
 
     // reset timer
-    this->currentTimerCount = -1;
-    pacerCounter = -1;
-    pacerCountDown = false;
-    pacerWait = false;
-    pacerCountUp = true;
-
-
+    if (!is_history) {
+        this->currentTimerCount = -1;
+        pacerCounter = -1;
+        pacerCountDown = false;
+        pacerWait = false;
+        pacerCountUp = true;
+    }
 
     turnOffLights();
     // TODO: session data varaibles to 0
@@ -728,7 +772,6 @@ void MainWindow::updatePacer() {
         }
     }
 }
-
 
 int MainWindow::generateHR() {
     int min = 50;

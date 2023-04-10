@@ -58,6 +58,19 @@ Profile* DBManager::getProfile(int id) {
     return pro;
 }
 
+bool DBManager::updateProfile(int id, double batteryLvl, int sessionAmt) {
+
+    hrvDB.transaction();
+
+    QSqlQuery query;
+    query.prepare("UPDATE profiles SET battery_level = :battery_level, sessionAmt = :sessionAmt WHERE id = :profile_id;");
+    query.bindValue(":profile_id", id);
+    query.bindValue(":battery_level", batteryLvl);
+    query.bindValue(":sessionAmt", sessionAmt);
+    query.exec();
+
+    return hrvDB.commit();
+}
 
 bool DBManager::addProfile(int id, double batteryLvl, int sessionsAmt) {
 

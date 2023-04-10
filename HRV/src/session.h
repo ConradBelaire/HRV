@@ -27,13 +27,12 @@ class Session {
         int getCoherenceCount() const;
         int getCurrentHeartRate() const;
 
-        float getCoherentSum() const;
         float getCurrentCoherence() const;
         float getAchievementScore() const;
 
         QTimer* getTimer();
         QDateTime getStartTime() const;
-        QVector<int> getGraph() const;
+        QVector<double> getGraph() const;
 
         // setters
         void addToLow();
@@ -50,7 +49,7 @@ class Session {
         const int SESSION_NUM;
         const int CHALLENGE_LEVEL;
         const int PACER_DURATION;
-        const QDateTime START_TIME;\
+        const QDateTime START_TIME;
 
         int currentHR;
         int timeInLow;
@@ -62,11 +61,9 @@ class Session {
 
         float coherenceSum;
         float currentCoherence;
-        float achievementScore;
-
 
         QTimer* timer;
-        QVector<int> recordedHR;
+        QVector<double> recordedHR;
 
         void addCoherenceScore(float newCoherenceScore);
         float calculateCoherenceScore();

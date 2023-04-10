@@ -19,7 +19,6 @@ Session::Session(
     coherenceCount(0),
     coherenceSum(0),
     currentCoherence(0),
-    achievementScore(0),
     timer(timer)   {
     std::srand(static_cast<unsigned>(std::time(0)));
 }
@@ -35,13 +34,12 @@ int Session::getChallengeLevel() const {return CHALLENGE_LEVEL;}
 int Session::getCoherenceCount() const {return coherenceCount;}
 int Session::getCurrentHeartRate() const {return currentHR;}
 
-float Session::getCoherentSum() const {return coherenceSum;}
 float Session::getCurrentCoherence() const {return currentCoherence;}
-float Session::getAchievementScore() const {return achievementScore;}
+float Session::getAchievementScore() const {return coherenceSum;}
 
 QTimer* Session::getTimer() {return timer;}
 QDateTime Session::getStartTime() const {return START_TIME;}
-QVector<int> Session::getGraph() const {return recordedHR;}
+QVector<double> Session::getGraph() const {return recordedHR;}
 
 // setters
 void Session::addToLow() {timeInLow++;}
@@ -94,7 +92,6 @@ int Session::determineScoreLevel(float cohernceScore) {
 void Session::addCoherenceScore(float newCoherenceScore) {
     coherenceSum += newCoherenceScore;
     coherenceCount++;
-    achievementScore = coherenceSum / coherenceCount;
 }
 
 float Session::calculateCoherenceScore() {
@@ -102,6 +99,7 @@ float Session::calculateCoherenceScore() {
 
     // TODO: Figure out how to calculate this shit
     currentCoherence = generateCS();
+    qDebug() << "New Coherence Score: " + QString::number(currentCoherence);
 
     int rank = determineScoreLevel(currentCoherence);
     switch(rank) {
@@ -121,7 +119,7 @@ float Session::calculateCoherenceScore() {
 
 float Session::generateCS() {
     float min = 0.0;
-    float max = 16.0;
+    float max = 7.0;
     float randomFraction = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
     float randomNumberInRange = min + (randomFraction * (max - min));
     return randomNumberInRange;

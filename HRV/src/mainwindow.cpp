@@ -7,7 +7,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // init settings
     pacer_dur = 10;
-    challenge_level = 1;
+//    challenge_level = 1;
+    challenge_level = 4; // delete this before we hand it in lol
     pacerCounter = -1;
 
     // Set initial Skin status
@@ -21,8 +22,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // create profile
     profile = dbmanager->getProfile(1);
-
-    //maxPower = 100;
 
     // Initialize the menu
     masterMenu = new Menu("MAIN MENU", {"BEGIN SESSION","HISTORY","SETTINGS"}, nullptr);
@@ -53,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->okButton, &QPushButton::pressed, this, &MainWindow::navigateSubMenu);
     connect(ui->menuButton, &QPushButton::pressed, this, &MainWindow::navigateToMainMenu);
     connect(ui->backButton, &QPushButton::pressed, this, &MainWindow::navigateBack);
+    connect(ui->skinToggle, &QPushButton::pressed, this, &MainWindow::toggleSkin);
 
 
     // TODO?: apply more skins
@@ -81,43 +81,28 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     //ui->electrodeLabel->setVisible(false);
     std::srand(static_cast<unsigned>(std::time(0)));
 
+    // setup graphs
     ui->sessionFrame->setVisible(false);
+    ui->summaryFrame->setVisible(false);
+    maxHR = 110;
+    minHR = 50;
+    ui->customPlot->xAxis->setRange(0, 5);
+    ui->customPlot->yAxis->setRange(minHR, maxHR);
+    ui->customPlot->xAxis->setLabel("Time (s)");
+    ui->customPlot->yAxis->setLabel("HR");
+    ui->customPlot->addGraph(); // active session graph
+    ui->customPlot->graph(0)->setPen(QPen(Qt::red)); // set the pen color
+    ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine); // set the line style
+    ui->customPlot->graph(0)->setScatterStyle(QCPScatterStyle::ssNone);
 
+    ui->customPlot_2->xAxis->setLabel("Time (s)");
+    ui->customPlot_2->yAxis->setLabel("HR");
+    ui->customPlot_2->addGraph(); // active session graph
+    ui->customPlot_2->graph(0)->setPen(QPen(Qt::red)); // set the pen color
+    ui->customPlot_2->graph(0)->setLineStyle(QCPGraph::lsLine); // set the line style
+    ui->customPlot_2->graph(0)->setScatterStyle(QCPScatterStyle::ssNone);
 
-    connectedStatus = true;
-
-
-    // add custom plot example
-    // Instantiate QCustomPlot widget
-//    QCustomPlot *customPlot = new QCustomPlot(this);
-//    setCentralWidget(customPlot);
-
-////     Create example data for the graph
-//    QVector<double> x(101), y(101);
-//    for (int i=0; i<101; ++i)
-//    {
-//      x[i] = i/50.0 - 1;
-//      y[i] = x[i]*x[i];
-//    }
-
-//    // Create a graph and set example data
-//    customPlot->addGraph();
-//    customPlot->graph(0)->setData(x, y);
-
-//    // Set axes labels and ranges
-//    customPlot->xAxis->setLabel("x");
-//    customPlot->yAxis->setLabel("y");
-//    customPlot->xAxis->setRange(-1, 1);
-//    customPlot->yAxis->setRange(0, 1);
-
-//    // Set the plot title
-//    customPlot->plotLayout()->insertRow(0);
-//    QCPTextElement *title = new QCPTextElement(customPlot, "Simple Graph Example", QFont("sans", 12, QFont::Bold));
-//    customPlot->plotLayout()->addElement(0, 0, title);
-
-//    // Replot the graph
-//    customPlot->replot();
-
+    sessionSummaryVisible = false;
 }
 
 
@@ -238,6 +223,8 @@ void MainWindow::navigateToMainMenu() {
 
     if (currentTimerCount != -1) {
         displaySummary();
+    } else if (sessionSummaryVisible) {
+        clearSessionSummary();
     }
 
     // go to main menu
@@ -254,6 +241,8 @@ void MainWindow::navigateBack() {
     if (currentTimerCount != -1) {
         displaySummary();
 
+    } else if (sessionSummaryVisible) {
+        clearSessionSummary();
     }
 
     if (masterMenu->getName() == "MAIN MENU") {
@@ -317,7 +306,7 @@ void MainWindow::navigateSubMenu() {
     }
 
     // fucntionality of the delete menu
-    if(masterMenu->getParent()->getName() == "DELETE"){
+    if(masterMenu->getParent() != nullptr && masterMenu->getParent()->getName() == "DELETE"){
         if (masterMenu->getMenuItems()[index] == "YES") {
             int log_id = masterMenu->getParent()->getParent()->getName().toInt();
             dbmanager->deleteLog(log_id);
@@ -338,7 +327,7 @@ void MainWindow::navigateSubMenu() {
     }
 
     // fucntionality of the clear menu
-    if (masterMenu->getParent()->getName() == "CLEAR"){
+    if (masterMenu->getParent() != nullptr && masterMenu->getParent()->getName() == "CLEAR"){
         if (masterMenu->getMenuItems()[index] == "YES") {
             dbmanager->deleteLogs();
             navigateBack();
@@ -365,12 +354,13 @@ void MainWindow::navigateSubMenu() {
     }
 
     // fucntionality of the reset menu
-    if(masterMenu->getParent()->getName() == "RESET"){
+    if(masterMenu->getParent() != nullptr && masterMenu->getParent()->getName() == "RESET"){
         if (masterMenu->getMenuItems()[index] == "YES") {
             dbmanager->deleteLogs();
             challenge_level = 1;
             pacer_dur = 10;
             navigateBack();
+            powerChange();
             return;
         }
         else {
@@ -387,7 +377,7 @@ void MainWindow::navigateSubMenu() {
     }
 
     // navigate to challenge menu
-    if(masterMenu->getParent()->getName() == "CHALLENGE LEVEL"){
+    if(masterMenu->getParent() != nullptr && masterMenu->getParent()->getName() == "CHALLENGE LEVEL"){
         challenge_level = index + 1;
     }
 
@@ -399,7 +389,7 @@ void MainWindow::navigateSubMenu() {
     }
 
     // navigate to Pacer duration menu
-    if(masterMenu->getParent()->getName() == "PACER DURATION"){
+    if(masterMenu->getParent() != nullptr && masterMenu->getParent()->getName() == "PACER DURATION"){
         pacer_dur = index + 1;
     }
 }
@@ -465,7 +455,11 @@ void MainWindow::powerChange(){
     if (currentTimerCount != -1){
         //Save Session
         applyToSkin(false);
+        displaySummary();
+        clearSessionSummary();
     }
+    ui->sessionFrame->setVisible(false);
+    ui->summaryFrame->setVisible(false);
 }
 
 // Toggle visibilty of the menu
@@ -526,6 +520,8 @@ void MainWindow::init_timer(QTimer* timer){
 
 void MainWindow::update_timer(){
     drainBattery();
+
+    // update duration text
     ui->lengthBar->setText(QString::number(currentTimerCount) + "s");
     //ui->treatmentView->scene()->clear();
     //ui->treatmentView->scene()->addText(timeString);
@@ -535,24 +531,44 @@ void MainWindow::update_timer(){
     // TODO: get new heart rate from table?
     int newHeartRate = generateHR();   // some function should be here to set this value. the function could look up an array heart rates based of currentTimerCount
 
+    // update y axis
+    if (newHeartRate < minHR) {
+        minHR = newHeartRate-10;
+    } else if (newHeartRate > maxHR) {
+        maxHR = newHeartRate+10;
+    }
+    ui->customPlot->yAxis->setRange(minHR, maxHR);
 
+    // should we update x axis?
+    if (currentTimerCount > 5) {
+        ui->customPlot->xAxis->setRange(currentTimerCount-5, 1+currentTimerCount);
+    }
+
+    // add in data and replot
+    ui->customPlot->graph(0)->addData(currentTimerCount, newHeartRate);
+    ui->customPlot->replot();
 
     // calculate new coherence score
     float newCoherenceScore = currentSession->updateSession(newHeartRate);
 
-    // determine light to turn on
-    switch(currentSession->determineScoreLevel(newCoherenceScore)) {
-        case 0:
-            toggleRedLED();
-            break;
-        case 1:
-            toggleBlueLED();
-            break;
-        case 2:
-            toggleGreenLED();
-            break;
-    }
+    // update achievement score text
+    if (newCoherenceScore != -1) {
+        float rounded = round(currentSession->getAchievementScore() * 10.0f) / 10.0f;
+        ui->achvScoreBar->setText(QString::number(rounded));
 
+        // determine light to turn on
+        switch(currentSession->determineScoreLevel(newCoherenceScore)) {
+            case 0:
+                toggleRedLED();
+                break;
+            case 1:
+                toggleBlueLED();
+                break;
+            case 2:
+                toggleGreenLED();
+                break;
+        }
+    }
     updatePacer();
 
 }
@@ -586,17 +602,45 @@ void MainWindow::applyToSkin(bool checked) {
 }
 
 void MainWindow::displaySummary() {
-
+    // stop timer
     currentSession->getTimer()->stop();
     currentSession->getTimer()->disconnect();
 
+    sessionSummaryVisible = true;
+
+    // display summary graph
     ui->sessionFrame->setVisible(false);
+    ui->customPlot_2->xAxis->setRange(0, currentTimerCount);
+    ui->customPlot_2->yAxis->setRange(minHR, maxHR);
+    QVector<double> emptyData;
+    ui->customPlot_2->graph(0)->setData(emptyData, emptyData);
+    QVector<double> seconds;
+    for (int i = 0; i <= currentTimerCount; ++i) {
+        seconds.append(static_cast<double>(i));
+    }
+    ui->customPlot_2->graph(0)->setData(seconds, currentSession->getGraph());
+    ui->customPlot_2->replot();
 
     // TODO: save session into dbmanager
     Log *log = new Log(this->currentSession, profile->getId());
     dbmanager->addLog(log);
 
+    // update labels
+    float avgScore = (currentSession->getAchievementScore()/currentSession->getCoherenceCount());
+    float rounded = round(avgScore * 10.0f) / 10.0f;
+    ui->avgScore->setText("Avg Score: "+ QString::number(rounded));
+    ui->challengeLvlBar->setText(QString::number(currentSession->getChallengeLevel()));
+    rounded = round(currentSession->getAchievementScore() * 10.0f) / 10.0f;
+    ui->achvScoreBar_2->setText(QString::number(rounded));
+    ui->lengthBar_2->setText(QString::number(currentSession->getElapsedTime()) + "s");
+    ui->timeInHigh->setText("% High: " + QString::number(log->getHighCoherencePercentage()));
+    ui->timeInMed->setText("% Med: " + QString::number(log->getMedCoherencePercentage()));
+    ui->timeInLow->setText("% Low: " + QString::number(log->getLowCoherencePercentage()));
+
     delete log;
+
+    ui->summaryFrame->setVisible(true);
+
     // reset timer
     this->currentTimerCount = -1;
     pacerCounter = -1;
@@ -608,10 +652,22 @@ void MainWindow::displaySummary() {
 
     turnOffLights();
     // TODO: session data varaibles to 0
-    // need to take in data for this
+}
 
-    // TODO: make session ui to invisible
-    // TODO: make session summary visible
+void MainWindow::clearSessionSummary() {
+
+    ui->summaryFrame->setVisible(false);
+    sessionSummaryVisible = false;
+    ui->coherenceBar->setText("0.0");
+    ui->lengthBar->setText("0s");
+    ui->achvScoreBar->setText("0.0");
+    maxHR = 103;
+    minHR = 57;
+    ui->customPlot->xAxis->setRange(0, 5);
+    ui->customPlot->yAxis->setRange(minHR, maxHR);
+    QVector<double> emptyData;
+    ui->customPlot->graph(0)->setData(emptyData, emptyData);
+    ui->customPlot->replot();
 }
 
 void MainWindow::toggleRedLED() {
@@ -675,8 +731,8 @@ void MainWindow::updatePacer() {
 
 
 int MainWindow::generateHR() {
-    int min = 60;
-    int max = 100;
+    int min = 50;
+    int max = 120;
     int randomNumberInRange = min + (std::rand() % (max - min + 1));
     return randomNumberInRange;
 }
@@ -685,4 +741,9 @@ void MainWindow::turnOffLights() {
     ui->redLED->setStyleSheet(redOff);
     ui->blueLED->setStyleSheet(blueOff);
     ui->greenLED->setStyleSheet(greenOff);
+}
+
+void MainWindow::toggleSkin() {
+    connectedStatus = !connectedStatus;
+    applyToSkin(connectedStatus);
 }

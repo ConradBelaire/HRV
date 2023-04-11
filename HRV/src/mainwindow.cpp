@@ -247,6 +247,7 @@ void MainWindow::navigateBack() {
 
     } else if (sessionSummaryVisible) {
         clearSessionSummary();
+        return;
     }
 
     if(masterMenu->getName() == "BEGIN SESSION") {
@@ -265,7 +266,7 @@ void MainWindow::navigateBack() {
         return;
     }
 
-    if(masterMenu->getParent()->getName() == "HISTORY"){
+    if(masterMenu->getParent() != nullptr && masterMenu->getParent()->getName() == "HISTORY"){
         masterMenu = new Menu("MAIN MENU", {"BEGIN SESSION","HISTORY","SETTINGS"}, nullptr);
         initializeMainMenu(masterMenu);
         updateMenu(masterMenu->getChildMenu(1)->getName(), masterMenu->getChildMenu(1)->getMenuItems());
@@ -294,7 +295,7 @@ void MainWindow::navigateSubMenu() {
     if (inSessionView) {
         if (!startSession) {
             startSession = true;;
-        } else if (currentTimerCount != -1) {
+        } else if (currentTimerCount > 0) {
             startSession = false;
         }
         applyToSkin(connectedStatus);
@@ -602,6 +603,8 @@ void MainWindow::update_timer(){
     if (newCoherenceScore != -1) {
         float rounded = round(currentSession->getAchievementScore() * 10.0f) / 10.0f;
         ui->achvScoreBar->setText(QString::number(rounded));
+        rounded = round(newCoherenceScore * 10.0f) / 10.0f;
+        ui->coherenceBar->setText(QString::number(rounded));
 
         // determine light to turn on
         switch(currentSession->determineScoreLevel(newCoherenceScore)) {
@@ -636,7 +639,7 @@ void MainWindow::applyToSkin(bool checked) {
 
         // is it on skin
         if (startSession) {
-            if (!onSkin) {
+            if (!onSkin && (currentTimerCount > 0)) {
                 displaySummary(currentSession, false);
             }
             else {
@@ -714,7 +717,7 @@ void MainWindow::displaySummary(Session* session, bool is_history) {
 
     delete log;
 
-    if (currentTimerCount != 0) {
+    if (session->getElapsedTime() > 0) {
         ui->summaryFrame->setVisible(true);
     } else {
         clearSessionSummary();
@@ -749,6 +752,7 @@ void MainWindow::clearSessionSummary() {
     QVector<double> emptyData;
     ui->customPlot->graph(0)->setData(emptyData, emptyData);
     ui->customPlot->replot();
+    navigateToMainMenu();
 }
 
 void MainWindow::toggleRedLED() {

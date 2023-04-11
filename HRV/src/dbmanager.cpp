@@ -105,26 +105,12 @@ QVector<Log*>* DBManager::getLogs(int id) {
     hrvDB.transaction();
 
     QSqlQuery query;
-    query.prepare("SELECT * FROM log;");
-    query.bindValue(":profile_id", id);
-    query.exec();
-
-    if (!hrvDB.commit()) {
-        throw "Error: Query failed to execute";
-    }
-
-   // profile does not exist
-    if (!query.next()) {
-        qDebug() << "ERR: No logs found";
-        return new QVector<Log*>();
-    }
+    query.exec("SELECT * FROM log;");
 
     QVector<Log*>* logs = new QVector<Log*>();
 
-    // profile exists
     int i = 0;
-    bool first = true;
-    while (first || query.next()) {
+    while (query.next()) {
         QVector<int> intVector;
         QJsonDocument heartRatesDoc = QJsonDocument::fromJson(query.value(9).toString().toUtf8());
         QJsonArray heartRatesArray = heartRatesDoc.array();
@@ -133,7 +119,7 @@ QVector<Log*>* DBManager::getLogs(int id) {
         }
 
         logs->append(
-            new Log( 
+            new Log(
                 query.value(1).toInt(), // session id
                 query.value(0).toInt(), // profile id
                 query.value(2).toInt(), // challenge level
@@ -146,7 +132,6 @@ QVector<Log*>* DBManager::getLogs(int id) {
                 intVector
             )
         );
-        first = false;
         i++;
     }
     return logs;
@@ -176,18 +161,10 @@ Log* DBManager::getLog(int id) {
     hrvDB.transaction();
 
     QSqlQuery query;
-    query.prepare("SELECT * FROM log WHERE id = :log_id;");
-    query.bindValue(":log", id);
+    query.prepare("SELECT * FROM log WHERE :id = id");
+    query.bindValue(":id", id);
     query.exec();
 
-    if (!hrvDB.commit()) {
-        throw "Error: Query failed to execute";
-    }
-
-   // Log does not exist
-    if (!query.next()) {
-        throw "Error: Log does not exist";
-    }
 
     QVector<int> intVector;
     QJsonDocument heartRatesDoc = QJsonDocument::fromJson(query.value(9).toString().toUtf8());

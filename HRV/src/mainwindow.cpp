@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     dbmanager = new DBManager();
 
     // create profile
-    profile = dbmanager->getProfile(1);
+    profile = dbmanager->getProfile(0);
 
     // Initialize the menu
     masterMenu = new Menu("MAIN MENU", {"BEGIN SESSION","HISTORY","SETTINGS"}, nullptr);
@@ -548,6 +548,7 @@ void MainWindow::start_session(){
 
     // create session
     int thisSessionID = profile->increaseSessAmt();
+    qDebug() << challenge_level << " CHALLENGE LEVEL";
     currentSession = new Session(thisSessionID, challenge_level, pacer_dur, QDateTime::currentDateTime(), timer);
 }
 
@@ -643,8 +644,6 @@ void MainWindow::applyToSkin(bool checked) {
 }
 
 void MainWindow::displaySummary(Session* session, bool is_history) {
-
-
     // stop timer
     if (!is_history) {
         currentSession->getTimer()->stop();
@@ -685,7 +684,8 @@ void MainWindow::displaySummary(Session* session, bool is_history) {
     ui->customPlot_2->graph(0)->setData(seconds, session->getGraph_double());
     ui->customPlot_2->replot();
 
-    Log *log = new Log(session, profile->getId());
+    Log *log = new Log(session, 0);
+    qDebug() << log->getChallengeLevel() << " CHALLENGE LEVEL3";
     if (!is_history){
         dbmanager->addLog(log);
     }

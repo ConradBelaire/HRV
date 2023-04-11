@@ -26,7 +26,7 @@ bool DBManager::DBInit() {
         qDebug() << "Error: " << query.lastError();
     }
 
-    if (!query.exec("CREATE TABLE IF NOT EXISTS log ( session_id INTEGER NOT NULL, profile_id INTEGER PRIMARY KEY, challenge_level INTEGER NOT NULL, is_low INTEGER NOT NULL, is_med INTEGER NOT NULL, is_high INTEGER NOT NULL, session_time INTEGER NOT NULL, achievement_score FLOAT NOT NULL, coherence_count INTEGER NOT NULL, heart_rates TEXT, CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES profiles (id) ON DELETE CASCADE );")){
+    if (!query.exec("CREATE TABLE IF NOT EXISTS log ( profile_id INTEGER PRIMARY KEY, session_id INTEGER NOT NULL, challenge_level INTEGER NOT NULL, is_low INTEGER NOT NULL, is_med INTEGER NOT NULL, is_high INTEGER NOT NULL, session_time INTEGER NOT NULL, achievement_score FLOAT NOT NULL, coherence_count INTEGER NOT NULL, heart_rates TEXT, CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES profiles (id) ON DELETE CASCADE );")){
         qDebug() << "Error: " << query.lastError();
     }
     return hrvDB.commit();
@@ -134,8 +134,8 @@ QVector<Log*>* DBManager::getLogs(int id) {
 
         logs->append(
             new Log( 
-                query.value(0).toInt(), // session id
-                query.value(1).toInt(), // profile id
+                query.value(1).toInt(), // session id
+                query.value(0).toInt(), // profile id
                 query.value(2).toInt(), // challenge level
                 query.value(3).toInt(), // is low
                 query.value(4).toInt(), // is med
@@ -198,8 +198,8 @@ Log* DBManager::getLog(int id) {
 
     // Log exists
     Log* log = new Log(
-                query.value(0).toInt(), // session id
-                query.value(1).toInt(), // profile id
+                query.value(1).toInt(), // session id
+                query.value(0).toInt(), // profile id
                 query.value(2).toInt(), // challenge level
                 query.value(3).toInt(), // is low
                 query.value(4).toInt(), // is med
@@ -223,9 +223,9 @@ bool DBManager::addLog(Log* log) {
     QString heartRatesJson = heartRatesDoc.toJson(QJsonDocument::Compact);
 
     QSqlQuery query;
-    query.prepare("INSERT INTO log (session_id, profile_id, challenge_level, is_low, is_med, is_high, session_time, achievement_score, coherence_count, heart_rates) VALUES (:session_id, :profile_id, :challenge_level, :is_low, :is_med, :is_high, :session_time, :achievement_score, :coherence_count, :heart_rates);");
-    query.bindValue(":session_id", log->getId());
+    query.prepare("INSERT INTO log (profile_id, session_id, challenge_level, is_low, is_med, is_high, session_time, achievement_score, coherence_count, heart_rates) VALUES (:profile_id, :session_id, :challenge_level, :is_low, :is_med, :is_high, :session_time, :achievement_score, :coherence_count, :heart_rates);");
     query.bindValue(":profile_id", log->getProfileId());
+    query.bindValue(":session_id", log->getId());
     query.bindValue(":challenge_level", log->getChallengeLevel());
     query.bindValue(":is_low", log->getIsLow());
     query.bindValue(":is_med", log->getIsMed());

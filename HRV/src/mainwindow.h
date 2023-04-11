@@ -112,6 +112,9 @@ class MainWindow : public QMainWindow
 
         void clearSessionSummary();
 
+        bool inSessionView;
+        bool startSession;
+
 
     private slots:
         void navigateDownMenu();

@@ -97,6 +97,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->customPlot_2->graph(0)->setScatterStyle(QCPScatterStyle::ssNone);
 
     sessionSummaryVisible = false;
+
+    inSessionView = false;
+    startSession = false;
 }
 
 
@@ -275,6 +278,19 @@ bool MainWindow::is_session_num(QString log_id){
 // pressing the ok button
 void MainWindow::navigateSubMenu() {
     int index = activeQListWidget->currentRow();
+
+
+    // TODO: add start stop functionality here
+    if (inSessionView) {
+        if (!startSession) {
+            startSession = true;;
+        } else if (currentTimerCount != -1) {
+            startSession = false;
+        }
+        applyToSkin(connectedStatus);
+    }
+
+
     if (index < 0) return;
 
 
@@ -340,6 +356,7 @@ void MainWindow::navigateSubMenu() {
         masterMenu = masterMenu->getChildMenu(index);
         MainWindow::updateMenu(masterMenu->getName(), {});
         MainWindow::start_session();
+        inSessionView = true;
         return;
     }
 
@@ -534,7 +551,7 @@ void MainWindow::start_session(){
 void MainWindow::init_timer(QTimer* timer){
     connect(timer, &QTimer::timeout, this, &MainWindow::update_timer);
 
-    if (connectedStatus){
+    if (connectedStatus && startSession){
         timer->start(1000);
     }
 }
@@ -609,11 +626,15 @@ void MainWindow::applyToSkin(bool checked) {
     if (currentTimerCount != -1) {
 
         // is it on skin
-        if (!onSkin) {
+        if (startSession) {
+            if (!onSkin) {
+                displaySummary(currentSession, false);
+            }
+            else {
+                currentSession->getTimer()->start(1000);
+            }
+        } else if (!startSession && onSkin && (currentTimerCount > 0)) {
             displaySummary(currentSession, false);
-        }
-        else {
-            currentSession->getTimer()->start(1000);
         }
     }
 }
@@ -692,6 +713,8 @@ void MainWindow::displaySummary(Session* session, bool is_history) {
         pacerCountDown = false;
         pacerWait = false;
         pacerCountUp = true;
+        inSessionView = false;
+        startSession = false;
     }
 
     turnOffLights();

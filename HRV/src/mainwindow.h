@@ -100,6 +100,8 @@ class MainWindow : public QMainWindow
         QString greenOff;
         QString blueOn;
         QString blueOff;
+        QString connectionOn;
+        QString connectionOff;
 
         int maxHR;
         int minHR;

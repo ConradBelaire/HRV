@@ -67,6 +67,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     greenOff = "background-color: rgb(0, 50, 0)";
     blueOn = "background-color: rgb(0, 0, 230)";
     blueOff = "background-color: rgb(0, 0, 80)";
+    connectionOn = "background-color: rgb(255, 0, 142)";
+    connectionOff = "background-color: rgb(142, 0, 142)";
     turnOffLights();
 
     // set session ui to invisible
@@ -511,6 +513,7 @@ void MainWindow::changePowerStatus() {
 
     //Remove this if we want the menu to stay in the same position when the power is off
     if (powerStatus) {
+        if (connectedStatus) {ui->hrConnection->setStyleSheet(connectionOn);}
         MainWindow::navigateToMainMenu();
         //applyToSkin(false);
     }
@@ -640,6 +643,8 @@ void MainWindow::applyToSkin(bool checked) {
 }
 
 void MainWindow::displaySummary(Session* session, bool is_history) {
+
+
     // stop timer
     if (!is_history) {
         currentSession->getTimer()->stop();
@@ -704,7 +709,11 @@ void MainWindow::displaySummary(Session* session, bool is_history) {
 
     delete log;
 
-    ui->summaryFrame->setVisible(true);
+    if (currentTimerCount != 0) {
+        ui->summaryFrame->setVisible(true);
+    } else {
+        clearSessionSummary();
+    }
 
     // reset timer
     if (!is_history) {
@@ -807,10 +816,16 @@ void MainWindow::turnOffLights() {
     ui->redLED->setStyleSheet(redOff);
     ui->blueLED->setStyleSheet(blueOff);
     ui->greenLED->setStyleSheet(greenOff);
+    if (!powerStatus) {ui->hrConnection->setStyleSheet(connectionOff);}
 }
 
 void MainWindow::toggleSkin() {
     connectedStatus = !connectedStatus;
+    if (connectedStatus && powerStatus) {
+        ui->hrConnection->setStyleSheet(connectionOn);
+    } else {
+        ui->hrConnection->setStyleSheet(connectionOff);
+    }
     applyToSkin(connectedStatus);
 }
 

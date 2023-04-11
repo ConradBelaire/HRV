@@ -63,9 +63,24 @@ QVector<int> Session::getGraph_int() const {
 }
 
 // setters
-void Session::addToLow() {timeInLow++;}
-void Session::addToMed() {timeInMed++;}
-void Session::addToHigh() {timeInHigh++;}
+void Session::addToLow() {
+    timeInLow++;
+    if (timeInLow == 1) {
+        qDebug() << "*BEEP* (low coherence light turned on for the first time)";
+    }
+}
+void Session::addToMed() {
+    timeInMed++;
+    if (timeInMed == 1) {
+        qDebug() << "*BEEP* (medium coherence light turned on for the first time)";
+    }
+}
+void Session::addToHigh() {
+    timeInHigh++;
+    if (timeInHigh == 1) {
+        qDebug() << "*BEEP* (high coherence light turned on for the first time)";
+    }
+}
 
 void Session::setAchievementScore(float newAchievementScore) {coherenceSum = newAchievementScore;}
 void Session::setLowCoherencePercentage(float newLowCoherencePercentage) {timeInLow = newLowCoherencePercentage;}

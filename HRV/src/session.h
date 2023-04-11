@@ -4,6 +4,7 @@
 #include <QDateTime>
 #include <QTimer>
 #include <QVector>
+#include <QDebug>
 #include "log.h"
 
 class Log;

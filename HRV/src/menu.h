@@ -12,6 +12,7 @@ class Menu {
 
         QString getName();
         QStringList getMenuItems();
+        QString getMenuItem(int i);
         Menu* getParent();
         void addChildMenu(Menu*);
         Menu* getChildMenu(int);

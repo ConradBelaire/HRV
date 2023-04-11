@@ -26,7 +26,7 @@ bool DBManager::DBInit() {
         qDebug() << "Error: " << query.lastError();
     }
 
-    if (!query.exec("CREATE TABLE IF NOT EXISTS log ( profile_id INTEGER PRIMARY KEY, session_id INTEGER NOT NULL, challenge_level INTEGER NOT NULL, is_low INTEGER NOT NULL, is_med INTEGER NOT NULL, is_high INTEGER NOT NULL, session_time INTEGER NOT NULL, achievement_score FLOAT NOT NULL, coherence_count INTEGER NOT NULL, heart_rates TEXT, CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES profiles (id) ON DELETE CASCADE );")){
+    if (!query.exec("CREATE TABLE IF NOT EXISTS log ( session_id INTEGER PRIMARY KEY, profile_id INTEGER NOT NULL, challenge_level INTEGER NOT NULL, is_low INTEGER NOT NULL, is_med INTEGER NOT NULL, is_high INTEGER NOT NULL, session_time INTEGER NOT NULL, achievement_score FLOAT NOT NULL, coherence_count INTEGER NOT NULL, heart_rates TEXT, CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES profiles (id) ON DELETE CASCADE );")){
         qDebug() << "Error: " << query.lastError();
     }
     return hrvDB.commit();
@@ -38,8 +38,8 @@ Profile* DBManager::getProfile(int id) {
     hrvDB.transaction();
 
     QSqlQuery query;
-    query.prepare("SELECT * FROM profile WHERE id = :profile_id;");
-    query.bindValue(":profile_id", id);
+    query.prepare("SELECT * FROM profiles WHERE pid=:pid");
+    query.bindValue(":pid", id);
     query.exec();
 
     if (!hrvDB.commit()) {
@@ -54,8 +54,25 @@ Profile* DBManager::getProfile(int id) {
     }
 
     // profile exists
-    Profile* pro = new Profile(query.value(0).toInt(), query.value(1).toDouble(), query.value(2).toInt());
+    Profile* pro = new Profile(query.value(0).toInt(), query.value(1).toDouble(), getLogCount(id));
     return pro;
+}
+
+int DBManager::getLogCount(int profile_id) {
+    QSqlQuery query;
+    query.prepare("SELECT COUNT(*) FROM log WHERE profile_id=:profile_id");
+    query.bindValue(":profile_id", profile_id);
+    query.exec();
+
+    if (!hrvDB.commit()) {
+        throw "Error: Query failed to execute";
+    }
+
+    if (!query.next()) {
+        return 0;
+    }
+
+    return query.value(0).toInt();
 }
 
 bool DBManager::updateProfile(int id, double batteryLvl, int sessionAmt) {
@@ -71,6 +88,7 @@ bool DBManager::updateProfile(int id, double batteryLvl, int sessionAmt) {
 
     return hrvDB.commit();
 }
+
 
 bool DBManager::addProfile(int id, double batteryLvl, int sessionsAmt) {
 
@@ -100,7 +118,7 @@ bool DBManager::deleteProfile(int id) {
 }
 
 
-QVector<Log*>* DBManager::getLogs(int id) {
+QVector<Log*>* DBManager::getLogs() {
 
     hrvDB.transaction();
 
@@ -120,8 +138,8 @@ QVector<Log*>* DBManager::getLogs(int id) {
 
         logs->append(
             new Log(
-                query.value(1).toInt(), // session id
                 query.value(0).toInt(), // profile id
+                query.value(1).toInt(), // session id
                 query.value(2).toInt(), // challenge level
                 query.value(3).toInt(), // is low
                 query.value(4).toInt(), // is med
@@ -175,8 +193,8 @@ Log* DBManager::getLog(int id) {
 
     // Log exists
     Log* log = new Log(
-                query.value(1).toInt(), // session id
                 query.value(0).toInt(), // profile id
+                query.value(1).toInt(), // session id
                 query.value(2).toInt(), // challenge level
                 query.value(3).toInt(), // is low
                 query.value(4).toInt(), // is med
@@ -189,7 +207,9 @@ Log* DBManager::getLog(int id) {
     return log;
 }
 
+
 bool DBManager::addLog(Log* log) {
+    qDebug() << log->getId() << " DAB ME up before database";
     hrvDB.transaction();
 
     QJsonArray heartRatesArray;
@@ -200,9 +220,8 @@ bool DBManager::addLog(Log* log) {
     QString heartRatesJson = heartRatesDoc.toJson(QJsonDocument::Compact);
 
     QSqlQuery query;
-    query.prepare("INSERT INTO log (profile_id, session_id, challenge_level, is_low, is_med, is_high, session_time, achievement_score, coherence_count, heart_rates) VALUES (:profile_id, :session_id, :challenge_level, :is_low, :is_med, :is_high, :session_time, :achievement_score, :coherence_count, :heart_rates);");
+    query.prepare("INSERT INTO log (profile_id, challenge_level, is_low, is_med, is_high, session_time, achievement_score, coherence_count, heart_rates) VALUES (:profile_id, :challenge_level, :is_low, :is_med, :is_high, :session_time, :achievement_score, :coherence_count, :heart_rates);");
     query.bindValue(":profile_id", log->getProfileId());
-    query.bindValue(":session_id", log->getId());
     query.bindValue(":challenge_level", log->getChallengeLevel());
     query.bindValue(":is_low", log->getIsLow());
     query.bindValue(":is_med", log->getIsMed());
@@ -229,7 +248,7 @@ bool DBManager::deleteLog(int id) {
         query.prepare("DELETE FROM log WHERE id = :log_id;");
         query.bindValue(":log_id", id);
         query.exec();
-
+        qDebug() << "Log deleted";
         return hrvDB.commit();
 }
 
@@ -243,10 +262,13 @@ bool DBManager::deleteLogs() {
         return hrvDB.commit();
 }
 
+
 void DBManager::dropTables() {
     QSqlQuery query;
     query.exec("DROP TABLE IF EXISTS log;");
+    qDebug() << query.lastError().text();
     query.exec("DROP TABLE IF EXISTS profiles;");
-    exit(1);
+
+    qDebug() << query.lastError().text();
 }
 

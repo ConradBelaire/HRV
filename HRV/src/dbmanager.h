@@ -30,10 +30,11 @@ public:
     bool deleteProfile(int id);
     Log* getLog(int id);
     bool addLog(Log* log);
-    QVector<Log*>* getLogs(int id);
+    QVector<Log*>* getLogs();
     bool deleteLog(int id);
     bool deleteLogs();
     bool doesLogExist(int id);
+    int getLogCount(int profile_id);
 
     void dropTables();
 private:

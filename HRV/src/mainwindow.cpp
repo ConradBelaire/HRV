@@ -132,13 +132,13 @@ Menu* MainWindow::create_history_menu(Menu* m) {
         QStringList sessionList;
         sessionList.append("CLEAR");
 
-        QVector<Log*>* logs = dbmanager->getLogs(profile->getId());
+        QVector<Log*>* logs = dbmanager->getLogs();
 
         qDebug() << "logs size: " + QString::number(logs->size());
 
 
         for (Log* currentLog : *logs) {
-            qDebug() << "Session Number: " + QString::number(currentLog->getSessionTime());
+            qDebug() << "Session Number: " + QString::number(currentLog->getId());
             sessionList.append("Session Number: " + QString::number(currentLog->getId()));
         }
 
@@ -148,20 +148,22 @@ Menu* MainWindow::create_history_menu(Menu* m) {
         // create child menus
         Menu* clearHistory = new Menu("CLEAR", {"YES","NO"}, history);
         history->addChildMenu(clearHistory);
+        sessions = QVector<Session*>();
 
         for (Log* currentLog : *logs) {
-            Menu* session_menu = new Menu(""+currentLog->getId(), {"VIEW", "DELETE"}, history);
-            sessions = QVector<Session*>();
+
+            qDebug() << currentLog->getId();
+
+            Menu* session_menu = new Menu(QString::number(currentLog->getId()), {"VIEW", "DELETE"}, history);
             sessions.append(new Session(currentLog));
 
-            Menu* view = new Menu("VIEW", {""}, session_menu);
+            Menu* view = new Menu("VIEW", {QString::number(currentLog->getId())}, session_menu);
             Menu* delete_menu = new Menu("DELETE", {"YES","NO"}, session_menu);
             session_menu->addChildMenu(view);
             session_menu->addChildMenu(delete_menu);
 
             history->addChildMenu(session_menu);
         }
-        qDebug() << history->getMenuItems();
         return history;
 }
 
@@ -261,6 +263,12 @@ void MainWindow::navigateBack() {
         initializeMainMenu(masterMenu);
         updateMenu(mainMenuOG->getName(), mainMenuOG->getMenuItems());
         return;
+    }
+
+    if(masterMenu->getParent()->getName() == "HISTORY"){
+        masterMenu = new Menu("MAIN MENU", {"BEGIN SESSION","HISTORY","SETTINGS"}, nullptr);
+        initializeMainMenu(masterMenu);
+        updateMenu(masterMenu->getChildMenu(1)->getName(), masterMenu->getChildMenu(1)->getMenuItems());
     }
 
     if (masterMenu->getName() == "MAIN MENU") {
@@ -369,24 +377,17 @@ void MainWindow::navigateSubMenu() {
         return;
     }
 
-    // delete session
-    if(is_session_num(masterMenu->getChildMenu(index)->getName())){
-        masterMenu = masterMenu->getChildMenu(index);
-        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
-        return;
-    }
-
     // navigate into the view menu
     if (masterMenu->getChildMenu(index)->getName() == "VIEW") {
-        displaySummary(sessions[index-1], true);
+        displaySummary(sessions[masterMenu->getName().toInt() - 1], true);
         return;
     }
 
 
     // navigate into the delete menu
     if (masterMenu->getChildMenu(index)->getName() == "DELETE") {
-        masterMenu = masterMenu->getChildMenu(index);
-        updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
+        dbmanager->deleteLog(masterMenu->getName().toInt());
+        navigateBack();
         return;
     }
 
@@ -398,8 +399,12 @@ void MainWindow::navigateSubMenu() {
     }
 
 
-    // navigate to clear menu
-    if (masterMenu->getChildMenu(index)->getName() == QString::number(index)) {
+    // navigate to session number menu
+    qDebug() << masterMenu->getName();
+    qDebug() << masterMenu->getMenuItem(index);
+    qDebug() << masterMenu->getChildMenu(index)->getName();
+    qDebug() << "Session Number: "+QString::number(index);
+    if (masterMenu->getMenuItem(index) == "Session Number: "+QString::number(index)) {
         masterMenu = masterMenu->getChildMenu(index);
         updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
         return;
@@ -548,7 +553,7 @@ void MainWindow::start_session(){
 
     // create session
     int thisSessionID = profile->increaseSessAmt();
-    qDebug() << challenge_level << " CHALLENGE LEVEL";
+    qDebug() << thisSessionID << " thisSessionID thisSessionID";
     currentSession = new Session(thisSessionID, challenge_level, pacer_dur, QDateTime::currentDateTime(), timer);
 }
 

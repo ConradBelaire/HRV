@@ -35,6 +35,7 @@ Session::Session(
     coherenceCount(log->getCoherenceCount()),
     coherenceSum(log->getAchievementScore()),
     recordedHR(log->getHeartRates_double()) {
+    qDebug() << SESSION_NUM << "SESSSSSSSSS";
 }
 
 // getters

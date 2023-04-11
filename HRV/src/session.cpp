@@ -26,14 +26,15 @@ Session::Session(
 Session::Session(
     Log* log) :
     SESSION_NUM(log->getId()),
-    PACER_DURATION(0),
     CHALLENGE_LEVEL(log->getChallengeLevel()),
+    PACER_DURATION(0),
     timeInLow(log->getIsLow()),
     timeInMed(log->getIsMed()),
     timeInHigh(log->getIsHigh()),
     elapsedTime(log->getSessionTime()),
     coherenceCount(log->getCoherenceCount()),
-    coherenceSum(log->getAchievementScore()) {
+    coherenceSum(log->getAchievementScore()),
+    recordedHR(log->getHeartRates_double()) {
 }
 
 // getters

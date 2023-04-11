@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 
     // TODO?: apply more skins
-
+    connect(ui->dropTable, &QPushButton::pressed, this, &MainWindow::dropTables);
     // TODO: connect the power level spin box
     //connect(ui->powerLevelAdminSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::changePowerLevel);
 
@@ -789,4 +789,8 @@ void MainWindow::turnOffLights() {
 void MainWindow::toggleSkin() {
     connectedStatus = !connectedStatus;
     applyToSkin(connectedStatus);
+}
+
+void MainWindow::dropTables() {
+    dbmanager->dropTables();
 }

@@ -3592,6 +3592,13 @@
        </property>
       </widget>
      </item>
+     <item row="4" column="1">
+      <widget class="QPushButton" name="dropTable">
+       <property name="text">
+        <string>DROP TABLE</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
   </widget>

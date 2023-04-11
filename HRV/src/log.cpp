@@ -33,8 +33,8 @@ Log::Log(Session* session, int profileId) :
     isHigh(session->getTimeHigh()),
     sessionTime(session->getElapsedTime()),
     achievementScore(session->getAchievementScore()),
-    heartRates(session->getGraph_int()),
-    coherenceCount(session->getCoherenceCount()) {}
+    coherenceCount(session->getCoherenceCount()),
+    heartRates(session->getGraph_int()) {}
 
 int Log::getId() {return sessionNum;}
 

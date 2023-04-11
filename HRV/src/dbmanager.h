@@ -35,6 +35,7 @@ public:
     bool deleteLogs();
     bool doesLogExist(int id);
 
+    void dropTables();
 private:
     QSqlDatabase hrvDB;
 

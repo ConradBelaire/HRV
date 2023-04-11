@@ -26,7 +26,7 @@ bool DBManager::DBInit() {
         qDebug() << "Error: " << query.lastError();
     }
 
-    if (!query.exec("CREATE TABLE IF NOT EXISTS log ( id INTEGER PRIMARY KEY, profile_id INTEGER NOT NULL, challenge_level INTEGER NOT NULL, is_low INTEGER NOT NULL, is_med INTEGER NOT NULL, is_high INTEGER NOT NULL, session_time INTEGER NOT NULL, achievement_score FLOAT NOT NULL, coherence_count INTEGER NOT NULL, heart_rates TEXT, CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES profiles (id) ON DELETE CASCADE );")){
+    if (!query.exec("CREATE TABLE IF NOT EXISTS log ( session_id INTEGER NOT NULL, profile_id INTEGER PRIMARY KEY, challenge_level INTEGER NOT NULL, is_low INTEGER NOT NULL, is_med INTEGER NOT NULL, is_high INTEGER NOT NULL, session_time INTEGER NOT NULL, achievement_score FLOAT NOT NULL, coherence_count INTEGER NOT NULL, heart_rates TEXT, CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES profiles (id) ON DELETE CASCADE );")){
         qDebug() << "Error: " << query.lastError();
     }
     return hrvDB.commit();
@@ -105,7 +105,7 @@ QVector<Log*>* DBManager::getLogs(int id) {
     hrvDB.transaction();
 
     QSqlQuery query;
-    query.prepare("SELECT * FROM log WHERE profile_id = :profile_id;");
+    query.prepare("SELECT * FROM log;");
     query.bindValue(":profile_id", id);
     query.exec();
 
@@ -126,23 +126,23 @@ QVector<Log*>* DBManager::getLogs(int id) {
     bool first = true;
     while (first || query.next()) {
         QVector<int> intVector;
-        QJsonDocument heartRatesDoc = QJsonDocument::fromJson(query.value(10).toString().toUtf8());
+        QJsonDocument heartRatesDoc = QJsonDocument::fromJson(query.value(9).toString().toUtf8());
         QJsonArray heartRatesArray = heartRatesDoc.array();
         for (const QJsonValue &value : heartRatesArray) {
             intVector.append(value.toInt());
         }
 
         logs->append(
-            new Log(
-                id,
-                query.value(0).toInt(),
-                query.value(1).toInt(),
-                query.value(2).toInt(),
-                query.value(3).toInt(),
-                query.value(4).toInt(),
-                query.value(5).toInt(),
-                query.value(6).toFloat(),
-                query.value(7).toInt(),
+            new Log( 
+                query.value(0).toInt(), // session id
+                query.value(1).toInt(), // profile id
+                query.value(2).toInt(), // challenge level
+                query.value(3).toInt(), // is low
+                query.value(4).toInt(), // is med
+                query.value(5).toInt(), // is high
+                query.value(6).toInt(), // session time
+                query.value(7).toFloat(), // achievement score
+                query.value(8).toInt(), // coherence count
                 intVector
             )
         );
@@ -190,7 +190,7 @@ Log* DBManager::getLog(int id) {
     }
 
     QVector<int> intVector;
-    QJsonDocument heartRatesDoc = QJsonDocument::fromJson(query.value(10).toString().toUtf8());
+    QJsonDocument heartRatesDoc = QJsonDocument::fromJson(query.value(9).toString().toUtf8());
     QJsonArray heartRatesArray = heartRatesDoc.array();
     for (const QJsonValue &value : heartRatesArray) {
         intVector.append(value.toInt());
@@ -198,16 +198,16 @@ Log* DBManager::getLog(int id) {
 
     // Log exists
     Log* log = new Log(
-        id,
-        query.value(0).toInt(),
-        query.value(1).toInt(),
-        query.value(2).toInt(),
-        query.value(3).toInt(),
-        query.value(4).toInt(),
-        query.value(5).toInt(),
-        query.value(6).toFloat(),
-        query.value(7).toInt(),
-        intVector
+                query.value(0).toInt(), // session id
+                query.value(1).toInt(), // profile id
+                query.value(2).toInt(), // challenge level
+                query.value(3).toInt(), // is low
+                query.value(4).toInt(), // is med
+                query.value(5).toInt(), // is high
+                query.value(6).toInt(), // session time
+                query.value(7).toFloat(), // achievement score
+                query.value(8).toInt(), // coherence count
+                intVector
     );
     return log;
 }
@@ -223,7 +223,8 @@ bool DBManager::addLog(Log* log) {
     QString heartRatesJson = heartRatesDoc.toJson(QJsonDocument::Compact);
 
     QSqlQuery query;
-    query.prepare("INSERT INTO log (profile_id, challenge_level, is_low, is_med, is_high, session_time, achievement_score, coherence_count, heart_rates) VALUES (:profile_id, :challenge_level, :is_low, :is_med, :is_high, :session_time, :achievement_score, :coherence_count, :heart_rates);");
+    query.prepare("INSERT INTO log (session_id, profile_id, challenge_level, is_low, is_med, is_high, session_time, achievement_score, coherence_count, heart_rates) VALUES (:session_id, :profile_id, :challenge_level, :is_low, :is_med, :is_high, :session_time, :achievement_score, :coherence_count, :heart_rates);");
+    query.bindValue(":session_id", log->getId());
     query.bindValue(":profile_id", log->getProfileId());
     query.bindValue(":challenge_level", log->getChallengeLevel());
     query.bindValue(":is_low", log->getIsLow());
@@ -263,5 +264,12 @@ bool DBManager::deleteLogs() {
         query.exec("DELETE FROM log;");
 
         return hrvDB.commit();
+}
+
+void DBManager::dropTables() {
+    QSqlQuery query;
+    query.exec("DROP TABLE IF EXISTS log;");
+    query.exec("DROP TABLE IF EXISTS profiles;");
+    exit(1);
 }
 

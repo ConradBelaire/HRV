@@ -124,5 +124,6 @@ class MainWindow : public QMainWindow
         void toggleGreenLED();
         void update_timer();
         void toggleSkin();
+        void dropTables();
 };
 #endif // MAINWINDOW_H

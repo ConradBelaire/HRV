@@ -701,19 +701,24 @@ void MainWindow::displaySummary(Session* session, bool is_history) {
     // update labels
     float avgScore = (session->getAchievementScore()/session->getCoherenceCount());
     float rounded = round(avgScore * 10.0f) / 10.0f;
-    ui->avgScore->setText("Avg Score: "+ QString::number(rounded));
-    ui->challengeLvlBar->setText(QString::number(session->getChallengeLevel()));
-    rounded = round(session->getAchievementScore() * 10.0f) / 10.0f;
-    ui->achvScoreBar_2->setText(QString::number(rounded));
-    ui->lengthBar_2->setText(QString::number(session->getElapsedTime()) + "s");
+    if (session->getCoherenceCount() >0) {
+        ui->avgScore->setText("Avg Score: "+ QString::number(rounded));
+        ui->challengeLvlBar->setText(QString::number(session->getChallengeLevel()));
+        rounded = round(session->getAchievementScore() * 10.0f) / 10.0f;
+        ui->achvScoreBar_2->setText(QString::number(rounded));
+        ui->lengthBar_2->setText(QString::number(session->getElapsedTime()) + "s");
+    }
 
     // calculate precentages
-
-
-
-    ui->timeInHigh->setText("% High: " + QString::number(log->getHighCoherencePercentage()));
-    ui->timeInMed->setText("% Med: " + QString::number(log->getMedCoherencePercentage()));
-    ui->timeInLow->setText("% Low: " + QString::number(log->getLowCoherencePercentage()));
+    if (session->getCoherenceCount() > 0) {
+        ui->timeInHigh->setText("% High: " + QString::number(log->getHighCoherencePercentage()));
+        ui->timeInMed->setText("% Med: " + QString::number(log->getMedCoherencePercentage()));
+        ui->timeInLow->setText("% Low: " + QString::number(log->getLowCoherencePercentage()));
+    } else {
+        ui->timeInHigh->setText("% High: N/A");
+        ui->timeInMed->setText("% Med: N/A");
+        ui->timeInLow->setText("% Low: N/A");
+    }
 
     delete log;
 

@@ -275,16 +275,17 @@ void MainWindow::navigateBack() {
         return;
     }
 
+    if (masterMenu->getName() == "MAIN MENU") {
+        activeQListWidget->setCurrentRow(0);
+    }
+
+    if (masterMenu->getParent() == nullptr) {return;}
+
     if(masterMenu->getParent()->getName() == "HISTORY"){
         masterMenu = new Menu("MAIN MENU", {"BEGIN SESSION","HISTORY","SETTINGS"}, nullptr);
         initializeMainMenu(masterMenu);
         updateMenu(masterMenu->getChildMenu(1)->getName(), masterMenu->getChildMenu(1)->getMenuItems());
-    }
-
-    if (masterMenu->getName() == "MAIN MENU") {
-        activeQListWidget->setCurrentRow(0);
-    }
-    else {
+    } else {
         masterMenu = masterMenu->getParent();
         updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
     }
@@ -746,7 +747,6 @@ void MainWindow::displaySummary(Session* session, bool is_history) {
         pacerCountDown = false;
         pacerWait = false;
         pacerCountUp = true;
-        inSessionView = false;
         startSession = false;
     }
 
@@ -768,6 +768,10 @@ void MainWindow::clearSessionSummary() {
     QVector<double> emptyData;
     ui->customPlot->graph(0)->setData(emptyData, emptyData);
     ui->customPlot->replot();
+    if (inSessionView) {
+        inSessionView = false;
+        navigateToMainMenu();
+    }
 }
 
 void MainWindow::toggleRedLED() {

@@ -214,7 +214,6 @@ Log* DBManager::getLog(int id) {
 
 
 bool DBManager::addLog(Log* log) {
-    qDebug() << log->getId() << " DAB ME up before database";
     hrvDB.transaction();
 
     QJsonArray heartRatesArray;
@@ -273,7 +272,6 @@ void DBManager::dropTables() {
     query.exec("DROP TABLE IF EXISTS log;");
     qDebug() << query.lastError().text();
     query.exec("DROP TABLE IF EXISTS profiles;");
-
     qDebug() << query.lastError().text();
 }
 

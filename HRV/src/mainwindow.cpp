@@ -79,8 +79,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // setup graphs
     ui->sessionFrame->setVisible(false);
     ui->summaryFrame->setVisible(false);
-    maxHR = 110;
-    minHR = 50;
+    maxHR = 100;
+    minHR = 60;
     ui->customPlot->xAxis->setRange(0, 5);
     ui->customPlot->yAxis->setRange(minHR, maxHR);
     ui->customPlot->xAxis->setLabel("Time (s)");
@@ -101,22 +101,57 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     inSessionView = false;
     startSession = false;
+
+    // hr data
+    vectorHRcount = 10; // max 9
+    heartRateData = {
+        {60, 60, 60, 60, 60, 60, 60, 60, 60, 60}, // Coherence Score: 0.4 | Challenge Level: 1
+        {80, 80, 80, 80, 80, 80, 80, 80, 80, 80}, // Coherence Score: 2.5 | Challenge Level: 2
+        {90, 90, 90, 90, 90, 90, 90, 90, 90, 90}, // Coherence Score: 4.5 | Challenge Level: 3
+
+        {70, 75, 72, 78, 71, 68, 74, 73, 69, 71}, // Coherence Score: 0.7 | Challenge Level: 1
+        {65, 70, 65, 75, 68, 67, 66, 68, 69, 70}, // Coherence Score: 1.3 | Challenge Level: 1
+        {76, 78, 79, 77, 76, 75, 78, 79, 78, 77}, // Coherence Score: 1.8 | Challenge Level: 2
+        {85, 83, 84, 85, 86, 87, 84, 85, 83, 82}, // Coherence Score: 3.5 | Challenge Level: 3
+        {78, 78, 79, 79, 78, 77, 77, 76, 76, 76}, // Coherence Score: 2.9 | Challenge Level: 2
+        {90, 92, 91, 89, 88, 90, 91, 92, 90, 89}, // Coherence Score: 4.2 | Challenge Level: 3
+        {70, 71, 69, 68, 70, 71, 72, 74, 75, 76}, // Coherence Score: 1.5 | Challenge Level: 1
+        {82, 81, 80, 82, 83, 84, 85, 84, 83, 82}, // Coherence Score: 6.0 | Challenge Level: 4
+        {75, 76, 74, 73, 72, 71, 72, 73, 74, 75}, // Coherence Score: 1.2 | Challenge Level: 1
+        {88, 86, 87, 85, 83, 84, 85, 86, 87, 88}, // Coherence Score: 3.8 | Challenge Level: 3
+        {67, 68, 69, 70, 71, 72, 73, 74, 75, 76}, // Coherence Score: 2.2 | Challenge Level: 2
+        {80, 79, 78, 77, 76, 75, 74, 73, 72, 71}, // Coherence Score: 1.9 | Challenge Level: 1
+        {95, 93, 94, 95, 96, 95, 94, 93, 92, 91}, // Coherence Score: 5.5 | Challenge Level: 4
+        {77, 77, 78, 79, 79, 78, 78, 77, 76, 76}, // Coherence Score: 2.7 | Challenge Level: 2
+        {92, 91, 90, 89, 88, 87, 86, 85, 84, 83}, // Coherence Score: 4.0 | Challenge Level: 3
+        {73, 73, 72, 72, 71, 71, 70, 70, 69, 69}, // Coherence Score: 0.9 | Challenge Level: 1
+        {81, 80, 81, 82, 83, 84, 85, 86, 87, 88}, // Coherence Score: 6.2 | Challenge Level: 4
+        {74, 75, 76, 77, 78, 79, 80, 81, 82, 83}, // Coherence Score: 1.4 | Challenge Level: 1
+        {89, 88, 87, 86, 85, 84, 83, 82, 81, 80}, // Coherence Score: 3.3 | Challenge Level: 3
+        {84, 85, 86, 87, 88, 89, 90, 91, 92, 93}, // Coherence Score: 2.8 | Challenge Level: 2
+        {70, 71, 72, 73, 74, 75, 76, 77, 78, 79}, // Coherence Score: 0.6 | Challenge Level: 1
+        {97, 96, 95, 94, 93, 92, 91, 90, 89, 88}, // Coherence Score: 5.2 | Challenge Level: 4
+        {72, 73, 74, 75, 76, 77, 78, 79, 80, 81}, // Coherence Score: 1.6 | Challenge Level: 1
+        {87, 86, 85, 84, 83, 82, 81, 80, 79, 78}, // Coherence Score: 3.5 | Challenge Level: 3
+        {82, 83, 84, 85, 86, 87, 88, 89, 90, 91}, // Coherence Score: 2.4 | Challenge Level: 2
+        {69, 70, 71, 72, 73, 74, 75, 76, 77, 78}, // Coherence Score: 0.8 | Challenge Level: 1
+    };
 }
 
 
 MainWindow::~MainWindow() {
-
     dbmanager->addProfile(profile->getId(), profile->getBLvl(), profile->getSessAmt());
 
     delete mainMenuOG;
     delete ui;
-
     for (int i = 0; i < sessions.size(); i++) {
         delete sessions[i];
     }
-
     delete dbmanager;
     delete profile;
+    delete activeQListWidget;
+    if (timer != nullptr) {delete timer;}
+    delete currentSession;
 }
 
 QString MainWindow::floatToStringWithOneDecimalPlace(float value) {
@@ -126,18 +161,13 @@ QString MainWindow::floatToStringWithOneDecimalPlace(float value) {
 }
 
 Menu* MainWindow::create_history_menu(Menu* m) {
-        qDebug() << "in create history menu";
         // initialise session list
         QStringList sessionList;
         sessionList.append("CLEAR");
 
         QVector<Log*>* logs = dbmanager->getLogs();
 
-        qDebug() << "logs size: " + QString::number(logs->size());
-
-
         for (Log* currentLog : *logs) {
-            qDebug() << "Session Number: " + QString::number(currentLog->getId());
             sessionList.append("Session Number: " + QString::number(currentLog->getId()));
         }
 
@@ -240,6 +270,7 @@ void MainWindow::navigateToMainMenu() {
 
 // back button
 void MainWindow::navigateBack() {
+    qDebug() << "HISTORY3";
     if (currentTimerCount > 0) {
         displaySummary(currentSession, false);
         return;
@@ -260,7 +291,6 @@ void MainWindow::navigateBack() {
     }
 
     if(masterMenu->getName() == "BEGIN SESSION") {
-        qDebug() << "in begin session back";
         masterMenu = new Menu("MAIN MENU", {"BEGIN SESSION","HISTORY","SETTINGS"}, nullptr);
         initializeMainMenu(masterMenu);
         updateMenu(mainMenuOG->getName(), mainMenuOG->getMenuItems());
@@ -268,7 +298,17 @@ void MainWindow::navigateBack() {
     }
 
     if(masterMenu->getName() == "CLEAR") {
-        qDebug() << "in clear back";
+        masterMenu = new Menu("MAIN MENU", {"BEGIN SESSION","HISTORY","SETTINGS"}, nullptr);
+        initializeMainMenu(masterMenu);
+        updateMenu(mainMenuOG->getName(), mainMenuOG->getMenuItems());
+        return;
+    }
+
+    if (masterMenu->getName() == "MAIN MENU") {
+        activeQListWidget->setCurrentRow(0);
+    }
+
+    if (masterMenu->getParent() == nullptr) {
         masterMenu = new Menu("MAIN MENU", {"BEGIN SESSION","HISTORY","SETTINGS"}, nullptr);
         initializeMainMenu(masterMenu);
         updateMenu(mainMenuOG->getName(), mainMenuOG->getMenuItems());
@@ -279,12 +319,7 @@ void MainWindow::navigateBack() {
         masterMenu = new Menu("MAIN MENU", {"BEGIN SESSION","HISTORY","SETTINGS"}, nullptr);
         initializeMainMenu(masterMenu);
         updateMenu(masterMenu->getChildMenu(1)->getName(), masterMenu->getChildMenu(1)->getMenuItems());
-    }
-
-    if (masterMenu->getName() == "MAIN MENU") {
-        activeQListWidget->setCurrentRow(0);
-    }
-    else {
+    } else {
         masterMenu = masterMenu->getParent();
         updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
     }
@@ -412,10 +447,6 @@ void MainWindow::navigateSubMenu() {
 
 
     // navigate to session number menu
-    qDebug() << masterMenu->getName();
-    qDebug() << masterMenu->getMenuItem(index);
-    qDebug() << masterMenu->getChildMenu(index)->getName();
-    qDebug() << "Session Number: "+QString::number(index);
     if (masterMenu->getMenuItem(index) == "Session Number: "+QString::number(index)) {
         masterMenu = masterMenu->getChildMenu(index);
         updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
@@ -565,8 +596,7 @@ void MainWindow::start_session(){
 
     // create session
     int thisSessionID = profile->increaseSessAmt();
-    qDebug() << thisSessionID << " thisSessionID thisSessionID";
-    currentSession = new Session(thisSessionID, challenge_level, pacer_dur, QDateTime::currentDateTime(), timer);
+    currentSession = new Session(thisSessionID, challenge_level, pacer_dur, timer);
 }
 
 void MainWindow::init_timer(QTimer* timer){
@@ -592,9 +622,9 @@ void MainWindow::update_timer(){
 
     // update y axis
     if (newHeartRate < minHR) {
-        minHR = newHeartRate-10;
+        minHR = newHeartRate;
     } else if (newHeartRate > maxHR) {
-        maxHR = newHeartRate+10;
+        maxHR = newHeartRate;
     }
     ui->customPlot->yAxis->setRange(minHR, maxHR);
 
@@ -608,7 +638,7 @@ void MainWindow::update_timer(){
     ui->customPlot->replot();
 
     // calculate new coherence score
-    float newCoherenceScore = currentSession->updateSession(newHeartRate);
+    float newCoherenceScore = currentSession->updateSession(newHeartRate, currentHRvector);
 
     // update achievement score text
     if (newCoherenceScore != -1) {
@@ -704,7 +734,6 @@ void MainWindow::displaySummary(Session* session, bool is_history) {
     ui->customPlot_2->replot();
 
     Log *log = new Log(session, 0);
-    qDebug() << log->getChallengeLevel() << " CHALLENGE LEVEL";
     if (!is_history){
         dbmanager->addLog(log);
     }
@@ -746,8 +775,8 @@ void MainWindow::displaySummary(Session* session, bool is_history) {
         pacerCountDown = false;
         pacerWait = false;
         pacerCountUp = true;
-        inSessionView = false;
         startSession = false;
+        vectorHRcount = 10;
     }
 
     turnOffLights();
@@ -768,6 +797,10 @@ void MainWindow::clearSessionSummary() {
     QVector<double> emptyData;
     ui->customPlot->graph(0)->setData(emptyData, emptyData);
     ui->customPlot->replot();
+    if (inSessionView) {
+        inSessionView = false;
+        navigateToMainMenu();
+    }
 }
 
 void MainWindow::toggleRedLED() {
@@ -830,10 +863,16 @@ void MainWindow::updatePacer() {
 }
 
 int MainWindow::generateHR() {
-    int min = 50;
-    int max = 120;
-    int randomNumberInRange = min + (std::rand() % (max - min + 1));
-    return randomNumberInRange;
+    if (vectorHRcount > 9) {
+        vectorHRcount = 0;
+        int min = 3;    // first 3 are debug
+        int max = 28;
+        int randomNumberInRange = min + (std::rand() % (max - min + 1));
+        currentHRvector = randomNumberInRange;
+        qDebug() << "HR Vector Selected " + QString::number(randomNumberInRange);
+    }
+    return heartRateData[currentHRvector][vectorHRcount++];
+
 }
 
 void MainWindow::turnOffLights() {

@@ -4,12 +4,10 @@ Session::Session(
     int sessionNum,
     int challengeLevel,
     int pacerDuration,
-    const QDateTime& startTime,
     QTimer* timer) :
     SESSION_NUM(sessionNum),
     CHALLENGE_LEVEL(challengeLevel),
     PACER_DURATION(pacerDuration),
-    START_TIME(startTime),
     currentHR(0),
     timeInLow(0),
     timeInMed(0),
@@ -19,8 +17,8 @@ Session::Session(
     coherenceCount(0),
     coherenceSum(0),
     currentCoherence(0),
-    timer(timer)   {
-    std::srand(static_cast<unsigned>(std::time(0)));
+    timer(timer)    {
+    coherenceScoreData = {0.4, 2.5, 4.5, 0.7, 1.3, 1.8, 3.5, 2.9, 4.2, 1.5, 6.0, 1.2, 3.8, 2.2, 1.9, 5.5, 2.7, 4.0, 0.9, 6.2, 1.4, 3.3, 2.8, 0.6, 5.2, 1.6, 3.5, 2.4, 0.8};
 }
 
 Session::Session(
@@ -35,7 +33,6 @@ Session::Session(
     coherenceCount(log->getCoherenceCount()),
     coherenceSum(log->getAchievementScore()),
     recordedHR(log->getHeartRates_double()) {
-    qDebug() << SESSION_NUM << "SESSSSSSSSS";
 }
 
 // getters
@@ -53,7 +50,6 @@ float Session::getCurrentCoherence() const {return currentCoherence;}
 float Session::getAchievementScore() const {return coherenceSum;}
 
 QTimer* Session::getTimer() {return timer;}
-QDateTime Session::getStartTime() const {return START_TIME;}
 QVector<double> Session::getGraph_double() const {return recordedHR;}
 QVector<int> Session::getGraph_int() const {
     QVector<int> list_of_ints;
@@ -90,14 +86,14 @@ void Session::setHighCoherencePercentage(float newHighCoherencePercentage) {time
 void Session::setHeartRates_double(QVector<double> newHeartRates_double) {recordedHR = newHeartRates_double;}
 
 // functions
-float Session::updateSession(int newHR) {
+float Session::updateSession(int newHR, int currentVector) {
     currentHR = newHR;
     elapsedTime++;
     recordedHR.append(newHR);
 
     if (countUpdates == 5) {
         countUpdates = 0;
-        return calculateCoherenceScore();;
+        return calculateCoherenceScore(currentVector);;
     } else {
         countUpdates++;
         return -1;
@@ -137,11 +133,8 @@ void Session::addCoherenceScore(float newCoherenceScore) {
     coherenceCount++;
 }
 
-float Session::calculateCoherenceScore() {
-//    currentCoherence = 0; // temp
-
-    // TODO: Figure out how to calculate this shit
-    currentCoherence = generateCS();
+float Session::calculateCoherenceScore(int currentVector) {
+    currentCoherence = coherenceScoreData[currentVector];
     qDebug() << "New Coherence Score: " + QString::number(currentCoherence);
 
     int rank = determineScoreLevel(currentCoherence);
@@ -159,12 +152,3 @@ float Session::calculateCoherenceScore() {
     addCoherenceScore(currentCoherence);
     return currentCoherence;
 }
-
-float Session::generateCS() {
-    float min = 0.0;
-    float max = 7.0;
-    float randomFraction = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-    float randomNumberInRange = min + (randomFraction * (max - min));
-    return randomNumberInRange;
-}
-

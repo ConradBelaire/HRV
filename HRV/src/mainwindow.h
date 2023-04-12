@@ -117,6 +117,9 @@ class MainWindow : public QMainWindow
         bool inSessionView;
         bool startSession;
 
+        QVector<QVector<double>> heartRateData;
+        int currentHRvector;
+        int vectorHRcount;
 
     private slots:
         void navigateDownMenu();

@@ -1,7 +1,6 @@
 #ifndef SESSION_H
 #define SESSION_H
 
-#include <QDateTime>
 #include <QTimer>
 #include <QVector>
 #include <QDebug>
@@ -16,7 +15,6 @@ class Session {
             int sessionNum,
             int challengeLevel,
             int pacerDuration,
-            const QDateTime& startTime,
             QTimer* timer
         );
 
@@ -37,7 +35,6 @@ class Session {
         float getAchievementScore() const;
 
         QTimer* getTimer();
-        QDateTime getStartTime() const;
         QVector<double> getGraph_double() const;
         QVector<int> getGraph_int() const;
 
@@ -54,16 +51,13 @@ class Session {
         void setHeartRates_double(QVector<double> newHeartRates_double);
 
         // functions
-        float updateSession(int newHR);
+        float updateSession(int newHR, int currentVector);
         int determineScoreLevel(float cohernceScore);
-
-
 
     private:
         const int SESSION_NUM;
         const int CHALLENGE_LEVEL;
         const int PACER_DURATION;
-        const QDateTime START_TIME;
 
         int currentHR;
         int timeInLow;
@@ -81,9 +75,9 @@ class Session {
         QVector<double> recordedHR;
 
         void addCoherenceScore(float newCoherenceScore);
-        float calculateCoherenceScore();
+        float calculateCoherenceScore(int currentVector);
 
-        float generateCS();
+        QVector<double> coherenceScoreData;
 };
 
 #endif // SESSION_H

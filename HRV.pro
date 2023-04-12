@@ -28,7 +28,7 @@ forms_dir = HRV/ui
 libs_dir = HRV/libs
 resources_dir = res
 
-QMAKE_CLEAN += hrv.sqlite
+QMAKE_CLEAN += hrv.db
 
 SOURCES += \
     $${source_dir}/dbmanager.cpp \

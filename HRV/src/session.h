@@ -4,6 +4,10 @@
 #include <QDateTime>
 #include <QTimer>
 #include <QVector>
+#include <QDebug>
+#include "log.h"
+
+class Log;
 
 class Session {
 
@@ -15,6 +19,8 @@ class Session {
             const QDateTime& startTime,
             QTimer* timer
         );
+
+        Session(Log* log);
 
         // getters
         int getTimeLow() const;
@@ -32,12 +38,20 @@ class Session {
 
         QTimer* getTimer();
         QDateTime getStartTime() const;
-        QVector<double> getGraph() const;
+        QVector<double> getGraph_double() const;
+        QVector<int> getGraph_int() const;
 
         // setters
         void addToLow();
         void addToMed();
         void addToHigh();
+
+        void setAvgCoherence(float newAvgCoherence);
+        void setAchievementScore(float newAchievementScore);
+        void setLowCoherencePercentage(float newLowCoherencePercentage);
+        void setMedCoherencePercentage(float newMedCoherencePercentage);
+        void setHighCoherencePercentage(float newHighCoherencePercentage);
+        void setHeartRates_double(QVector<double> newHeartRates_double);
 
         // functions
         float updateSession(int newHR);
@@ -58,6 +72,7 @@ class Session {
         int elapsedTime;
         int countUpdates;
         int coherenceCount;
+        float newAvgCoherence;
 
         float coherenceSum;
         float currentCoherence;

@@ -54,7 +54,7 @@ class MainWindow : public QMainWindow
 
         void changePowerStatus();
         //void powerChange();
-        QVector<Log*> sessions;
+        QVector<Session*> sessions;
 
         QTimer* timer;
         QString timeString;
@@ -83,7 +83,7 @@ class MainWindow : public QMainWindow
         void rechargeBattery();
 
 
-        void displaySummary();
+        void displaySummary(Session* session, bool is_history);
 
         // util fucntions
         Menu* create_history_menu(Menu* m);
@@ -100,6 +100,8 @@ class MainWindow : public QMainWindow
         QString greenOff;
         QString blueOn;
         QString blueOff;
+        QString connectionOn;
+        QString connectionOff;
 
         int maxHR;
         int minHR;
@@ -111,6 +113,9 @@ class MainWindow : public QMainWindow
         float generateCS();
 
         void clearSessionSummary();
+
+        bool inSessionView;
+        bool startSession;
 
 
     private slots:
@@ -124,5 +129,6 @@ class MainWindow : public QMainWindow
         void toggleGreenLED();
         void update_timer();
         void toggleSkin();
+        void dropTables();
 };
 #endif // MAINWINDOW_H

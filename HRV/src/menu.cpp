@@ -18,5 +18,6 @@ void Menu::addChildMenu(Menu* m) {
 // getters
 QString Menu::getName() { return name; }
 QStringList Menu::getMenuItems() { return menuItems; }
+QString Menu::getMenuItem(int i) { return menuItems[i]; }
 Menu* Menu::getParent() { return parent; }
 Menu* Menu::getChildMenu(int i) { return childMenus[i]; }

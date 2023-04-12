@@ -23,6 +23,21 @@ Session::Session(
     std::srand(static_cast<unsigned>(std::time(0)));
 }
 
+Session::Session(
+    Log* log) :
+    SESSION_NUM(log->getId()),
+    CHALLENGE_LEVEL(log->getChallengeLevel()),
+    PACER_DURATION(0),
+    timeInLow(log->getIsLow()),
+    timeInMed(log->getIsMed()),
+    timeInHigh(log->getIsHigh()),
+    elapsedTime(log->getSessionTime()),
+    coherenceCount(log->getCoherenceCount()),
+    coherenceSum(log->getAchievementScore()),
+    recordedHR(log->getHeartRates_double()) {
+    qDebug() << SESSION_NUM << "SESSSSSSSSS";
+}
+
 // getters
 int Session::getTimeLow() const {return timeInLow;}
 int Session::getTimeMed() const {return timeInMed;}
@@ -39,12 +54,40 @@ float Session::getAchievementScore() const {return coherenceSum;}
 
 QTimer* Session::getTimer() {return timer;}
 QDateTime Session::getStartTime() const {return START_TIME;}
-QVector<double> Session::getGraph() const {return recordedHR;}
+QVector<double> Session::getGraph_double() const {return recordedHR;}
+QVector<int> Session::getGraph_int() const {
+    QVector<int> list_of_ints;
+    for (double value : recordedHR) {
+        list_of_ints.append(static_cast<int>(value));
+    }
+    return list_of_ints;
+}
 
 // setters
-void Session::addToLow() {timeInLow++;}
-void Session::addToMed() {timeInMed++;}
-void Session::addToHigh() {timeInHigh++;}
+void Session::addToLow() {
+    timeInLow++;
+    if (timeInLow == 1) {
+        qDebug() << "*BEEP* (low coherence light turned on for the first time)";
+    }
+}
+void Session::addToMed() {
+    timeInMed++;
+    if (timeInMed == 1) {
+        qDebug() << "*BEEP* (medium coherence light turned on for the first time)";
+    }
+}
+void Session::addToHigh() {
+    timeInHigh++;
+    if (timeInHigh == 1) {
+        qDebug() << "*BEEP* (high coherence light turned on for the first time)";
+    }
+}
+
+void Session::setAchievementScore(float newAchievementScore) {coherenceSum = newAchievementScore;}
+void Session::setLowCoherencePercentage(float newLowCoherencePercentage) {timeInLow = newLowCoherencePercentage;}
+void Session::setMedCoherencePercentage(float newMedCoherencePercentage) {timeInMed = newMedCoherencePercentage;}
+void Session::setHighCoherencePercentage(float newHighCoherencePercentage) {timeInHigh = newHighCoherencePercentage;}
+void Session::setHeartRates_double(QVector<double> newHeartRates_double) {recordedHR = newHeartRates_double;}
 
 // functions
 float Session::updateSession(int newHR) {

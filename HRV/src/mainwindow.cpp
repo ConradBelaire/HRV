@@ -503,19 +503,20 @@ void MainWindow::changeBatteryLevel(double newLevel) {
 // change the power status variable
 void MainWindow::powerChange(){
 
+    // if in the middle of a session
+    if (currentTimerCount > 0){
+        //Save Session
+        applyToSkin(false);
+        displaySummary(currentSession, false);
+        clearSessionSummary();
+    }
+
     // if the battery level is greater than 0, then toggle the power status
     if (profile->getBLvl() > 0) {
         powerStatus  = !powerStatus;
         changePowerStatus();
     }
 
-    // if in the middle of a session
-    if (currentTimerCount != -1){
-        //Save Session
-        applyToSkin(false);
-        displaySummary(currentSession, false);
-        clearSessionSummary();
-    }
     ui->sessionFrame->setVisible(false);
     ui->summaryFrame->setVisible(false);
 }
@@ -523,8 +524,7 @@ void MainWindow::powerChange(){
 // Toggle visibilty of the menu
 void MainWindow::changePowerStatus() {
     if (!powerStatus) {turnOffLights();}
-    //activeQListWidget->setVisible(powerStatus);
-    //ui->menuLabel->setVisible(powerStatus);
+    //dbmanager->updateProfile(profile->getId(), profile->getBLvl(), sessions.size());
 
     ui->screen->setVisible(powerStatus); // Sets the whole screen widget's and all children's visibility
 
@@ -768,7 +768,6 @@ void MainWindow::clearSessionSummary() {
     QVector<double> emptyData;
     ui->customPlot->graph(0)->setData(emptyData, emptyData);
     ui->customPlot->replot();
-    navigateToMainMenu();
 }
 
 void MainWindow::toggleRedLED() {

@@ -151,7 +151,6 @@ Menu* MainWindow::create_history_menu(Menu* m) {
 
         for (Log* currentLog : *logs) {
 
-            qDebug() << currentLog->getId();
 
             Menu* session_menu = new Menu(QString::number(currentLog->getId()), {"VIEW", "DELETE"}, history);
             sessions.append(new Session(currentLog));
@@ -276,7 +275,7 @@ void MainWindow::navigateBack() {
         return;
     }
 
-    if(masterMenu->getParent() != nullptr && masterMenu->getParent()->getName() == "HISTORY"){
+    if(masterMenu->getParent()->getName() == "HISTORY"){
         masterMenu = new Menu("MAIN MENU", {"BEGIN SESSION","HISTORY","SETTINGS"}, nullptr);
         initializeMainMenu(masterMenu);
         updateMenu(masterMenu->getChildMenu(1)->getName(), masterMenu->getChildMenu(1)->getMenuItems());
@@ -331,7 +330,7 @@ void MainWindow::navigateSubMenu() {
     // fucntionality of the delete menu
     if(masterMenu->getName() == "DELETE"){
         if (masterMenu->getMenuItems().value(index) == "YES") {
-            int log_id = masterMenu->getParent()->getParent()->getName().toInt();
+            int log_id = masterMenu->getParent()->getParent()->getName().toInt() -1;
             dbmanager->deleteLog(log_id);
             navigateBack();
             return;

@@ -243,12 +243,12 @@ bool DBManager::addLog(Log* log) {
 
 bool DBManager::deleteLog(int id) {
         hrvDB.transaction();
+        qDebug() << id << "the Id of the log deleted";
 
         QSqlQuery query;
-        query.prepare("DELETE FROM log WHERE id = :log_id;");
+        query.prepare("DELETE FROM log WHERE session_id = :log_id;");
         query.bindValue(":log_id", id);
         query.exec();
-        qDebug() << "Log deleted";
         return hrvDB.commit();
 }
 

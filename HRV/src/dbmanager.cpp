@@ -38,8 +38,8 @@ Profile* DBManager::getProfile(int id) {
     hrvDB.transaction();
 
     QSqlQuery query;
-    query.prepare("SELECT * FROM profiles WHERE pid=:pid");
-    query.bindValue(":pid", id);
+    query.prepare("SELECT * FROM profiles WHERE :id = id");
+    query.bindValue(":id", id);
     query.exec();
 
     if (!hrvDB.commit()) {
@@ -48,10 +48,13 @@ Profile* DBManager::getProfile(int id) {
 
    // profile does not exist
     if (!query.next()) {
+        qDebug() << "new Profile created";
         addProfile(id, 100, 0);
         Profile* pro = new Profile(id, 100, 1);
         return pro;
     }
+
+    qDebug() << query.value(0).toInt() << query.value(1).toDouble() << "id and battery level";
 
     // profile exists
     Profile* pro = new Profile(query.value(0).toInt(), query.value(1).toDouble(), getLogCount(id));
@@ -59,6 +62,8 @@ Profile* DBManager::getProfile(int id) {
 }
 
 int DBManager::getLogCount(int profile_id) {
+    hrvDB.transaction();
+
     QSqlQuery query;
     query.prepare("SELECT COUNT(*) FROM log WHERE profile_id=:profile_id");
     query.bindValue(":profile_id", profile_id);
@@ -75,16 +80,17 @@ int DBManager::getLogCount(int profile_id) {
     return query.value(0).toInt();
 }
 
-bool DBManager::updateProfile(int id, double batteryLvl, int sessionAmt) {
+bool DBManager::updateProfile(int id, double batteryLvl) {
 
     hrvDB.transaction();
 
     QSqlQuery query;
-    query.prepare("UPDATE profiles SET battery_level = :battery_level, sessionAmt = :sessionAmt WHERE id = :profile_id;");
+    query.prepare("UPDATE profiles SET battery_level = :battery_level WHERE id = :profile_id;");
     query.bindValue(":profile_id", id);
     query.bindValue(":battery_level", batteryLvl);
-    query.bindValue(":sessionAmt", sessionAmt);
     query.exec();
+
+    qDebug() << query.lastError().text();
 
     return hrvDB.commit();
 }
@@ -95,10 +101,9 @@ bool DBManager::addProfile(int id, double batteryLvl, int sessionsAmt) {
     hrvDB.transaction();
 
     QSqlQuery query;
-    query.prepare("REPLACE INTO profiles (id, battery_level, sessionAmt) VALUES (:profile_id, :battery_level, :sessionAmt);");
-    query.bindValue(":profile_id", id);
+    query.prepare("REPLACE INTO profiles (id, battery_level) VALUES (:id, :battery_level);");
+    query.bindValue(":id", id);
     query.bindValue(":battery_level", batteryLvl);
-    query.bindValue(":sessionAmt", sessionsAmt);
     query.exec();
 
     return hrvDB.commit();
@@ -179,7 +184,7 @@ Log* DBManager::getLog(int id) {
     hrvDB.transaction();
 
     QSqlQuery query;
-    query.prepare("SELECT * FROM log WHERE :id = id");
+    query.prepare("SELECT * FROM log WHERE :id = session_id");
     query.bindValue(":id", id);
     query.exec();
 

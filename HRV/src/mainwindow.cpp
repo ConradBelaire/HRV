@@ -524,7 +524,7 @@ void MainWindow::powerChange(){
 // Toggle visibilty of the menu
 void MainWindow::changePowerStatus() {
     if (!powerStatus) {turnOffLights();}
-    //dbmanager->updateProfile(profile->getId(), profile->getBLvl(), sessions.size());
+    dbmanager->updateProfile(profile->getId(), profile->getBLvl());
 
     ui->screen->setVisible(powerStatus); // Sets the whole screen widget's and all children's visibility
 

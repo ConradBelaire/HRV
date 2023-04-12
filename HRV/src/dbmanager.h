@@ -26,7 +26,7 @@ public:
     DBManager();
     bool addProfile(int id, double batterLvl, int sessionAmt);
     Profile* getProfile(int id);
-    bool updateProfile(int id, double batteryLvl, int sessionAmt);
+    bool updateProfile(int id, double batteryLvl);
     bool deleteProfile(int id);
     Log* getLog(int id);
     bool addLog(Log* log);

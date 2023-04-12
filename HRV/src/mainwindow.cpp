@@ -242,11 +242,22 @@ void MainWindow::navigateToMainMenu() {
 
 // back button
 void MainWindow::navigateBack() {
-    if (currentTimerCount != -1) {
+    if (currentTimerCount > 0) {
         displaySummary(currentSession, false);
-
+        return;
     } else if (sessionSummaryVisible) {
         clearSessionSummary();
+        return;
+    } else if (inSessionView) {
+        inSessionView = false;
+        startSession = false;
+        currentTimerCount = -1;
+        pacerCounter = -1;
+        pacerCountDown = false;
+        pacerWait = false;
+        pacerCountUp = true;
+        ui->sessionFrame->setVisible(false);
+        navigateToMainMenu();
         return;
     }
 
@@ -642,7 +653,7 @@ void MainWindow::applyToSkin(bool checked) {
             if (!onSkin && (currentTimerCount > 0)) {
                 displaySummary(currentSession, false);
             }
-            else {
+            else if (onSkin) {
                 currentSession->getTimer()->start(1000);
             }
         } else if (!startSession && onSkin && (currentTimerCount > 0)) {
@@ -711,9 +722,9 @@ void MainWindow::displaySummary(Session* session, bool is_history) {
 
     // calculate precentages
     if (session->getCoherenceCount() > 0) {
-        ui->timeInHigh->setText("% High: " + QString::number(log->getHighCoherencePercentage()));
-        ui->timeInMed->setText("% Med: " + QString::number(log->getMedCoherencePercentage()));
-        ui->timeInLow->setText("% Low: " + QString::number(log->getLowCoherencePercentage()));
+        ui->timeInHigh->setText("% High: " + QString::number(round(log->getHighCoherencePercentage() * 10.0f) / 10.0f));
+        ui->timeInMed->setText("% Med: " + QString::number(round(log->getMedCoherencePercentage() * 10.0f) / 10.0f));
+        ui->timeInLow->setText("% Low: " + QString::number(round(log->getLowCoherencePercentage() * 10.0f) / 10.0f));
     } else {
         ui->timeInHigh->setText("% High: N/A");
         ui->timeInMed->setText("% Med: N/A");

@@ -7,8 +7,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // init settings
     pacer_dur = 10;
-    //    challenge_level = 1;
-    challenge_level = 4; // delete this before we hand it in lol
+    challenge_level = 1;
     pacerCounter = -1;
 
     // Set initial Skin status
@@ -341,6 +340,8 @@ void MainWindow::navigateSubMenu() {
             navigateBack();
             return;
         }
+
+        // this whole thing is dogshit
     }
 
     // fucntionality of the reset menu
@@ -532,7 +533,7 @@ void MainWindow::changePowerStatus() {
     if (powerStatus) {
         if (connectedStatus) {ui->hrConnection->setStyleSheet(connectionOn);}
         MainWindow::navigateToMainMenu();
-        //applyToSkin(false);
+        //Skin(false);
     }
 
     ui->upButton->setEnabled(powerStatus);
@@ -642,7 +643,7 @@ void MainWindow::drainBattery() {
 void MainWindow::applyToSkin(bool checked) {
     // TODO: update screen
     // ui->electrodeLabel->setPixmap(QPixmap(checked ? ":/icons/electrodeOn.svg" : ":/icons/electrodeOff.svg"));
-    // ui->applyToSkinAdminBox->setCurrentIndex(checked ? 1 : 0);
+    // ui->SkinAdminBox->setCurrentIndex(checked ? 1 : 0);
     bool onSkin = checked; // why?
 
     // if the timer is not running
@@ -704,7 +705,7 @@ void MainWindow::displaySummary(Session* session, bool is_history) {
     ui->customPlot_2->replot();
 
     Log *log = new Log(session, 0);
-    qDebug() << log->getChallengeLevel() << " CHALLENGE LEVEL3";
+    qDebug() << log->getChallengeLevel() << " CHALLENGE LEVEL";
     if (!is_history){
         dbmanager->addLog(log);
     }

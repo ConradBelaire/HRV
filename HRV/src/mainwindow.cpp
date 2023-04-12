@@ -270,6 +270,7 @@ void MainWindow::navigateToMainMenu() {
 
 // back button
 void MainWindow::navigateBack() {
+    qDebug() << "HISTORY3";
     if (currentTimerCount > 0) {
         displaySummary(currentSession, false);
         return;
@@ -307,7 +308,12 @@ void MainWindow::navigateBack() {
         activeQListWidget->setCurrentRow(0);
     }
 
-    if (masterMenu->getParent() == nullptr) {return;}
+    if (masterMenu->getParent() == nullptr) {
+        masterMenu = new Menu("MAIN MENU", {"BEGIN SESSION","HISTORY","SETTINGS"}, nullptr);
+        initializeMainMenu(masterMenu);
+        updateMenu(mainMenuOG->getName(), mainMenuOG->getMenuItems());
+        return;
+    }
 
     if(masterMenu->getParent()->getName() == "HISTORY"){
         masterMenu = new Menu("MAIN MENU", {"BEGIN SESSION","HISTORY","SETTINGS"}, nullptr);

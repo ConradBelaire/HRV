@@ -3,7 +3,6 @@
 
 #include <QString>
 #include <QSqlDatabase>
-#include <QDateTime>
 #include <QDebug>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -20,28 +19,31 @@
 class DBManager {
 
 public:
-    const QString DATE_FORMAT = "yyyy-MM-dd hh:mm";
+    // database path
     static const QString DATABASE_PATH;
 
+    // constructor
     DBManager();
-    bool addProfile(int id, double batterLvl, int sessionAmt);
-    Profile* getProfile(int id);
-    bool updateProfile(int id, double batteryLvl);
-    bool deleteProfile(int id);
-    Log* getLog(int id);
-    bool addLog(Log* log);
-    QVector<Log*>* getLogs();
-    bool deleteLog(int id);
+    
+    // methods
+    void dropTables();
     bool deleteLogs();
+    bool addLog(Log* log);
+    bool deleteLog(int id);
     bool doesLogExist(int id);
+    bool deleteProfile(int id);
+    bool updateProfile(int id, double batteryLvl);
+    bool addProfile(int id, double batterLvl, int sessionAmt);
+
+    // getters
+    Log* getLog(int id);
+    QVector<Log*>* getLogs();
+    Profile* getProfile(int id);
     int getLogCount(int profile_id);
 
-    void dropTables();
 private:
     QSqlDatabase hrvDB;
-
     bool DBInit();
-
 };
 
 #endif // DBMANAGER_H

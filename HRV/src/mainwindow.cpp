@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     changePowerStatus();
 
     // connect user widgets
-    connect(ui->batteryLevelAdminSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryLevel);-
+    connect(ui->batteryLevelAdminSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryLevel);
     connect(ui->powerButton, &QPushButton::released, this, &MainWindow::powerChange);
     connect(ui->chargeBatteryButton, &QPushButton::released, this, &MainWindow::rechargeBattery);
     connect(ui->upButton, &QPushButton::pressed, this, &MainWindow::navigateUpMenu);
@@ -620,7 +620,6 @@ void MainWindow::start_session(){
 
     // initialize the timer
     timer = new QTimer(this);
-    timeString = QString::number(currentTimerCount) + "s";
     init_timer(timer);
 
     // create session

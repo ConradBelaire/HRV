@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include <QListWidget>
 #include <QTimer>
-#include <iostream>
 
 #include "session.h"
 #include "menu.h"
@@ -32,6 +31,8 @@ class MainWindow : public QMainWindow
 
         // public methods
         void start_session(Session* session);
+        void updateMenu(const QString&, const QStringList&);
+        void resetDevice();
     private:
         // menus
         Menu* masterMenu;   // current menu
@@ -76,7 +77,6 @@ class MainWindow : public QMainWindow
         QString connectionOff;
 
         // methods / util fucntions
-        void updateMenu(const QString&, const QStringList&);
         void initializeMainMenu(Menu*);
         void init_timer(QTimer* timer);
         void applyToSkin(bool checked);
@@ -106,8 +106,6 @@ class MainWindow : public QMainWindow
         void toggleSkin();
         void dropTables();
         void drainBattery();
-        void resetDevice();
         void powerChange();
-        void UpdateMenu();
 };
 #endif // MAINWINDOW_H

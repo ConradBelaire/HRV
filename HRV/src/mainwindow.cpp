@@ -1,8 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
+/**
+ * @brief MainWindow constructor: Initializes the main window of the application, including the user interface (UI), settings, 
+ * and other necessary components.
+ *
+ * @param parent: The parent widget for the main window.
+ */
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
-
+    // init ui
     ui->setupUi(this);
 
     // init settings
@@ -27,39 +32,29 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     mainMenuOG = masterMenu;
     initializeMainMenu(masterMenu);
 
+    // start program with device in an off state
     powerStatus = false;
     changePowerStatus();
-    // TODO: connect power button
+
+    // connect user widgets
+    connect(ui->batteryLevelAdminSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryLevel);-
     connect(ui->powerButton, &QPushButton::released, this, &MainWindow::powerChange);
-
-    // TODO: connect charge button
     connect(ui->chargeBatteryButton, &QPushButton::released, this, &MainWindow::rechargeBattery);
-
-    // TODO: connect SpinBox to set the battery level
-    connect(ui->batteryLevelAdminSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryLevel);
-
-    // TODO: connect the menu buttons
-    // TODO?: maybe apply a skin to these buttons
     connect(ui->upButton, &QPushButton::pressed, this, &MainWindow::navigateUpMenu);
     connect(ui->downButton, &QPushButton::pressed, this, &MainWindow::navigateDownMenu);
     connect(ui->okButton, &QPushButton::pressed, this, &MainWindow::navigateSubMenu);
     connect(ui->menuButton, &QPushButton::pressed, this, &MainWindow::navigateToMainMenu);
     connect(ui->backButton, &QPushButton::pressed, this, &MainWindow::navigateBack);
     connect(ui->skinToggle, &QPushButton::pressed, this, &MainWindow::toggleSkin);
-
-
-    // TODO?: apply more skins
     connect(ui->dropTable, &QPushButton::pressed, this, &MainWindow::dropTables);
-    // TODO: connect the power level spin box
-    //connect(ui->powerLevelAdminSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::changePowerLevel);
+    connect(ui->redButton, &QPushButton::pressed, this, &MainWindow::toggleRedLED);
+    connect(ui->greenButton, &QPushButton::pressed, this, &MainWindow::toggleGreenLED);
+    connect(ui->blueButton, &QPushButton::pressed, this, &MainWindow::toggleBlueLED);
 
     // Initialize battery levels
-    //ui->powerLevelAdminSpinBox->setValue(profile->getPLvl());
     ui->batteryLevelAdminSpinBox->setValue(profile->getBLvl());
 
-    connect(ui->redButton, SIGNAL(released()), this, SLOT (toggleRedLED()));
-    connect(ui->greenButton, SIGNAL(released()), this, SLOT (toggleGreenLED()));
-    connect(ui->blueButton, SIGNAL(released()), this, SLOT (toggleBlueLED()));
+    // setup for lights
     redOn = "background-color: rgb(220, 0, 0)";
     redOff = "background-color: rgb(80, 0, 0)";
     greenOn = "background-color: rgb(0, 170, 0)";
@@ -70,13 +65,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connectionOff = "background-color: rgb(142, 0, 142)";
     turnOffLights();
 
-    // set session ui to invisible
-    // TODO: add session ui items
-    //ui->programViewWidget->setVisible(false);
-    //ui->electrodeLabel->setVisible(false);
+    // randomize for heart vector selection
     std::srand(static_cast<unsigned>(std::time(0)));
 
     // setup graphs
+    // session graph
     ui->sessionFrame->setVisible(false);
     ui->summaryFrame->setVisible(false);
     maxHR = 100;
@@ -89,7 +82,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->customPlot->graph(0)->setPen(QPen(Qt::red)); // set the pen color
     ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine); // set the line style
     ui->customPlot->graph(0)->setScatterStyle(QCPScatterStyle::ssNone);
-
+    // summary graph
     ui->customPlot_2->xAxis->setLabel("Time (s)");
     ui->customPlot_2->yAxis->setLabel("HR");
     ui->customPlot_2->addGraph(); // active session graph
@@ -97,13 +90,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->customPlot_2->graph(0)->setLineStyle(QCPGraph::lsLine); // set the line style
     ui->customPlot_2->graph(0)->setScatterStyle(QCPScatterStyle::ssNone);
 
+    // session / summary visiblity setup
     sessionSummaryVisible = false;
-
     inSessionView = false;
     startSession = false;
 
-    // hr data
-    vectorHRcount = 10; // max 9
+    // hardcoded hr data
+    vectorHRcount = 10; // max 9. we set it to 10 so it picks an array of first time call
     heartRateData = {
         {60, 60, 60, 60, 60, 60, 60, 60, 60, 60}, // Coherence Score: 0.4 | Challenge Level: 1
         {80, 80, 80, 80, 80, 80, 80, 80, 80, 80}, // Coherence Score: 2.5 | Challenge Level: 2
@@ -138,7 +131,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     };
 }
 
-
+/**
+ * @brief MainWindow destructor: Deletes and cleans up the dynamically allocated objects and memory associated with the main window.
+ */
 MainWindow::~MainWindow() {
     dbmanager->addProfile(profile->getId(), profile->getBLvl(), profile->getSessAmt());
 
@@ -150,16 +145,15 @@ MainWindow::~MainWindow() {
     delete dbmanager;
     delete profile;
     delete activeQListWidget;
-    if (timer != nullptr) {delete timer;}
+    // if (timer != nullptr) {delete timer;}
     delete currentSession;
 }
 
-QString MainWindow::floatToStringWithOneDecimalPlace(float value) {
-    std::ostringstream ss;
-    ss << std::fixed << std::setprecision(1) << value;
-    return QString::fromStdString(ss.str());
-}
-
+/**
+ * @brief Creates the history menu, including session list, clear history option, and child menus for each session.
+ * @param m Pointer to the parent menu of the history menu.
+ * @return Pointer to the created history menu.
+ */
 Menu* MainWindow::create_history_menu(Menu* m) {
         // initialise session list
         QStringList sessionList;
@@ -195,6 +189,11 @@ Menu* MainWindow::create_history_menu(Menu* m) {
         return history;
 }
 
+/**
+ * @brief Creates the settings menu, including options for resetting, changing challenge level, and setting pacer duration.
+ * @param m Pointer to the parent menu of the settings menu.
+ * @return Pointer to the created settings menu.
+ */
 Menu* MainWindow::create_settings_menu(Menu* m){
     Menu* settings = new Menu("SETTINGS", {"RESET", "CHALLENGE LEVEL", "PACER DURATION"}, m);
     Menu* reset = new Menu("RESET", {"YES","NO"}, settings);
@@ -210,6 +209,11 @@ Menu* MainWindow::create_settings_menu(Menu* m){
     return settings;
 }
 
+/**
+ * @brief Initializes the main menu by adding menu items to the active QListWidget, setting the menu label, and creating
+ * sub-menus for begin session, history, and settings.
+ * @param m Pointer to the main menu object to be initialized.
+ */
 void MainWindow::initializeMainMenu(Menu* m) {
     activeQListWidget = ui->mainMenuListView;
     activeQListWidget->addItems(masterMenu->getMenuItems());
@@ -229,6 +233,9 @@ void MainWindow::initializeMainMenu(Menu* m) {
     m->addChildMenu(settings);
 }
 
+/**
+ * Navigates the selection up within the active QListWidget. 
+ */
 void MainWindow::navigateUpMenu() {
 
     int nextIndex = activeQListWidget->currentRow() - 1;
@@ -240,6 +247,9 @@ void MainWindow::navigateUpMenu() {
     activeQListWidget->setCurrentRow(nextIndex);
 }
 
+/**
+ * Navigates the selection down within the active QListWidget. 
+ */
 void MainWindow::navigateDownMenu() {
 
     int nextIndex = activeQListWidget->currentRow() + 1;
@@ -251,7 +261,11 @@ void MainWindow::navigateDownMenu() {
     activeQListWidget->setCurrentRow(nextIndex);
 }
 
-
+/**
+ * @brief Navigates to the main menu. If a session is in progress, displays the session summary. If the session summary is visible,
+ * clears the session summary. This function creates a new main menu and initializes it, then updates the display with
+ * the new main menu's name and items.
+ */
 void MainWindow::navigateToMainMenu() {
 
     if (currentTimerCount != -1) {
@@ -264,13 +278,15 @@ void MainWindow::navigateToMainMenu() {
     masterMenu = new Menu("MAIN MENU", {"BEGIN SESSION","HISTORY","SETTINGS"}, nullptr);
     initializeMainMenu(masterMenu);
     updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
-    //ui->programViewWidget->setVisible(false);
-    //ui->electrodeLabel->setVisible(false);
 }
 
 // back button
+/**
+ * @brief Navigates back through the menu hierarchy based on the current state. If a session is in progress or the session summary
+ * is visible, these will be displayed or cleared respectively. If the user is in the session view, it will exit the view
+ * and return to the main menu.
+ */
 void MainWindow::navigateBack() {
-    //qDebug() << "HISTORY3";
     if (currentTimerCount > 0) {
         displaySummary(currentSession, false);
         return;
@@ -316,28 +332,24 @@ void MainWindow::navigateBack() {
     }
 
     if(masterMenu->getParent()->getName() == "HISTORY"){
-        //qDebug() << "History Back";
         navigateToMainMenu();
         activeQListWidget->setCurrentRow(1);
         navigateSubMenu();
     } else {
-        //qDebug() << "Default back";
         masterMenu = masterMenu->getParent();
         updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
     }
 }
 
-// fucntion to determine if session number is real
-bool MainWindow::is_session_num(QString log_id){
-    return dbmanager->doesLogExist(log_id.toInt());
-}
-
 // pressing the ok button
+/**
+ * @brief Handles navigation within submenus, as well as the functionality for each submenu item. This function includes logic
+ * for menu items such as starting a session, resetting logs, changing settings, and more. It checks the name of the
+ * current menu and the selected menu item to determine the appropriate action to take.
+ */
 void MainWindow::navigateSubMenu() {
     int index = activeQListWidget->currentRow();
 
-
-    // TODO: add start stop functionality here
     if (inSessionView) {
         if (!startSession) {
             startSession = true;;
@@ -377,7 +389,7 @@ void MainWindow::navigateSubMenu() {
             return;
         }
 
-        // this whole thing is dogshit
+        // this isnt great
     }
 
     // fucntionality of the reset menu
@@ -485,6 +497,13 @@ void MainWindow::navigateSubMenu() {
     }
 }
 
+/**
+ * @brief Updates the current active QListWidget menu with a new set of menu items and a new title. This function is used to
+ * refresh the menu UI when navigating between menus.
+ * 
+ * @param selectedMenuItem The QString for the new title of the menu to be displayed.
+ * @param menuItems The QStringList containing the new set of menu items to be displayed in the QListWidget.
+ */
 void MainWindow::updateMenu(const QString &selectedMenuItem, const QStringList &menuItems) {
 
     activeQListWidget->clear();
@@ -496,11 +515,20 @@ void MainWindow::updateMenu(const QString &selectedMenuItem, const QStringList &
 
 
 // function will be used as a reference to the recharge button
+/**
+ * Recharges the battery to its full capacity (100%). This function is used to simulate the
+ * battery being recharged to its maximum level.
+ */
 void MainWindow::rechargeBattery(){
     changeBatteryLevel(100);
 }
 
 // function will set the battery level to the newLevel
+/**
+ * @brief Changes the battery level and updates the UI accordingly.
+ * 
+ * @param newLevel A double value representing the new battery level (0.0 to 100.0).
+ */
 void MainWindow::changeBatteryLevel(double newLevel) {
 
     if (newLevel >= 0.0 && newLevel <= 100.0) {
@@ -534,6 +562,9 @@ void MainWindow::changeBatteryLevel(double newLevel) {
 
 
 // change the power status variable
+/**
+ * @brief Toggles the power status of the MainWindow, will save session if one is active
+ */
 void MainWindow::powerChange(){
 
     // if in the middle of a session
@@ -561,11 +592,9 @@ void MainWindow::changePowerStatus() {
 
     ui->screen->setVisible(powerStatus); // Sets the whole screen widget's and all children's visibility
 
-    //Remove this if we want the menu to stay in the same position when the power is off
     if (powerStatus) {
         if (connectedStatus) {ui->hrConnection->setStyleSheet(connectionOn);}
         MainWindow::navigateToMainMenu();
-        //Skin(false);
     }
 
     ui->upButton->setEnabled(powerStatus);
@@ -592,8 +621,6 @@ void MainWindow::start_session(){
     // initialize the timer
     timer = new QTimer(this);
     timeString = QString::number(currentTimerCount) + "s";
-    // TODO: update screen
-    //scene->addText(timeString);
     init_timer(timer);
 
     // create session
@@ -614,12 +641,8 @@ void MainWindow::update_timer(){
 
     // update duration text
     ui->lengthBar->setText(QString::number(currentTimerCount) + "s");
-    //ui->treatmentView->scene()->clear();
-    //ui->treatmentView->scene()->addText(timeString);
 
     currentTimerCount++;
-
-    // TODO: get new heart rate from table?
     int newHeartRate = generateHR();   // some function should be here to set this value. the function could look up an array heart rates based of currentTimerCount
 
     // update y axis
@@ -672,23 +695,18 @@ void MainWindow::drainBattery() {
 }
 
 void MainWindow::applyToSkin(bool checked) {
-    // TODO: update screen
-    // ui->electrodeLabel->setPixmap(QPixmap(checked ? ":/icons/electrodeOn.svg" : ":/icons/electrodeOff.svg"));
-    // ui->SkinAdminBox->setCurrentIndex(checked ? 1 : 0);
-    bool onSkin = checked; // why?
-
     // if the timer is not running
     if (currentTimerCount != -1) {
 
         // is it on skin
         if (startSession) {
-            if (!onSkin && (currentTimerCount > 0)) {
+            if (!checked && (currentTimerCount > 0)) {
                 displaySummary(currentSession, false);
             }
-            else if (onSkin) {
+            else if (checked) {
                 currentSession->getTimer()->start(1000);
             }
-        } else if (!startSession && onSkin && (currentTimerCount > 0)) {
+        } else if (!startSession && checked && (currentTimerCount > 0)) {
             displaySummary(currentSession, false);
         }
     }
@@ -782,7 +800,6 @@ void MainWindow::displaySummary(Session* session, bool is_history) {
     }
 
     turnOffLights();
-    // TODO: session data varaibles to 0
 }
 
 void MainWindow::clearSessionSummary() {
@@ -806,35 +823,28 @@ void MainWindow::clearSessionSummary() {
 }
 
 void MainWindow::toggleRedLED() {
-    // TODO: Change colour of red led to on
     ui->redLED->setStyleSheet(redOn);
 
-    // TODO: change colour of green and blue led to off
     ui->greenLED->setStyleSheet(greenOff);
     ui->blueLED->setStyleSheet(blueOff);
 
 }
 
 void MainWindow::toggleBlueLED() {
-    // TODO: Change colour of blue led to on
     ui->blueLED->setStyleSheet(blueOn);
 
-    // TODO: change colour of red and green led to off
     ui->greenLED->setStyleSheet(greenOff);
     ui->redLED->setStyleSheet(redOff);
 }
 
 void MainWindow::toggleGreenLED() {
-    // TODO: Change colour of green led to on
     ui->greenLED->setStyleSheet(greenOn);
 
-    // TODO: change colour of red and blue led to off
     ui->redLED->setStyleSheet(redOff);
     ui->blueLED->setStyleSheet(blueOff);
 }
 
 void MainWindow::updatePacer() {
-    // TODO: timing seems a little off might wanna look into it
     if (pacerCountUp) {
         if (pacerCounter < 6) {
             ui->pacerBar->setValue(pacerCounter*20);

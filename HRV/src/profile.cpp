@@ -1,6 +1,6 @@
 #include "profile.h"
 /**
- * Profile constructor
+ * @brief Profile constructor
  *
  * @param id The profile ID
  * @param batteryLvl The battery level
@@ -11,13 +11,13 @@ Profile::Profile(int id, double batteryLvl, int sessionAmt):
 
 // setters
 /**
- * Set the battery level
+ * @brief Set the battery level
  *
  * @param newLvl The new battery level
  */
 void Profile::setBLvl(double newLvl) { batteryLvl = newLvl; }
 /**
- * Increase the session amount by one
+ * @brief Increase the session amount by one
  *
  * @return The updated session amount
  */
@@ -25,19 +25,19 @@ int Profile::increaseSessAmt() { return sessionAmt++; }
 
 // getters
 /**
- * Get the profile ID
+ * @brief Get the profile ID
  *
  * @return The profile ID
  */
 int Profile::getId() { return id; }
 /**
- * Get the session amount
+ * @brief Get the session amount
  *
  * @return The amount of sessions
  */
 int Profile::getSessAmt() { return sessionAmt; }
 /**
- * Get the battery level
+ * @brief Get the battery level
  *
  * @return The battery level
  */

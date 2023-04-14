@@ -1,0 +1,87 @@
+@@startuml Normal Operation 3-5: User Changes a Setting - Sequence Diagram
+' title
+title
+    Normal Operation 3-5: User Changes a Setting - Sequence Diagram
+end title
+' declare
+participant User
+participant "MainWindow" as main
+participant "ui: UI::MainWindow" as ui
+participant "MAIN MENU: Menu" as menu
+participant "SETTINGS: Menu" as menu2
+participant "CHALLENGE LEVEL: Menu" as menu3
+autoactivate on
+' user selects history on main menu
+User -> main : navigateSubMenu()
+note left
+    User has pressed 
+    Ok button on main menu 
+    with the device already
+    on.
+end note
+main -> menu : getChildMenu(index);
+return return: Menu*
+deactivate menu
+main -> menu2 : getName()
+return return: QString
+deactivate menu2
+main -> menu2 : getMenuItems()
+return return: QStringList
+deactivate menu2
+main -> main : updateMenu(QString, QStringList)
+main -> ui : ui->menuLabel->setText(selectedMenuItem)
+deactivate ui
+deactivate main
+deactivate main
+
+== User presses Ok on challenge level in the  ==
+User -> main : navigateSubMenu()
+note left
+    User has pressed 
+    Ok button on a setting 
+    in the settings menu.
+end note
+main -> menu2 : getChildMenu(index);
+return return: Menu*
+deactivate menu2
+main -> menu3 : getName()
+return return: QString
+deactivate menu3
+main -> menu3 : getMenuItems()
+return return: QStringList
+deactivate menu3
+main -> main : updateMenu(QString, QStringList)
+main -> ui : ui->menuLabel->setText(selectedMenuItem)
+deactivate ui
+deactivate main
+deactivate main
+
+== User presses Ok on 1, 2, 3, or 4 in the CHALLENGE LEVEL sub menu ==
+User -> main : navigateSubMenu()
+note left
+    User has pressed 
+    Ok button on a setting 
+    in the settings menu.
+end note
+main -> menu3 : getName()
+return return: QString
+deactivate menu3
+
+main -> main : navigateBack()
+main -> menu3 : getParent()
+return return: Menu*
+deactivate menu3
+main -> menu2 : getName()
+return return: QString
+deactivate menu2
+main -> menu2 : getMenuItems()
+return return: QStringList
+deactivate menu2
+main -> main : updateMenu(QString, QStringList)
+main -> ui : ui->menuLabel->setText(selectedMenuItem)
+deactivate ui
+deactivate main
+deactivate main
+deactivate main
+
+@@enduml

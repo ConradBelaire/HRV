@@ -1,0 +1,104 @@
+@@startuml Interruption 2-2: Dead Battery During Session - Sequence Diagram
+' title
+title
+    Interruption 2-2: Dead Battery During Session - Sequence Diagram
+end title
+' declare
+participant "timer: QTimer" as thistimer
+participant "MainWindow" as main
+participant "ui: UI::MainWindow" as ui
+participant "BEGIN SESSION: Menu" as menu
+participant Profile
+
+participant "currentSession: Session" as session
+participant "dbmanager: DBManager" as db
+autoactivate on
+' timer runs update_timer()
+thistimer -> main : update_timer()
+note left
+    There is an active session.
+    And the Battery hits 0%
+    before the next update_timer()
+end note
+
+
+main -> main : drainBattery()
+main -> Profile : getBLvl()
+return return: double
+
+    main -> main: changeBatteryLevel(newBatteryLevel)
+        main -> main: powerChange()
+        main -> main : applyToSkin(false)
+        deactivate main
+        main -> main : displaySummary(currentSession, false)
+        deactivate main
+        main -> main : clearSessionSummary()
+        deactivate main
+
+        main -> Profile: getBLvl()
+        return return: double
+        deactivate Profile
+
+            main -> main : changePowerStatus()
+
+            main -> main : turnOffLights()
+            main -> ui : ui->redLED->setStyleSheet(redOff)
+            deactivate ui
+            main -> ui : ui->blueLED->setStyleSheet(blueOff)
+            deactivate ui
+            main -> ui : ui->greenLED->setStyleSheet(greenOff)
+            deactivate ui
+            main -> ui : ui->hrConnection->setStyleSheet(connectionOff)
+            deactivate ui
+            deactivate main
+
+            main -> Profile : getId()
+            return return: int
+            deactivate Profile
+            main -> Profile : getBLvl()
+            return return: double
+            deactivate Profile
+
+            main -> db : updateProfile(int, double)
+            deactivate db
+
+            main -> ui : ui->screen->setVisible(false)
+            deactivate ui
+
+            main -> ui : ui->upButton->setEnabled(false)
+            deactivate ui
+            main -> ui : ui->downButton->setEnabled(false)
+            deactivate ui
+            main -> ui : ui->leftButton->setEnabled(false)
+            deactivate ui
+            main -> ui : ui->rightButton->setEnabled(false)
+            deactivate ui
+            main -> ui : ui->menuButton->setEnabled(false)
+            deactivate ui
+            main -> ui : ui->okButton->setEnabled(false)
+            deactivate ui
+            main -> ui : ui->backButton->setEnabled(false)
+            deactivate ui
+            deactivate main
+
+        main -> ui : ui->sessionFrame->setVisible(false)
+        deactivate ui
+        main -> ui : ui->summaryFrame->setVisible(false)
+        deactivate ui 
+        deactivate main
+
+    main -> Profile: setBLvl(0)
+    deactivate Profile
+
+    main -> ui : ui->batteryLevelAdminSpinBox->setValue(newLevel);
+    deactivate ui
+    main -> ui : ui->batteryLevelBar->setValue(newLevelInt)
+    deactivate ui
+
+    main -> ui : ui->batteryLevelBar->setStyleSheet(lowBatteryHealth)
+    deactivate ui
+
+
+deactivate main
+
+@@enduml

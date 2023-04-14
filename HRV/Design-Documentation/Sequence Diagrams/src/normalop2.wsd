@@ -1,0 +1,127 @@
+@@startuml Normal Operation 2-5: User Views Log - Sequence Diagram
+' title
+title
+    Normal Operation 2-5: User Views Log - Sequence Diagram
+end title
+' declare
+participant User
+participant "MainWindow" as main
+participant "ui: UI::MainWindow" as ui
+participant "session x: Session" as session
+participant "MAIN MENU: Menu" as menu
+participant "HISTORY: Menu" as menu2
+participant "session_menu: Menu" as menu3
+autoactivate on
+' user selects history on main menu
+User -> main : navigateSubMenu()
+note left
+    User has pressed 
+    Ok button on main menu 
+    with the device already
+    on.
+end note
+main -> menu : getChildMenu(index);
+return return: Menu*
+deactivate menu
+main -> menu2 : getName()
+return return: QString
+deactivate menu2
+main -> menu2 : getMenuItems()              
+return return: QStringList
+deactivate menu2
+main -> main : updateMenu(QString, QStringList)
+main -> ui : ui->menuLabel->setText(selectedMenuItem)
+deactivate ui
+deactivate main
+deactivate main
+
+== User presses Ok on a selected log in the history menu ==
+User -> main : navigateSubMenu()
+note left
+    There must be at
+    least 1 log present
+    for this to occur
+end note
+main -> menu3 : getName()
+return return: QString
+deactivate menu3
+main -> main : displaySummary(sessions[QString.toInt() - 1], true)
+
+
+
+
+main -> ui : ui->sessionFrame->setVisible(false)
+deactivate ui
+main -> session : getElapsedTime()
+return return: int
+deactivate session
+main -> ui : ui->customPlot_2->xAxis->setRange(0, int)
+deactivate ui
+
+loop size of recordedHR in session
+    main -> session : getGraph_int().size()
+    return return: int
+    deactivate session
+    main -> session : getGraph_int()
+    return return: QVector<int>
+    deactivate session
+end
+
+main -> ui : ui->customPlot_2->yAxis->setRange(sessionMin, sessionMax)
+deactivate ui
+main -> ui : ui->customPlot_2->graph(0)->setData(emptyData, emptyData)
+deactivate ui
+
+main -> session : session->getElapsedTime()
+return return: int
+deactivate session
+
+main -> ui : ui->customPlot_2->graph(0)->setData(seconds, session->getGraph_double())
+deactivate ui
+main -> ui : ui->customPlot_2->replot()
+deactivate ui
+
+main -> session : getCoherenceCount()
+return return: int
+deactivate session
+main -> session : getAchievementScore()
+return return: float
+deactivate session
+main -> session : getCoherenceCount()
+return return: int
+deactivate session
+main -> ui : ui->avgScore->setText("Avg Score: "+ QString::number(rounded))
+deactivate ui
+main -> ui : ui->challengeLvlBar->setText(QString::number(session->getChallengeLevel()))
+deactivate ui
+main -> ui : ui->achvScoreBar_2->setText(QString::number(rounded))
+deactivate ui
+main -> ui : ui->lengthBar_2->setText(QString::number(session->getElapsedTime()) + "s")
+deactivate ui
+
+main -> ui : ui->timeInHigh->setText(string))
+deactivate ui
+main -> ui : ui->timeInMed->setText(string)
+deactivate ui
+main -> ui : ui->timeInLow->setText(string)
+deactivate ui
+
+main -> session : session->getElapsedTime()
+return return: int
+deactivate session
+main -> ui : ui->summaryFrame->setVisible(true)
+deactivate ui
+
+main -> main : turnOffLights()
+main -> ui : ui->redLED->setStyleSheet(redOff)
+deactivate ui
+main -> ui : ui->blueLED->setStyleSheet(blueOff)
+deactivate ui
+main -> ui : ui->greenLED->setStyleSheet(greenOff)
+deactivate ui
+deactivate main
+deactivate main
+deactivate main
+deactivate main
+
+@@enduml

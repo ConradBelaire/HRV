@@ -1,0 +1,71 @@
+@@startuml Normal Operation 4-5: User Powers Off the Device - Sequence Diagram
+' title
+title
+    Normal Operation 4-5: User Powers Off the Device - Sequence Diagram
+end title
+' declare
+participant User
+participant "MainWindow" as main
+participant "ui: UI::MainWindow" as ui
+participant Profile
+participant "dbmanager: DBManager" as db
+autoactivate on
+User -> main : powerChange()
+note left
+    User has pressed 
+    Power button with the
+    device already on and
+    no current active session.
+end note
+main -> Profile : getBLvl()
+return return: double
+deactivate Profile
+
+main -> main : changePowerStatus()
+
+main -> main : turnOffLights()
+main -> ui : ui->redLED->setStyleSheet(redOff)
+deactivate ui
+main -> ui : ui->blueLED->setStyleSheet(blueOff)
+deactivate ui
+main -> ui : ui->greenLED->setStyleSheet(greenOff)
+deactivate ui
+main -> ui : ui->hrConnection->setStyleSheet(connectionOff)
+deactivate ui
+deactivate main
+
+main -> Profile : getId()
+return return: int
+deactivate Profile
+main -> Profile : getBLvl()
+return return: double
+deactivate Profile
+
+main -> db : updateProfile(int, double)
+deactivate db
+
+main -> ui : ui->screen->setVisible(false)
+deactivate ui
+
+main -> ui : ui->upButton->setEnabled(false)
+deactivate ui
+main -> ui : ui->downButton->setEnabled(false)
+deactivate ui
+main -> ui : ui->leftButton->setEnabled(false)
+deactivate ui
+main -> ui : ui->rightButton->setEnabled(false)
+deactivate ui
+main -> ui : ui->menuButton->setEnabled(false)
+deactivate ui
+main -> ui : ui->okButton->setEnabled(false)
+deactivate ui
+main -> ui : ui->backButton->setEnabled(false)
+deactivate ui
+deactivate main
+
+main -> ui : ui->sessionFrame->setVisible(false)
+deactivate ui
+main -> ui : ui->summaryFrame->setVisible(false)
+deactivate ui
+deactivate main
+@@enduml

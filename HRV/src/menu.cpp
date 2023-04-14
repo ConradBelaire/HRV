@@ -24,13 +24,13 @@ Menu::~Menu() {
 Get the parent menu
 @return parent menu as a Menu pointer
 */
-Menu Menu::getParent() { return parent; }
+Menu* Menu::getParent() { return parent; }
 /**
 Get a specific child menu
 @param i Index of the child menu
 @return child menu at the specified index as a Menu pointer
 */
-Menu Menu::getChildMenu(int i) { return childMenus[i]; }
+Menu* Menu::getChildMenu(int i) { return childMenus[i]; }
 /**
 Get the name of the menu
 @return menu name as a QString
@@ -53,6 +53,6 @@ QStringList Menu::getMenuItems() { return menuItems; }
 Add a child menu
 @param m Pointer to the Menu object to be added as a child
 */
-void Menu::addChildMenu(Menu m) {
+void Menu::addChildMenu(Menu *m) {
     childMenus.push_back(m);
 }

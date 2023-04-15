@@ -586,6 +586,10 @@ void MainWindow::powerChange(){
 }
 
 // Toggle visibilty of the menu
+/**
+ * @brief Updates the power status of the MainWindow, managing the UI elements
+ *        visibility and state according to the current power status.
+ */
 void MainWindow::changePowerStatus() {
     if (!powerStatus) {turnOffLights();}
     dbmanager->updateProfile(profile->getId(), profile->getBLvl());
@@ -606,6 +610,10 @@ void MainWindow::changePowerStatus() {
     ui->backButton->setEnabled(powerStatus);
 }
 
+/**
+ * @brief Initializes and a new session, creating a new Session object,
+ *        updating the UI elements, and initializing the session timer.
+ */
 void MainWindow::start_session(){
     //make sesions ui visible
     ui->pacerBar->setValue(0);
@@ -627,6 +635,11 @@ void MainWindow::start_session(){
     currentSession = new Session(thisSessionID, challenge_level, pacer_dur, timer);
 }
 
+/**
+ * @brief Initializes a timer object and connects its timeout signal to the update_timer slot.
+ *
+ * @param timer The QTimer object to initialize and connect.
+ */
 void MainWindow::init_timer(QTimer* timer){
     connect(timer, &QTimer::timeout, this, &MainWindow::update_timer);
 
@@ -635,6 +648,20 @@ void MainWindow::init_timer(QTimer* timer){
     }
 }
 
+/**
+ * @brief Updates the session timer, heart rate data, coherence score, UI elements,
+ *        and LED lights based on the current session state.
+ * 
+ * 1. Drains the battery at each timer update.
+ * 2. Updates the duration text displayed on the UI.
+ * 3. Generates a new heart rate value and updates the y-axis of the plot accordingly.
+ * 4. Updates the x-axis of the plot if necessary to show a sliding window of the last 5 seconds.
+ * 5. Adds the new heart rate data to the plot and re-draws the plot.
+ * 6. Calculates the new coherence score and updates the achievement score.
+ * 7. Updates the achievement score and coherence score text displayed on the UI.
+ * 8. Determines which LED light to turn on based on the coherence score.
+ * 9. Updates the pacer based on the current session state.
+ */
 void MainWindow::update_timer(){
     drainBattery();
 
@@ -688,11 +715,25 @@ void MainWindow::update_timer(){
 
 }
 
+/**
+ * @brief Decreases the battery level by a small fixed amount and updates the UI accordingly.
+ * 
+ * 1. Calculates the new battery level by subtracting a fixed amount (0.05) from the current level.
+ * 2. Calls the changeBatteryLevel() function to update the battery level and UI elements.
+ */
 void MainWindow::drainBattery() {
     double newBatteryLevel = profile->getBLvl()-0.05;
     changeBatteryLevel(newBatteryLevel);
 }
 
+/**
+ * @brief Adjusts the behavior of the timer based on whether the device is on the skin or not.
+ * @param checked A boolean value indicating if the sensor is applied to the skin (true) or not (false).
+ * 
+ * This function is responsible for the following actions:
+ * 1. If the timer is not running and the device is applied to the skin and the ok button is pressed, it starts the timer.
+ * 2. If the timer is running and the device is removed from the skin or the ok button is pressed, it stops the timer and displays the session summary. 
+ */
 void MainWindow::applyToSkin(bool checked) {
     // if the timer is not running
     if (currentTimerCount != -1) {
@@ -711,6 +752,19 @@ void MainWindow::applyToSkin(bool checked) {
     }
 }
 
+/**
+ * @brief Displays the summary of a session after it has been completed or when viewing session history.
+ * @param session A pointer to the Session object containing the session data.
+ * @param is_history A boolean value indicating if the session we are presenting a log (true) or a session summary after completion (false).
+ * 
+ * This function is responsible for the following actions:
+ * 1. Stops the timer and disconnects it if the session is not a log.
+ * 2. Hides the session graph and calculates and sets the range for the summary graph.
+ * 3. Populates the summary graph with session data.
+ * 4. Creates a Log object, adds it to the database if not already a log, and updates the summary labels with relevant data.
+ * 5. Calculates and displays coherence percentages for High, Medium, and Low coherence states.
+ * 6. If not a log, resets the timer and various variables, and turns off the lights.
+ */
 void MainWindow::displaySummary(Session* session, bool is_history) {
     // stop timer
     if (!is_history) {
@@ -801,6 +855,16 @@ void MainWindow::displaySummary(Session* session, bool is_history) {
     turnOffLights();
 }
 
+/**
+ * @brief Clears the session summary and resets the session UI elements.
+ * 
+ * This function is responsible for the following actions:
+ * 1. Hides the summary frame and sets sessionSummaryVisible to false.
+ * 2. Resets the Coherence, Length, and Achievement Score UI elements to their initial values.
+ * 3. Resets the maxHR and minHR variables, and sets the ranges for the x and y axes of the session graph.
+ * 4. Clears the data in the session graph and re-plots it.
+ * 5. If inSessionView is true, navigates back to the main menu.
+ */
 void MainWindow::clearSessionSummary() {
 
     ui->summaryFrame->setVisible(false);
@@ -821,6 +885,9 @@ void MainWindow::clearSessionSummary() {
     }
 }
 
+/**
+ * @brief Toggles the Red LED on and turns off the Green and Blue LEDs.
+ */
 void MainWindow::toggleRedLED() {
     ui->redLED->setStyleSheet(redOn);
 
@@ -829,6 +896,9 @@ void MainWindow::toggleRedLED() {
 
 }
 
+/**
+ * @brief Toggles the Blue LED on and turns off the Green and Red LEDs.
+ */
 void MainWindow::toggleBlueLED() {
     ui->blueLED->setStyleSheet(blueOn);
 
@@ -836,6 +906,9 @@ void MainWindow::toggleBlueLED() {
     ui->redLED->setStyleSheet(redOff);
 }
 
+/**
+ * @brief Toggles the Green LED on and turns off the Red and Blue LEDs.
+ */
 void MainWindow::toggleGreenLED() {
     ui->greenLED->setStyleSheet(greenOn);
 
@@ -843,6 +916,15 @@ void MainWindow::toggleGreenLED() {
     ui->blueLED->setStyleSheet(blueOff);
 }
 
+/**
+ * @brief Updates the pacer bar's value based on the current pacer state.
+ *
+ * This function manages three pacer stages: Count Up, Wait, and Count Down.
+ * In the Count Up stage, the pacer bar fills up from 0 to 100 over 6 iterations.
+ * In the Wait stage, the pacer holds its filled state for the pacer duration set by the device or the user.
+ * In the Count Down stage, the pacer bar empties from 100 to 0 over 5 iterations.
+ * The function cycles through these stages to create a continuous breathing pacer.
+ */
 void MainWindow::updatePacer() {
     if (pacerCountUp) {
         if (pacerCounter < 6) {
@@ -873,6 +955,16 @@ void MainWindow::updatePacer() {
     }
 }
 
+/**
+ * @brief Generates a heart rate value using a pre-defined heart rate data array.
+ *
+ * This function selects a random heart rate vector from the pre-defined heart rate data array
+ * and returns the heart rate value at the current index within that vector.
+ * It cycles through the vector and resets the index when it reaches the end.
+ * The random vector selection occurs every time the index resets.
+ *
+ * @return The heart rate value at the current index of the selected vector.
+ */
 int MainWindow::generateHR() {
     if (vectorHRcount > 9) {
         vectorHRcount = 0;
@@ -886,6 +978,9 @@ int MainWindow::generateHR() {
 
 }
 
+/**
+ * @brief Turns off all LED lights and the heart rate connection indicator if the device is powered off.
+ */
 void MainWindow::turnOffLights() {
     ui->redLED->setStyleSheet(redOff);
     ui->blueLED->setStyleSheet(blueOff);
@@ -893,6 +988,9 @@ void MainWindow::turnOffLights() {
     if (!powerStatus) {ui->hrConnection->setStyleSheet(connectionOff);}
 }
 
+/**
+ * @brief Toggles the skin connection status and updates the UI accordingly.
+ */
 void MainWindow::toggleSkin() {
     connectedStatus = !connectedStatus;
     if (connectedStatus && powerStatus) {
@@ -903,6 +1001,9 @@ void MainWindow::toggleSkin() {
     applyToSkin(connectedStatus);
 }
 
+/**
+ * @brief Drops all tables in the database using the database manager.
+ */
 void MainWindow::dropTables() {
     dbmanager->dropTables();
 }

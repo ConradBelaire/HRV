@@ -1,8 +1,6 @@
 QT       += core gui sql
 INCLUDEPATH += HRV/libs
-#LIBS     += -lqcustomplot
 
-#greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 lessThan(QT_MAJOR_VERSION, 5): QMAKE_CXXFLAGS += -std=c++11

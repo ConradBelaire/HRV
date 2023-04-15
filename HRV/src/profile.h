@@ -4,12 +4,17 @@
 class Profile {
 
 public:
-    Profile(int, double, int);
-    int getId();
-    double getBLvl();
+    // constructors
+    Profile(int id, double batteryLvl, int sessionAmt);
+    
+    // setters
     void setBLvl(double);
-    int getSessAmt();
     int increaseSessAmt();
+
+    // getters
+    int getId();
+    int getSessAmt();
+    double getBLvl();
 
 private:
     int id;

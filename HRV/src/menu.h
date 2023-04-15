@@ -7,15 +7,21 @@
 
 class Menu {
     public:
+        // constructor
         Menu(QString, QStringList, Menu*);
+        // destructor
         ~Menu();
-
-        QString getName();
-        QStringList getMenuItems();
-        QString getMenuItem(int i);
+        
+        // getters
         Menu* getParent();
-        void addChildMenu(Menu*);
         Menu* getChildMenu(int);
+        QString getName();
+        QString getMenuItem(int i);
+        QStringList getMenuItems();
+
+        // methods
+        void addChildMenu(Menu*);
+
     private:
         QString name;
         QStringList menuItems;

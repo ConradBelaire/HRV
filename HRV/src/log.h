@@ -3,7 +3,6 @@
 
 #include <QString>
 #include <QVector>
-#include <QDateTime>
 #include "session.h"
 
 
@@ -12,6 +11,7 @@ class DBManager;
 class Session;
 class Log {
     public:
+        // constructors
         Log(
             int sessionNum,
             int profileId,
@@ -23,23 +23,23 @@ class Log {
             float achievementScore,
             int coherenceCount,
             QVector<int> heartRates);
-        Log(Session*, int);
+        Log(Session* session, int profileId);
 
+        // getters
         int getId();
-        int getProfileId();
-        int getChallengeLevel();
         int getIsLow();
         int getIsMed();
         int getIsHigh();
+        int getProfileId();
         int getSessionTime();
+        int getChallengeLevel();
+        int getCoherenceCount();
         float getAchievementScore();
-        QVector<int> getHeartRates_int();
-        QVector<double> getHeartRates_double();
         float getLowCoherencePercentage();
         float getMedCoherencePercentage();
         float getHighCoherencePercentage();
-        int getCoherenceCount();
-
+        QVector<int> getHeartRates_int();
+        QVector<double> getHeartRates_double();
     private:
 
         int sessionNum;

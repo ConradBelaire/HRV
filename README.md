@@ -35,10 +35,10 @@ Arda Dolanay, Zach Graham, Thomas Wood, and Conrad Belaire
 
 ## Team Member Contributions
 
-- **Arda Dolanay**: Sequence Diagrams, Coherence Score Calculator, created the coherence algorithm that corresponds to the specific dataset of heart rates, Project Timeline, and Design Implementation Plan.
-- **Zach Graham**: Implemented the whole database for the program. A part of the logical interpretations of the program, including class creations, functions, variable allocation, and such.
-- **Thomas Wood**: UML Diagram, Use Case Diagram, Action Diagram, a part of the documentation of the program, a part of the logical interpretations of the program, including class creations, functions,
-- **Conrad Belaire**: Traceability Matrix, a part of the design implementation regarding the UI, a part of the documentation of the program, a part of the logical interpretations of the program, including class creations, functions, variable allocation, and such.
+- **Arda Dolanay**: Responbile for Sequence Diagrams, Coherence Score Calculator. Also created the coherence algorithm that corresponds to the specific dataset of heart rates and organized the Project Timeline, and Design Implementation Plan.
+- **Zach Graham**: Implemented the whole database for the program. Worked on program logic including class creations, functions, variable allocation.
+- **Thomas Wood**: Worked on documentation of the program including the UML Class Diagram, Use Cases, Use Case Diagram, Activity Diagrams, and code comments. Worked on program logic for classes, functions, variable allocation. Also assisted with various parts of the user interface. 
+- **Conrad Belaire**: Worked on documentation of the program: Traceability Matrix and Demo video. Created and organized the user interface. Also implemented program logic including functions, variable allocation, and bug fixing.
 
 ## Organization of the Submission
 

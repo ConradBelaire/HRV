@@ -5,4 +5,4 @@ All folders in this directory contain all that will be submited
 [Source](src/) contains all source code
 [Libraries](libs/) includes external libraries.
 [UI](ui/) the main UI for the project.
-[Spec](Project_Requirements/) This folder contains the documents that outline how the project should have been constructed.
+[Spec](../Project_Requirements/) This folder contains the documents that outline how the project should have been constructed.

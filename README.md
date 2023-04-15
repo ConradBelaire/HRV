@@ -35,19 +35,22 @@ Arda Dolanay, Zach Graham, Thomas Wood, and Conrad Belaire
 
 ## Team Member Contributions
 
-- **Arda Dolanay**: Responbile for Sequence Diagrams, Coherence Score Calculator. Also created the coherence algorithm that corresponds to the specific dataset of heart rates and organized the Project Timeline, and Design Implementation Plan.
-- **Zach Graham**: Implemented the whole database for the program. Worked on program logic including class creations, functions, variable allocation.
-- **Thomas Wood**: Worked on documentation of the program including the UML Class Diagram, Use Cases, Use Case Diagram, Activity Diagrams, and code comments. Worked on program logic for classes, functions, variable allocation. Also assisted with various parts of the user interface. 
-- **Conrad Belaire**: Worked on documentation of the program: Traceability Matrix and Demo video. Created and organized the user interface. Also implemented program logic including functions, variable allocation, and bug fixing.
+- **Arda Dolanay**: Heart Rate & Coherence Data, Algorithm to calculate Coherence, Team Project Timeline, and Team Design Implementation Plan, Sequence Diagrams
+- **Zach Graham**: DBManager, MainWindow, Log, Session, Menu, Profile, Debugging
+- **Thomas Wood**: MainWindow, Log, Session, User Interface Graph Functionality, Debugging, Code Comments, Program Design, Use Cases, Use Case Diagram, UML Class Diagram, Activity Diagrams
+- **Conrad Belaire**: User Interface Design & Functionality, MainWindow, Debugging, Traceability Matrix, Demonstration Video
 
 ## Organization of the Submission
 
 The submission is organized into 3 folders:
 
-1. **Project_Requirements**: This folder contains the documents that outline how the project should have been constructed.
-2. **HRV**: This folder includes the following:
-   - *Design-Documentation*: Contains all the diagrams and related documentation.
-   - *libs*: Includes external libraries.
-   - *src*: Contains the source code for the project.
-   - *ui*: Has the main UI for the project.
-3. **Coherence Score Calculator**: This folder contains a separate C++ file that uses an external library to calculate the coherence score. This file does not need to be compiled with the program; it exists on its own.
+1. **[Project_Requirements](Project_Requirements/)**: This folder contains the documents that outline how the project should have been constructed.
+2. **[HRV](HRV/)**: This folder includes the following:
+   - *[Design-Documentation](HRV/Design-Documentation/)*: Contains all the diagrams and related documentation.
+      - *[Activity_Diagrams](HRV/Design-Documentation/Activity_Diagrams/)*: Activity Diagrams
+      - *[Sequence_Diagrams](HRV/Design-Documentation/Sequence_Diagrams/)*: Sequence Diagrams
+         - [src](HRV/Design-Documentation/Sequence_Diagrams/src): PlantUML Sequence Diagram Raw Code.
+   - *[libs](HRV/libs/)*: Includes external libraries.
+   - *[src](HRV/src/)*: Contains the source code for the project.
+   - *[ui](HRV/ui/)*: Has the main UI for the project.
+3. **[Coherence_Score_Calculator](Coherence_Score_Calculator/)**: This folder contains a separate C++ file that uses an external library to calculate the coherence score. This file does not need to be compiled with the program; it exists on its own.

@@ -1,5 +1,6 @@
 #include "dbmanager.h"
 
+
 const QString DBManager::DATABASE_PATH = "/database/hrv.db";
 
 /**
@@ -15,7 +16,6 @@ If the database cannot be initialized, it throws an error message:
 "Error: Database could not be initialized".
 */
 DBManager::DBManager() {
-
     hrvDB = QSqlDatabase::addDatabase("QSQLITE");
     hrvDB.setDatabaseName("hrv.db");
 
@@ -28,21 +28,16 @@ DBManager::DBManager() {
     }
 }
 
-/** 
+/**
 DBManager::dropTables() method
 This method is responsible for dropping the existing tables in the database.
 It executes two SQL queries to drop the 'log' and 'profiles' tables if they
 exist.
-
-If the execution of any SQL query fails, it outputs the error message using
-qDebug().
 */
 void DBManager::dropTables() {
     QSqlQuery query;
     query.exec("DROP TABLE IF EXISTS log;");
-    qDebug() << query.lastError().text();
     query.exec("DROP TABLE IF EXISTS profiles;");
-    qDebug() << query.lastError().text();
 }
 
 /**
@@ -75,10 +70,7 @@ document, which is serialized into a compact JSON string.
 
 It binds the values from the 'Log' object to the placeholders in the query
 and executes it. If the execution is successful, the transaction is committed
-and the method returns 'true'. Otherwise, it outputs the error message using
-qDebug(), rolls back the transaction, and returns 'false'.
-
-Upon successful addition, it outputs "Log added" using qDebug().
+and the method returns 'true'.
 */
 bool DBManager::addLog(Log* log) {
     hrvDB.transaction();
@@ -87,6 +79,7 @@ bool DBManager::addLog(Log* log) {
     for (int value : log->getHeartRates_int()) {
         heartRatesArray.append(value);
     }
+
     QJsonDocument heartRatesDoc(heartRatesArray);
     QString heartRatesJson = heartRatesDoc.toJson(QJsonDocument::Compact);
 
@@ -101,13 +94,12 @@ bool DBManager::addLog(Log* log) {
     query.bindValue(":achievement_score", log->getAchievementScore());
     query.bindValue(":coherence_count", log->getCoherenceCount());
     query.bindValue(":heart_rates", heartRatesJson);
+
     if (!query.exec()) {
-        qDebug() << query.lastError().text();
         hrvDB.rollback();
         return false;
     }
 
-    qDebug() << "Log added";
     return hrvDB.commit();
 }
 
@@ -125,7 +117,6 @@ It also outputs the 'id' of the log entry being deleted using qDebug().
 */
 bool DBManager::deleteLog(int id) {
         hrvDB.transaction();
-        qDebug() << id << "the Id of the log deleted";
 
         QSqlQuery query;
         query.prepare("DELETE FROM log WHERE session_id = :log_id;");
@@ -176,7 +167,6 @@ executes it. If the execution is successful, the transaction is committed
 and the method returns 'true'. Otherwise, it returns 'false'.
 */
 bool DBManager::deleteProfile(int id) {
-
     hrvDB.transaction();
 
     QSqlQuery query;
@@ -197,8 +187,7 @@ entry with the specified 'id'.
 The method binds the 'id' and 'batteryLvl' to the ':profile_id' and ':battery_level'
 placeholders in the query, respectively, and executes it.
 
-If there is an error during the execution, it outputs the error message using
-qDebug(). If the execution is successful, the transaction is committed and
+If the execution is successful, the transaction is committed and
 the method returns 'true'. Otherwise, it returns 'false'.
 */
 bool DBManager::updateProfile(int id, double batteryLvl) {
@@ -209,8 +198,6 @@ bool DBManager::updateProfile(int id, double batteryLvl) {
     query.bindValue(":profile_id", id);
     query.bindValue(":battery_level", batteryLvl);
     query.exec();
-
-    qDebug() << query.lastError().text();
 
     return hrvDB.commit();
 }
@@ -352,7 +339,6 @@ with the retrieved data and the log count obtained by calling 'getLogCount(id)'.
 The method returns a pointer to the created 'Profile' object.
 */
 Profile* DBManager::getProfile(int id) {
-
     hrvDB.transaction();
 
     QSqlQuery query;
@@ -366,13 +352,10 @@ Profile* DBManager::getProfile(int id) {
 
    // profile does not exist
     if (!query.next()) {
-        qDebug() << "new Profile created";
         addProfile(id, 100, 0);
         Profile* pro = new Profile(id, 100, 1);
         return pro;
     }
-
-    qDebug() << query.value(0).toInt() << query.value(1).toDouble() << "id and battery level";
 
     // profile exists
     Profile* pro = new Profile(query.value(0).toInt(), query.value(1).toDouble(), getLogCount(id));
@@ -421,22 +404,18 @@ coherence_count (INTEGER NOT NULL)
 heart_rates (TEXT)
 FOREIGN KEY (profile_id) REFERENCES profiles (id) ON DELETE CASCADE
 
-If the execution of any SQL query fails, it outputs the error message using
-qDebug() and does not commit the transaction.
-
 The method returns 'true' if the transaction is committed successfully,
 otherwise 'false'.
 */
 bool DBManager::DBInit() {
     hrvDB.transaction();
-
     QSqlQuery query;
-    if (!query.exec("CREATE TABLE IF NOT EXISTS profiles ( id INTEGER PRIMARY KEY, battery_level FLOAT NOT NULL );")){
-        qDebug() << "Error: " << query.lastError();
-    }
 
-    if (!query.exec("CREATE TABLE IF NOT EXISTS log ( session_id INTEGER PRIMARY KEY, profile_id INTEGER NOT NULL, challenge_level INTEGER NOT NULL, is_low INTEGER NOT NULL, is_med INTEGER NOT NULL, is_high INTEGER NOT NULL, session_time INTEGER NOT NULL, achievement_score FLOAT NOT NULL, coherence_count INTEGER NOT NULL, heart_rates TEXT, CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES profiles (id) ON DELETE CASCADE );")){
-        qDebug() << "Error: " << query.lastError();
-    }
+    //creates Profiles table
+    query.exec("CREATE TABLE IF NOT EXISTS profiles ( id INTEGER PRIMARY KEY, battery_level FLOAT NOT NULL );");
+
+    //creates Log table
+    query.exec("CREATE TABLE IF NOT EXISTS log ( session_id INTEGER PRIMARY KEY, profile_id INTEGER NOT NULL, challenge_level INTEGER NOT NULL, is_low INTEGER NOT NULL, is_med INTEGER NOT NULL, is_high INTEGER NOT NULL, session_time INTEGER NOT NULL, achievement_score FLOAT NOT NULL, coherence_count INTEGER NOT NULL, heart_rates TEXT, CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES profiles (id) ON DELETE CASCADE );");
+
     return hrvDB.commit();
 }

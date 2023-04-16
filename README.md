@@ -46,15 +46,13 @@ Arda Dolanay, Zach Graham, Thomas Wood, and Conrad Belaire
 
 ## Organization of the Submission
 
-The submission is organized into 3 folders:
+The submission is organized into 2 folders:
 
-1. **[Project_Requirements](Project_Requirements/)**: This folder contains the documents that outline how the project should have been constructed.
-2. **[HRV](HRV/)**: This folder includes the following:
-   - *[Design-Documentation](HRV/Design-Documentation/)*: Contains all the diagrams and related documentation.
-      - *[Activity_Diagrams](HRV/Design-Documentation/Activity_Diagrams/)*: Activity Diagrams
-      - *[Sequence_Diagrams](HRV/Design-Documentation/Sequence_Diagrams/)*: Sequence Diagrams
-         - [src](HRV/Design-Documentation/Sequence_Diagrams/src): PlantUML Sequence Diagram Raw Code.
+1. **[HRV](HRV/)**: This folder includes the following:
    - *[libs](HRV/libs/)*: Includes external libraries.
    - *[src](HRV/src/)*: Contains the source code for the project.
    - *[ui](HRV/ui/)*: Has the main UI for the project.
-3. **[Coherence_Score_Calculator](Coherence_Score_Calculator/)**: This folder contains a separate C++ file that uses an external library to calculate the coherence score. This file does not need to be compiled with the program; it exists on its own.
+2. **[Documentation](Design-Documentation/)**: Contains all the diagrams and related documentation.
+   - *[Activity_Diagrams](Design-Documentation/Activity_Diagrams/)*: Activity Diagrams
+   - *[Sequence_Diagrams](Design-Documentation/Sequence_Diagrams/)*: Sequence Diagrams
+      - [src](Design-Documentation/Sequence_Diagrams/src): PlantUML Sequence Diagram Raw Code.

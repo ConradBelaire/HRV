@@ -39,9 +39,9 @@ Arda Dolanay, Zach Graham, Thomas Wood, and Conrad Belaire
 
 ## Team Member Contributions
 
-- **Arda Dolanay**: Heart Rate & Coherence Data, Algorithm to calculate Coherence, Team Project Timeline, and Team Design Implementation Plan, Sequence Diagrams
+- **Arda Dolanay**: Heart Rate & Coherence Data, Algorithm to calculate Coherence, Team Project Timeline, and Team Design Implementation Plan
 - **Zach Graham**: DBManager, MainWindow, Log, Session, Menu, Profile, Debugging
-- **Thomas Wood**: MainWindow, Log, Session, User Interface Graph Functionality, Debugging, Code Comments, Program Design, Use Cases, Use Case Diagram, UML Class Diagram, Activity Diagrams
+- **Thomas Wood**: MainWindow, Log, Session, User Interface Graph Functionality, Debugging, Code Comments, Program Design, Use Cases, Use Case Diagram, UML Class Diagram, Activity Diagrams, Sequence Diagrams
 - **Conrad Belaire**: User Interface Design & Functionality, MainWindow, Debugging, Traceability Matrix, Demonstration Video
 
 ## Organization of the Submission

@@ -7,8 +7,8 @@
 HeartWave is a Qt-based application designed to monitor and analyze heart rate variability (HRV) to provide insight into a user's coherence levels. The application processes heart rate data collected by a sensor to calculate a coherence score and display it on the screen. The coherence score ranges from 0 to 16 and reflects the user's internal order or harmony, enabling better balance, greater health, and improved creativity, resilience, and productivity.
 
 ## Demonstration Video
-[![Video_Title](https://img.youtube.com/vi/svQZl6YGmF4/hqdefault.jpg)](https://www.youtube.com/watch?v=svQZl6YGmF4 "COMP3004 Demo Video")\
-https://www.youtube.com/watch?v=svQZl6YGmF4
+[![Video_Title](https://img.youtube.com/vi/GyaLtza7teg/hqdefault.jpg)](https://www.youtube.com/watch?v=GyaLtza7teg "COMP3004 Demo Video")\
+https://www.youtube.com/watch?v=GyaLtza7teg
 
 ## Features
 

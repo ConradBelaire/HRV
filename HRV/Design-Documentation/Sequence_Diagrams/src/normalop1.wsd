@@ -1,0 +1,361 @@
+@@startuml Normal Operation 1-5: User Starts/Ends a Session - Sequence Diagram
+' title
+title
+    Normal Operation 1-5: User Starts/Ends a Session - Sequence Diagram
+end title
+' declare
+participant User
+participant "MainWindow" as main
+participant "ui: UI::MainWindow" as ui
+participant "BEGIN SESSION: Menu" as menu
+participant Profile
+participant "timer: QTimer" as thistimer
+participant "currentSession: Session" as session
+participant "dbmanager: DBManager" as db
+participant "log: Log" as thislog
+participant "HISTORY: Menu" as menu2
+participant "session_menu: Menu" as menu3
+participant "SETTINGS: Menu" as menu4
+participant "MAIN MENU: Menu" as menu5
+autoactivate on
+' sequence
+' ok button pressed on "BEGIN SESSION"
+User -> main : navigateSubMenu()
+note left
+    User has pressed 
+    Ok button on main menu 
+    with the device already
+    on.
+end note
+activate main
+
+main -> menu : getChildMenu(index)
+activate menu
+return return: Menu*
+deactivate menu
+
+main -> main : updateMenu(masterMenu->getName(), {})
+main -> ui : ui->menuLabel->setText(selectedMenuItem);
+deactivate ui
+deactivate main
+
+main -> main : start_session()
+main -> ui : ui->pacerBar->setValue(0)
+deactivate ui
+main -> ui : sessionFrame->setVisible(true)
+deactivate ui
+main -> main : init_timer(timer)
+main -> thistimer : connect(timer, &QTimer::timeout, this, &MainWindow::update_timer)
+deactivate thistimer
+main -> Profile : increaseSessAmt()
+return return: int
+deactivate Profile
+deactivate main
+deactivate main
+deactivate main
+deactivate main
+deactivate main
+
+== User presses Ok and connects sensor ==
+
+User -> main : toggleSkin()
+main -> ui : ui->hrConnection->setStyleSheet(connectionOn)
+deactivate ui
+main -> main : applyToSkin(true)
+deactivate main
+deactivate main
+
+User -> main : navigateSubMenu()
+main -> main : applyToSkin(connectedStatus)
+main -> session : getTimer()
+return return: QTimer
+main -> thistimer: start(1000)
+deactivate thistimer
+deactivate main
+deactivate main
+
+== Timer calls update_timer() ==
+
+thistimer -> main : update_timer()
+main -> main : drainBattery()
+main -> Profile : getBLvl()
+return return: double
+main -> main: changeBatteryLevel(newBatteryLevel)
+main -> Profile: setBLvl(newLevel)
+deactivate Profile
+main -> ui : ui->batteryLevelAdminSpinBox->setValue(newLevel);
+deactivate ui
+main -> ui : ui->batteryLevelBar->setValue(newLevelInt)
+deactivate ui
+
+alt change battery colour
+    main -> ui : ui->batteryLevelBar->setStyleSheet(lowBatteryHealth)
+    deactivate ui
+else battery % >= 50
+    main -> ui : ui->batteryLevelBar->setStyleSheet(highBatteryHealth)
+    deactivate ui
+else battery % >= 20
+    main -> ui : ui->batteryLevelBar->setStyleSheet(mediumBatteryHealth)
+    deactivate ui
+end
+
+deactivate main
+deactivate main
+main -> ui : ui->lengthBar->setText(QString::number(currentTimerCount) + "s")
+deactivate ui
+
+main -> main : generateHR()
+deactivate main
+
+main -> ui : ui->customPlot->yAxis->setRange(minHR, maxHR)
+deactivate ui
+
+alt if 5 seconds has passed
+main -> ui : ui->customPlot->xAxis->setRange(currentTimerCount-5, 1+currentTimerCount)
+deactivate ui
+end
+
+main -> ui : ui->customPlot->graph(0)->addData(currentTimerCount, newHeartRate)
+deactivate ui
+main -> ui : ui->customPlot->replot();
+deactivate ui
+
+main -> session : updateSession(newHeartRate, currentHRvector)
+' alt 5 seconds since last coherence score
+'     session -> session : calculateCoherenceScore(currentVector)
+'     session -> session : determineScoreLevel(currentCoherence)
+'     deactivate session
+'     alt case 0
+'         session -> session : addToLow()
+'         deactivate session
+'     else case 1 
+'         session -> session : addToMed()
+'         deactivate session
+'     else case 2
+'         session -> session : addToHigh()
+'         deactivate session
+'     end
+'     session -> session : addCoherenceScore(currentCoherence)
+'     deactivate session
+'     deactivate session
+' end
+return return: float
+deactivate session
+
+alt newCoherenceScore != 1
+    main -> session : currentSession->getAchievementScore()
+    return return: float
+    deactivate session
+    main -> ui : ui->achvScoreBar->setText(QString::number(rounded))
+    deactivate ui
+    main -> ui : ui->coherenceBar->setText(QString::number(rounded))
+    deactivate ui
+    main -> session : determineScoreLevel(newCoherenceScore)
+    return return: int
+    deactivate session
+    alt case 0
+        main -> main : toggleRedLED()
+        main -> ui : ui->redLED->setStyleSheet(redOn)
+        deactivate ui
+        main -> ui : ui->greenLED->setStyleSheet(greenOff)
+        deactivate ui
+        main -> ui : ui->blueLED->setStyleSheet(blueOff)
+        deactivate ui
+        deactivate main
+    else case 1
+        main -> main : toggleBlueLED()
+        main -> ui : ui->blueLED->setStyleSheet(blueOn)
+        deactivate ui
+        main -> ui : ui->greenLED->setStyleSheet(greenOff)
+        deactivate ui
+        main -> ui : ui->redLED->setStyleSheet(redOff)
+        deactivate ui
+        deactivate main   
+    else case 2
+        main -> main : toggleGreenLED()
+        main -> ui : ui->greenLED->setStyleSheet(greenOn)
+        deactivate ui
+        main -> ui : ui->blueLED->setStyleSheet(blueOff)
+        deactivate ui
+        main -> ui : ui->redLED->setStyleSheet(redOff)
+        deactivate ui
+        deactivate main   
+end
+
+main -> main : updatePacer()
+alt pacerCountUp == true
+    alt pacerCounter < 6
+        main -> ui:ui->pacerBar->setValue(pacerCounter*20)
+        deactivate ui 
+    end
+else pacerCountDown == true
+    alt pacerCounter != 0
+        main -> ui:ui->pacerBar->setValue(pacerCounter*20)
+        deactivate ui 
+    end
+deactivate main
+deactivate main
+
+== Ok pressed during active session ==
+User -> main : navigateSubMenu()
+main -> main : applyToSkin(connectedStatus)
+main -> main : displaySummary(currentSession, false)
+main -> session : getTimer()
+return return: QTimer
+main -> thistimer: stop()
+deactivate thistimer
+main -> session : getTimer()
+return return: QTimer
+main -> thistimer: disconnect()
+deactivate thistimer
+
+main -> ui : ui->sessionFrame->setVisible(false)
+deactivate ui
+main -> session : getElapsedTime()
+return return: int
+deactivate session
+main -> ui : ui->customPlot_2->xAxis->setRange(0, int)
+deactivate ui
+
+loop size of recordedHR in session
+    main -> session : getGraph_int().size()
+    return return: int
+    deactivate session
+    main -> session : getGraph_int()
+    return return: QVector<int>
+    deactivate session
+end
+
+main -> ui : ui->customPlot_2->yAxis->setRange(sessionMin, sessionMax)
+deactivate ui
+main -> ui : ui->customPlot_2->graph(0)->setData(emptyData, emptyData)
+deactivate ui
+
+main -> session : session->getElapsedTime()
+return return: int
+deactivate session
+
+main -> ui : ui->customPlot_2->graph(0)->setData(seconds, session->getGraph_double())
+deactivate ui
+main -> ui : ui->customPlot_2->replot()
+deactivate ui
+
+main -> db : addLog(log)
+deactivate db
+
+main -> session : getCoherenceCount()
+return return: int
+deactivate session
+main -> session : getAchievementScore()
+return return: float
+deactivate session
+main -> session : getCoherenceCount()
+return return: int
+deactivate session
+main -> ui : ui->avgScore->setText("Avg Score: "+ QString::number(rounded))
+deactivate ui
+main -> ui : ui->challengeLvlBar->setText(QString::number(session->getChallengeLevel()))
+deactivate ui
+main -> ui : ui->achvScoreBar_2->setText(QString::number(rounded))
+deactivate ui
+main -> ui : ui->lengthBar_2->setText(QString::number(session->getElapsedTime()) + "s")
+deactivate ui
+
+main -> ui : ui->timeInHigh->setText(string))
+deactivate ui
+main -> ui : ui->timeInMed->setText(string)
+deactivate ui
+main -> ui : ui->timeInLow->setText(string)
+deactivate ui
+
+main -> session : session->getElapsedTime()
+return return: int
+deactivate session
+main -> ui : ui->summaryFrame->setVisible(true)
+deactivate ui
+
+main -> main : turnOffLights()
+main -> ui : ui->redLED->setStyleSheet(redOff)
+deactivate ui
+main -> ui : ui->blueLED->setStyleSheet(blueOff)
+deactivate ui
+main -> ui : ui->greenLED->setStyleSheet(greenOff)
+deactivate ui
+deactivate main
+deactivate main
+deactivate main
+deactivate main
+
+== Back or Menu pressed while session summary is visible ==
+User -> main : navigateBack()
+
+main -> main : clearSessionSummary()
+main -> ui : ui->summaryFrame->setVisible(false)
+deactivate ui
+main -> ui : ui->coherenceBar->setText("0.0")
+deactivate ui
+main -> ui : ui->lengthBar->setText("0s")
+deactivate ui
+main -> ui : ui->achvScoreBar->setText("0.0")
+deactivate ui
+main -> ui : ui->customPlot->xAxis->setRange(0, 5)
+deactivate ui
+main -> ui : ui->customPlot->yAxis->setRange(minHR, maxHR)
+deactivate ui
+main -> ui : ui->customPlot->graph(0)->setData(emptyData, emptyData)
+deactivate ui
+main -> ui : ui->customPlot->replot()
+deactivate ui
+
+main -> main : navigateToMainMenu()
+main -> main : initializeMainMenu(masterMenu)
+main -> ui : ui->menuLabel->setText(masterMenu->getName())
+deactivate ui
+main -> menu : addChildMenu(begin_session)
+deactivate menu
+
+main -> main : create_history_menu(m)
+main -> db : getLogs()
+return return: QVector<Log*>*
+main -> menu2 : addChildMenu(clearHistory)
+deactivate menu2
+loop for each log returned by dbmanager
+    main -> menu3 : addChildMenu(view)
+    deactivate menu3
+    main -> menu3 : addChildMenu(delete_menu)
+    deactivate menu3
+    main -> menu2 : addChildMenu(session_menu)
+    deactivate menu2
+end
+deactivate main
+
+main -> menu2 : addChildMenu(history)
+deactivate menu2
+
+main -> main : create_settings_menu(m)
+main -> menu4 : addChildMenu(reset)
+deactivate menu4
+main -> menu4 : addChildMenu(challengeLevel)
+deactivate menu4
+main -> menu4 : addChildMenu(pacerDuration)
+deactivate menu4
+deactivate main
+
+main -> menu4 : addChildMenu(settings)
+deactivate menu4
+deactivate main
+
+main -> menu5 : getName()
+return return: QString
+deactivate menu5
+main -> menu5 : getMenuItems()
+return return: QStringList
+deactivate menu5
+main -> main : updateMenu(QString, QStringList)
+main -> ui : ui->menuLabel->setText(selectedMenuItem)
+deactivate ui
+deactivate main
+deactivate main
+deactivate main
+deactivate main
+@@enduml

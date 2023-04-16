@@ -1,0 +1,115 @@
+@@startuml Interruption 1-2: Sensor Connection Lost - Sequence Diagram
+' title
+title
+    Interruption 1-2: Sensor Connection Lost - Sequence Diagram
+end title
+' declare
+participant User
+participant "MainWindow" as main
+participant "ui: UI::MainWindow" as ui
+participant "BEGIN SESSION: Menu" as menu
+participant Profile
+participant "timer: QTimer" as thistimer
+participant "currentSession: Session" as session
+participant "dbmanager: DBManager" as db
+autoactivate on
+' sequence
+' ok button pressed on "BEGIN SESSION"
+User -> main : toggleSkin()
+note left
+    The user has disconnected
+    the sensor during an active
+    session.
+end note
+main -> ui : ui->hrConnection->setStyleSheet(connectionOff)
+deactivate ui
+main -> main : applyToSkin(false)
+main -> main : displaySummary(currentSession, false)
+
+main -> session : getTimer()
+return return: QTimer
+main -> thistimer: stop()
+deactivate thistimer
+main -> session : getTimer()
+return return: QTimer
+main -> thistimer: disconnect()
+deactivate thistimer
+
+main -> ui : ui->sessionFrame->setVisible(false)
+deactivate ui
+main -> session : getElapsedTime()
+return return: int
+deactivate session
+main -> ui : ui->customPlot_2->xAxis->setRange(0, int)
+deactivate ui
+
+loop size of recordedHR in session
+    main -> session : getGraph_int().size()
+    return return: int
+    deactivate session
+    main -> session : getGraph_int()
+    return return: QVector<int>
+    deactivate session
+end
+
+main -> ui : ui->customPlot_2->yAxis->setRange(sessionMin, sessionMax)
+deactivate ui
+main -> ui : ui->customPlot_2->graph(0)->setData(emptyData, emptyData)
+deactivate ui
+
+main -> session : session->getElapsedTime()
+return return: int
+deactivate session
+
+main -> ui : ui->customPlot_2->graph(0)->setData(seconds, session->getGraph_double())
+deactivate ui
+main -> ui : ui->customPlot_2->replot()
+deactivate ui
+
+main -> db : addLog(log)
+deactivate db
+
+main -> session : getCoherenceCount()
+return return: int
+deactivate session
+main -> session : getAchievementScore()
+return return: float
+deactivate session
+main -> session : getCoherenceCount()
+return return: int
+deactivate session
+main -> ui : ui->avgScore->setText("Avg Score: "+ QString::number(rounded))
+deactivate ui
+main -> ui : ui->challengeLvlBar->setText(QString::number(session->getChallengeLevel()))
+deactivate ui
+main -> ui : ui->achvScoreBar_2->setText(QString::number(rounded))
+deactivate ui
+main -> ui : ui->lengthBar_2->setText(QString::number(session->getElapsedTime()) + "s")
+deactivate ui
+
+main -> ui : ui->timeInHigh->setText(string))
+deactivate ui
+main -> ui : ui->timeInMed->setText(string)
+deactivate ui
+main -> ui : ui->timeInLow->setText(string)
+deactivate ui
+
+main -> session : session->getElapsedTime()
+return return: int
+deactivate session
+main -> ui : ui->summaryFrame->setVisible(true)
+deactivate ui
+
+main -> main : turnOffLights()
+main -> ui : ui->redLED->setStyleSheet(redOff)
+deactivate ui
+main -> ui : ui->blueLED->setStyleSheet(blueOff)
+deactivate ui
+main -> ui : ui->greenLED->setStyleSheet(greenOff)
+deactivate ui
+deactivate main
+deactivate main
+deactivate main
+deactivate main
+
+@@enduml

@@ -1,0 +1,123 @@
+@@startuml Normal Operation 5-5: User Powers On the Device - Sequence Diagram
+' title
+title
+    Normal Operation 5-5: User Powers On the Device - Sequence Diagram
+end title
+' declare
+participant User
+participant "MainWindow" as main
+participant "ui: UI::MainWindow" as ui
+participant Profile
+participant "dbmanager: DBManager" as db
+participant "BEGIN SESSION: Menu" as menu
+participant "HISTORY: Menu" as menu2
+participant "session_menu: Menu" as menu3
+participant "SETTINGS: Menu" as menu4
+participant "MAIN MENU: Menu" as menu5
+autoactivate on
+User -> main : powerChange()
+note left
+    User has pressed 
+    Power button with the
+    device off.
+end note
+main -> Profile : getBLvl()
+return return: double
+deactivate Profile
+
+main -> main : changePowerStatus()
+
+main -> Profile : getId()
+return return: int
+deactivate Profile
+main -> Profile : getBLvl()
+return return: double
+deactivate Profile
+
+main -> db : updateProfile(int, double)
+deactivate db
+
+main -> ui : ui->screen->setVisible(true)
+deactivate ui
+
+alt sensor is connected to skin
+    main -> ui : ui->hrConnection->setStyleSheet(connectionOn);
+    deactivate ui
+end
+
+main -> main : navigateToMainMenu()
+main -> main : initializeMainMenu(masterMenu)
+main -> ui : ui->menuLabel->setText(masterMenu->getName())
+deactivate ui
+main -> menu : addChildMenu(begin_session)
+deactivate menu
+
+main -> main : create_history_menu(m)
+main -> db : getLogs()
+return return: QVector<Log*>*
+main -> menu2 : addChildMenu(clearHistory)
+deactivate menu2
+loop for each log returned by dbmanager
+    main -> menu3 : addChildMenu(view)
+    deactivate menu3
+    main -> menu3 : addChildMenu(delete_menu)
+    deactivate menu3
+    main -> menu2 : addChildMenu(session_menu)
+    deactivate menu2
+end
+deactivate main
+
+main -> menu2 : addChildMenu(history)
+deactivate menu2
+
+main -> main : create_settings_menu(m)
+main -> menu4 : addChildMenu(reset)
+deactivate menu4
+main -> menu4 : addChildMenu(challengeLevel)
+deactivate menu4
+main -> menu4 : addChildMenu(pacerDuration)
+deactivate menu4
+deactivate main
+
+main -> menu4 : addChildMenu(settings)
+deactivate menu4
+deactivate main
+
+main -> menu5 : getName()
+return return: QString
+deactivate menu5
+main -> menu5 : getMenuItems()
+return return: QStringList
+deactivate menu5
+main -> main : updateMenu(QString, QStringList)
+main -> ui : ui->menuLabel->setText(selectedMenuItem)
+deactivate ui
+deactivate main
+deactivate main
+
+
+
+
+
+main -> ui : ui->upButton->setEnabled(true)
+deactivate ui
+main -> ui : ui->downButton->setEnabled(true)
+deactivate ui
+main -> ui : ui->leftButton->setEnabled(true)
+deactivate ui
+main -> ui : ui->rightButton->setEnabled(true)
+deactivate ui
+main -> ui : ui->menuButton->setEnabled(true)
+deactivate ui
+main -> ui : ui->okButton->setEnabled(true)
+deactivate ui
+main -> ui : ui->backButton->setEnabled(true)
+deactivate ui
+deactivate main
+
+main -> ui : ui->sessionFrame->setVisible(false)
+deactivate ui
+main -> ui : ui->summaryFrame->setVisible(false)
+deactivate ui
+deactivate main
+@@enduml

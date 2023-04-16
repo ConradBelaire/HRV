@@ -966,7 +966,6 @@ int MainWindow::generateHR() {
         int max = 28;
         int randomNumberInRange = min + (std::rand() % (max - min + 1));
         currentHRvector = randomNumberInRange;
-        qDebug() << "HR Vector Selected " + QString::number(randomNumberInRange);
     }
     return heartRateData[currentHRvector][vectorHRcount++];
 

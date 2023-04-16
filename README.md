@@ -1,6 +1,6 @@
 # HeartWave Application
 
-**Authors**: Arda Dolanay, Thomas Wood
+**Authors**: Arda Dolanay, Thomas Wood, Zack Graham and Conrad Belaire
 
 ## Overview
 

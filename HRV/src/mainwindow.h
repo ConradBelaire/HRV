@@ -12,8 +12,6 @@
 #include "profile.h"
 #include "qcustomplot.h"
 
-#include <QDebug>
-
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }

@@ -3,7 +3,6 @@
 
 #include <QString>
 #include <QSqlDatabase>
-#include <QDebug>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QList>
@@ -15,6 +14,7 @@
 
 #include "profile.h"
 #include "log.h"
+
 
 class DBManager {
 

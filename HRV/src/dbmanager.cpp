@@ -33,9 +33,6 @@ DBManager::dropTables() method
 This method is responsible for dropping the existing tables in the database.
 It executes two SQL queries to drop the 'log' and 'profiles' tables if they
 exist.
-
-If the execution of any SQL query fails, it outputs the error message using
-qDebug().
 */
 void DBManager::dropTables() {
     QSqlQuery query;
@@ -73,10 +70,7 @@ document, which is serialized into a compact JSON string.
 
 It binds the values from the 'Log' object to the placeholders in the query
 and executes it. If the execution is successful, the transaction is committed
-and the method returns 'true'. Otherwise, it outputs the error message using
-qDebug(), rolls back the transaction, and returns 'false'.
-
-Upon successful addition, it outputs "Log added" using qDebug().
+and the method returns 'true'.
 */
 bool DBManager::addLog(Log* log) {
     hrvDB.transaction();
@@ -193,8 +187,7 @@ entry with the specified 'id'.
 The method binds the 'id' and 'batteryLvl' to the ':profile_id' and ':battery_level'
 placeholders in the query, respectively, and executes it.
 
-If there is an error during the execution, it outputs the error message using
-qDebug(). If the execution is successful, the transaction is committed and
+If the execution is successful, the transaction is committed and
 the method returns 'true'. Otherwise, it returns 'false'.
 */
 bool DBManager::updateProfile(int id, double batteryLvl) {
@@ -410,9 +403,6 @@ achievement_score (FLOAT NOT NULL)
 coherence_count (INTEGER NOT NULL)
 heart_rates (TEXT)
 FOREIGN KEY (profile_id) REFERENCES profiles (id) ON DELETE CASCADE
-
-If the execution of any SQL query fails, it outputs the error message using
-qDebug() and does not commit the transaction.
 
 The method returns 'true' if the transaction is committed successfully,
 otherwise 'false'.

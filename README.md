@@ -46,17 +46,13 @@ Arda Dolanay, Zach Graham, Thomas Wood, and Conrad Belaire
 
 ## Organization of the Submission
 
-The submission is organized into 3 folders:
+The submission is organized into 2 folders:
 
 1. **[HRV](HRV/)**: This folder includes the following:
-   - *[Design-Documentation](HRV/Design-Documentation/)*: Contains all the diagrams and related documentation.
-      - *[Activity_Diagrams](HRV/Design-Documentation/Activity_Diagrams/)*: Activity Diagrams
-      - *[Sequence_Diagrams](HRV/Design-Documentation/Sequence_Diagrams/)*: Sequence Diagrams
-         - [src](HRV/Design-Documentation/Sequence_Diagrams/src): PlantUML Sequence Diagram Raw Code.
    - *[libs](HRV/libs/)*: Includes external libraries.
    - *[src](HRV/src/)*: Contains the source code for the project.
    - *[ui](HRV/ui/)*: Has the main UI for the project.
 2. **[Documentation](Design-Documentation/)**: Contains all the diagrams and related documentation.
-   - *[Activity_Diagrams](HRV/Design-Documentation/Activity_Diagrams/)*: Activity Diagrams
-   - *[Sequence_Diagrams](HRV/Design-Documentation/Sequence_Diagrams/)*: Sequence Diagrams
-      - [src](HRV/Design-Documentation/Sequence_Diagrams/src): PlantUML Sequence Diagram Raw Code.
+   - *[Activity_Diagrams](Design-Documentation/Activity_Diagrams/)*: Activity Diagrams
+   - *[Sequence_Diagrams](Design-Documentation/Sequence_Diagrams/)*: Sequence Diagrams
+      - [src](Design-Documentation/Sequence_Diagrams/src): PlantUML Sequence Diagram Raw Code.

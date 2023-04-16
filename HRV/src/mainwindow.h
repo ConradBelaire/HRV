@@ -37,17 +37,17 @@ class MainWindow : public QMainWindow
         // menus
         Menu* masterMenu;   // current menu
         Menu* mainMenuOG;   // holds main menu
-        
+
         Ui::MainWindow *ui;
         QListWidget* activeQListWidget; // for updating and getting the menu on screen
         DBManager* dbmanager;   // how we talk to the database in mainwindow
         Profile* profile;   // stores device profile for current session index and battery
         QVector<Session*> sessions; // list of previous sessions
         QTimer* timer;  // timer for calling update_timer()
-        Session* currentSession;    // stores the current session 
+        Session* currentSession;    // stores the current session
 
         QVector<QVector<double>> heartRateData; // stores harccoded heart rate data
-        QStringList allLogs;    // stores list of logs: Session 1, Session 2 ... 
+        QStringList allLogs;    // stores list of logs: Session 1, Session 2 ...
 
         bool powerStatus;   // is the device on or off
         bool pacerCountUp;  // are we in the stage of counting up on the pacer?
@@ -60,7 +60,7 @@ class MainWindow : public QMainWindow
         int currentTimerCount;  // how long has this session been going
         int pacerCounter;   // keeps track of where we are in the pacer sequence
         int pacer_dur;  // how long should the user hold their breath
-        int challenge_level;    // stores challenge level 
+        int challenge_level;    // stores challenge level
         int currentHRvector;    // current vector we are obtaining heart rates from
         int vectorHRcount;  // keeps track for when we need to switch to a new hr vector
         int maxHR;  // max for graph y axis

@@ -1,7 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
+
 /**
- * @brief MainWindow constructor: Initializes the main window of the application, including the user interface (UI), settings, 
+ * @brief MainWindow constructor: Initializes the main window of the application, including the user interface (UI), settings,
  * and other necessary components.
  *
  * @param parent: The parent widget for the main window.
@@ -234,7 +236,7 @@ void MainWindow::initializeMainMenu(Menu* m) {
 }
 
 /**
- * Navigates the selection up within the active QListWidget. 
+ * Navigates the selection up within the active QListWidget.
  */
 void MainWindow::navigateUpMenu() {
 
@@ -248,7 +250,7 @@ void MainWindow::navigateUpMenu() {
 }
 
 /**
- * Navigates the selection down within the active QListWidget. 
+ * Navigates the selection down within the active QListWidget.
  */
 void MainWindow::navigateDownMenu() {
 
@@ -280,7 +282,6 @@ void MainWindow::navigateToMainMenu() {
     updateMenu(masterMenu->getName(), masterMenu->getMenuItems());
 }
 
-// back button
 /**
  * @brief Navigates back through the menu hierarchy based on the current state. If a session is in progress or the session summary
  * is visible, these will be displayed or cleared respectively. If the user is in the session view, it will exit the view
@@ -341,7 +342,6 @@ void MainWindow::navigateBack() {
     }
 }
 
-// pressing the ok button
 /**
  * @brief Handles navigation within submenus, as well as the functionality for each submenu item. This function includes logic
  * for menu items such as starting a session, resetting logs, changing settings, and more. It checks the name of the
@@ -500,7 +500,7 @@ void MainWindow::navigateSubMenu() {
 /**
  * @brief Updates the current active QListWidget menu with a new set of menu items and a new title. This function is used to
  * refresh the menu UI when navigating between menus.
- * 
+ *
  * @param selectedMenuItem The QString for the new title of the menu to be displayed.
  * @param menuItems The QStringList containing the new set of menu items to be displayed in the QListWidget.
  */
@@ -513,8 +513,6 @@ void MainWindow::updateMenu(const QString &selectedMenuItem, const QStringList &
     ui->menuLabel->setText(selectedMenuItem);
 }
 
-
-// function will be used as a reference to the recharge button
 /**
  * Recharges the battery to its full capacity (100%). This function is used to simulate the
  * battery being recharged to its maximum level.
@@ -523,10 +521,9 @@ void MainWindow::rechargeBattery(){
     changeBatteryLevel(100);
 }
 
-// function will set the battery level to the newLevel
 /**
  * @brief Changes the battery level and updates the UI accordingly.
- * 
+ *
  * @param newLevel A double value representing the new battery level (0.0 to 100.0).
  */
 void MainWindow::changeBatteryLevel(double newLevel) {
@@ -560,8 +557,6 @@ void MainWindow::changeBatteryLevel(double newLevel) {
     }
 }
 
-
-// change the power status variable
 /**
  * @brief Toggles the power status of the MainWindow, will save session if one is active
  */
@@ -585,7 +580,6 @@ void MainWindow::powerChange(){
     ui->summaryFrame->setVisible(false);
 }
 
-// Toggle visibilty of the menu
 /**
  * @brief Updates the power status of the MainWindow, managing the UI elements
  *        visibility and state according to the current power status.
@@ -651,7 +645,7 @@ void MainWindow::init_timer(QTimer* timer){
 /**
  * @brief Updates the session timer, heart rate data, coherence score, UI elements,
  *        and LED lights based on the current session state.
- * 
+ *
  * 1. Drains the battery at each timer update.
  * 2. Updates the duration text displayed on the UI.
  * 3. Generates a new heart rate value and updates the y-axis of the plot accordingly.
@@ -717,7 +711,7 @@ void MainWindow::update_timer(){
 
 /**
  * @brief Decreases the battery level by a small fixed amount and updates the UI accordingly.
- * 
+ *
  * 1. Calculates the new battery level by subtracting a fixed amount (0.05) from the current level.
  * 2. Calls the changeBatteryLevel() function to update the battery level and UI elements.
  */
@@ -729,10 +723,10 @@ void MainWindow::drainBattery() {
 /**
  * @brief Adjusts the behavior of the timer based on whether the device is on the skin or not.
  * @param checked A boolean value indicating if the sensor is applied to the skin (true) or not (false).
- * 
+ *
  * This function is responsible for the following actions:
  * 1. If the timer is not running and the device is applied to the skin and the ok button is pressed, it starts the timer.
- * 2. If the timer is running and the device is removed from the skin or the ok button is pressed, it stops the timer and displays the session summary. 
+ * 2. If the timer is running and the device is removed from the skin or the ok button is pressed, it stops the timer and displays the session summary.
  */
 void MainWindow::applyToSkin(bool checked) {
     // if the timer is not running
@@ -756,7 +750,7 @@ void MainWindow::applyToSkin(bool checked) {
  * @brief Displays the summary of a session after it has been completed or when viewing session history.
  * @param session A pointer to the Session object containing the session data.
  * @param is_history A boolean value indicating if the session we are presenting a log (true) or a session summary after completion (false).
- * 
+ *
  * This function is responsible for the following actions:
  * 1. Stops the timer and disconnects it if the session is not a log.
  * 2. Hides the session graph and calculates and sets the range for the summary graph.
@@ -857,7 +851,7 @@ void MainWindow::displaySummary(Session* session, bool is_history) {
 
 /**
  * @brief Clears the session summary and resets the session UI elements.
- * 
+ *
  * This function is responsible for the following actions:
  * 1. Hides the summary frame and sets sessionSummaryVisible to false.
  * 2. Resets the Coherence, Length, and Achievement Score UI elements to their initial values.

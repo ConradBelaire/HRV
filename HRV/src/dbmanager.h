@@ -24,18 +24,18 @@ public:
 
     // constructor
     DBManager();
-    
+
     // methods
     void dropTables();
+    bool doesLogExist(int id);
+
+    // CRUD operations
     bool deleteLogs();
     bool addLog(Log* log);
     bool deleteLog(int id);
-    bool doesLogExist(int id);
     bool deleteProfile(int id);
     bool updateProfile(int id, double batteryLvl);
     bool addProfile(int id, double batterLvl, int sessionAmt);
-
-    // getters
     Log* getLog(int id);
     QVector<Log*>* getLogs();
     Profile* getProfile(int id);
